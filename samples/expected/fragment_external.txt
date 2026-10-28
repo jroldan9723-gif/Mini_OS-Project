@@ -1,0 +1,59 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+FRAGMENTATION - internal vs external
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+EXTERNAL FRAGMENTATION: free space exists, but it is split into holes.
+Total memory (KB): How many jobs to allocate first?   Name of job 1 (e.g. A):   Size of A (KB):   A allocated.
+  Memory map: [A 0-400] [HOLE 400-1000]
+  Name of job 2 (e.g. A):   Size of B (KB):   B allocated.
+  Memory map: [A 0-400] [B 400-500] [HOLE 500-1000]
+  Name of job 3 (e.g. A):   Size of C (KB):   C allocated.
+  Memory map: [A 0-400] [B 400-500] [C 500-800] [HOLE 800-1000]
+How many jobs to free?   Name of the job to free:   B freed.
+  Memory map: [A 0-400] [HOLE 400-500] [C 500-800] [HOLE 800-1000]
+New request size (KB): 
+Request of 250 KB:
+  Total free memory : 300 KB
+  Largest single hole: 200 KB
+  -> EXTERNAL FRAGMENTATION! There is enough free memory in total
+     (300 KB >= 250 KB) but no single hole is large
+     enough (largest hole = 200 KB). The job must wait, or the
+     OS has to compact memory / use paging.
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

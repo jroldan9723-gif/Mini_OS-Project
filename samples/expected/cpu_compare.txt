@@ -1,0 +1,63 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+CPU SCHEDULING
+Assumption: every process arrives at time 0.
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare all three on the same processes
+  0) Back to main menu
+  Choose an option: 
+How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4: Time quantum for Round Robin (whole time units): 
+COMPARISON OF THE THREE ALGORITHMS
+(W = waiting time, T = turnaround time)
+
+Process  Burst | FCFS    | SJF     | RR     
+               | W    T  | W    T  | W    T 
+-------- ----- | ------- | ------- | -------
+P1           5 |   0   5 |   3   8 |  11  16
+P2           3 |   5   8 |   0   3 |   4   7
+P3           8 |   8  16 |  14  22 |  12  20
+P4           6 |  16  22 |   8  14 |  16  22
+-------- ----- | ------- | ------- | -------
+Averages (waiting / turnaround):
+  FCFS : 7.25 / 12.75
+  SJF  : 6.25 / 11.75
+  RR   : 10.75 / 16.25
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare all three on the same processes
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

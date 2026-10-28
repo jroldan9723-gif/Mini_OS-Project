@@ -1,0 +1,53 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+FRAGMENTATION - internal vs external
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+INTERNAL FRAGMENTATION: space wasted INSIDE a partition.
+Number of fixed partitions:   Size of partition 1 (KB):   Size of partition 2 (KB):   Size of partition 3 (KB):   Size of partition 4 (KB): Number of processes:   Size of P1 (KB):   Size of P2 (KB):   Size of P3 (KB):   Size of P4 (KB): 
+Allocation result (first-fit):
+  Partition | Size | Process | Wasted (internal frag)
+  ----------|------|---------|----------------------
+  partition 1 |  100 | P1      |   20 KB
+  partition 2 |  150 | P2      |   10 KB
+  partition 3 |  250 | P3      |   50 KB
+  partition 4 |  400 | P4      |  100 KB
+
+Total internal fragmentation (wasted inside partitions): 180 KB
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

@@ -1,0 +1,70 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+DISK SCHEDULING
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) Compare all four on the same requests
+  0) Back to main menu
+  Choose an option: 
+Highest cylinder number (disk = 0..max): Initial head position (0..199): Number of pending requests: Request queue (8 cylinder number(s), space separated): Initial direction for SCAN / C-SCAN (1 = toward higher cylinders, 2 = toward lower): FCFS (First-Come, First-Served)
+  Order of service : 53 -> 98 -> 183 -> 37 -> 122 -> 14 -> 124 -> 65 -> 67
+  Total head movement: 640 cylinders
+
+SSTF (Shortest Seek Time First)
+  Order of service : 53 -> 65 -> 67 -> 37 -> 14 -> 98 -> 122 -> 124 -> 183
+  Total head movement: 236 cylinders
+
+SCAN (elevator)
+  Order of service : 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 (end of disk) -> 37 -> 14
+  Total head movement: 331 cylinders
+
+C-SCAN (circular elevator)
+  Order of service : 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 (end of disk) -> 0 (wrap) -> 14 -> 37
+  Total head movement: 382 cylinders
+
+SUMMARY (total head movement)
+  FCFS  : 640 cylinders
+  SSTF  : 236 cylinders
+  SCAN  : 331 cylinders
+  C-SCAN: 382 cylinders  (includes the return jump - some books exclude it)
+  Smallest movement in this run: 236 cylinders.
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) Compare all four on the same requests
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

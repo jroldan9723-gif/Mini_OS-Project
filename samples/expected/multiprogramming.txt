@@ -1,0 +1,79 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+MULTIPROGRAMMING - jobs sharing memory and the CPU
+
+  1) Start a new multiprogramming simulation
+  0) Back to main menu
+  Choose an option: 
+Main memory size (KB): How many jobs?   Name of job 1 (e.g. J1):   Memory needed by J1 (KB):   CPU burst of J1 (ticks):   Name of job 2 (e.g. J1):   Memory needed by J2 (KB):   CPU burst of J2 (ticks):   Name of job 3 (e.g. J1):   Memory needed by J3 (KB):   CPU burst of J3 (ticks):   Name of job 4 (e.g. J1):   Memory needed by J4 (KB):   CPU burst of J4 (ticks): Time quantum for the CPU (ticks): 
+Simulation rules:
+  - first-fit contiguous loading, memory = 100 KB
+  - Round Robin on the CPU, quantum = 2 tick(s)
+  - each job does ONE I/O of 3 ticks at the halfway point of its burst
+
+Tick | State after the tick:  CPU | READY (queue order) | WAITING | JOB QUEUE | memory
+-----+--------------------------------------------------------------+-----------------------
+0    | CPU: J1 (6 left) | READY: J2, J3 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 LOADED (40 KB at 0); J2 LOADED (30 KB at 40); J3 LOADED (25 KB at 70); J1 -> RUNNING
+1    | CPU: J1 (5 left) | READY: J2, J3, J1 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 quantum expired -> READY
+2    | CPU: J2 (3 left) | READY: J3, J1 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J2 -> RUNNING
+3    | CPU: J2 (2 left) | READY: J3, J1 | WAITING: J2 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J2 starts I/O (3 ticks)
+4    | CPU: J3 (4 left) | READY: J1 | WAITING: J2 (2) | QUEUE: J4 | MEM: J1, J2, J3 | J3 -> RUNNING
+5    | CPU: J3 (3 left) | READY: J1, J3 | WAITING: J2 (1) | QUEUE: J4 | MEM: J1, J2, J3 | J3 quantum expired -> READY
+6    | CPU: J1 (4 left) | READY: J3, J2 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 -> RUNNING; J2 I/O finished -> READY
+7    | CPU: J1 (3 left) | READY: J3, J2 | WAITING: J1 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J1 starts I/O (3 ticks)
+8    | CPU: J3 (2 left) | READY: J2 | WAITING: J1 (2), J3 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J3 -> RUNNING; J3 starts I/O (3 ticks)
+9    | CPU: J2 (1 left) | READY: - | WAITING: J1 (1), J3 (2) | QUEUE: J4 | MEM: J1, J2, J3 | J2 -> RUNNING
+10   | CPU: J2 (0 left) | READY: J1 | WAITING: J3 (1) | QUEUE: J4 | MEM: J1, J3 | J1 I/O finished -> READY; J2 FINISHED (memory freed)
+11   | CPU: J1 (2 left) | READY: J4, J3 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J4 LOADED (20 KB at 40); J1 -> RUNNING; J3 I/O finished -> READY
+12   | CPU: J1 (1 left) | READY: J4, J3, J1 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J1 quantum expired -> READY
+13   | CPU: J4 (2 left) | READY: J3, J1 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J4 -> RUNNING
+14   | CPU: J4 (1 left) | READY: J3, J1 | WAITING: J4 (3) | QUEUE: - | MEM: J1, J4, J3 | J4 starts I/O (3 ticks)
+15   | CPU: J3 (1 left) | READY: J1 | WAITING: J4 (2) | QUEUE: - | MEM: J1, J4, J3 | J3 -> RUNNING
+16   | CPU: J3 (0 left) | READY: J1 | WAITING: J4 (1) | QUEUE: - | MEM: J1, J4 | J3 FINISHED (memory freed)
+17   | CPU: J1 (0 left) | READY: J4 | WAITING: - | QUEUE: - | MEM: J4 | J1 -> RUNNING; J4 I/O finished -> READY; J1 FINISHED (memory freed)
+18   | CPU: J4 (0 left) | READY: - | WAITING: - | QUEUE: - | MEM: - | J4 -> RUNNING; J4 FINISHED (memory freed)
+
+All jobs finished at tick 19.
+
+Job     Mem(KB)  Burst Loaded at Finished at  Turnaround
+------ -------- ------ --------- ---------- -----------
+J1           40      7         0         18          18
+J2           30      4         0         11          11
+J3           25      5         0         17          17
+J4           20      3        11         19          19
+
+Note: 'Loaded at' is how long the job waited in the job queue
+for memory; turnaround = finish time (all jobs arrived at 0).
+
+  1) Start a new multiprogramming simulation
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

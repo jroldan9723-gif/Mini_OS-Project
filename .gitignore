@@ -1,3 +1,6 @@
+# Eclipse build output folder
+bin/
+
 # Compiled class file
 *.class
 

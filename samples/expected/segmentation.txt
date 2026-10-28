@@ -1,0 +1,54 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+SEGMENTATION - logical to physical address translation
+
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+How many segments?   Base address of segment 0:   Limit (size) of segment 0:   Base address of segment 1:   Limit (size) of segment 1:   Base address of segment 2:   Limit (size) of segment 2:   Base address of segment 3:   Limit (size) of segment 3: Physical memory (RAM) size in bytes: 
+Segment table in use:
+  Segment |   Base | Limit | Ends at
+  --------|--------|-------|--------
+        0 |      0 |   600 |     599
+        1 |   1000 |   400 |    1399
+        2 |   1800 |   500 |    2299
+        3 |   3000 |   700 |    3699
+
+Segment number (-1 to stop):   Offset inside that segment:   0:250 -> base 0 + offset 250 = physical address 250
+Segment number (-1 to stop):   Offset inside that segment:   1:400 -> SEGMENTATION FAULT: offset 400 is past the end of segment 1 (limit = 400).
+Segment number (-1 to stop):   Offset inside that segment:   2:450 -> base 1800 + offset 450 = physical address 2250
+Segment number (-1 to stop):   Offset inside that segment:   5:10 -> INVALID ADDRESS: segment 5 does not exist (valid segments are 0..3).
+Segment number (-1 to stop):   Offset inside that segment:   1:399 -> base 1000 + offset 399 = physical address 1399
+Segment number (-1 to stop): 
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye! Remember: this simulator only demonstrates selected
+OS concepts for study purposes - it is not a real operating system.

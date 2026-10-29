@@ -56,5 +56,4 @@ Logical address to translate (-1 to stop):
 ----------------------------------------------
 Your choice: 
 
-Goodbye! Remember: this simulator only demonstrates selected
-OS concepts for study purposes - it is not a real operating system.
+Goodbye!

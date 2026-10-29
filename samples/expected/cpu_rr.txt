@@ -57,5 +57,4 @@ Note: in Round Robin the execution list shows one entry
 ----------------------------------------------
 Your choice: 
 
-Goodbye! Remember: this simulator only demonstrates selected
-OS concepts for study purposes - it is not a real operating system.
+Goodbye!

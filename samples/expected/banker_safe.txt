@@ -56,5 +56,4 @@ Safe sequence: P2 -> P4 -> P1 -> P3 -> P5
 ----------------------------------------------
 Your choice: 
 
-Goodbye! Remember: this simulator only demonstrates selected
-OS concepts for study purposes - it is not a real operating system.
+Goodbye!

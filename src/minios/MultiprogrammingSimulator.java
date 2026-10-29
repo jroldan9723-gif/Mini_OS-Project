@@ -13,7 +13,7 @@ import java.util.List;
  *   - The CPU runs one job at a time and switches away after a time quantum
  *     (Round Robin), so every loaded job makes progress.
  *   - A job can leave the CPU to WAIT for a simulated I/O operation and later
- *     come back to READY - exactly the state cycle every OS textbook draws:
+ *     come back to READY - the usual job states:
  *
  *        JOB QUEUE --(loaded, memory found)--> READY --(CPU)--> RUNNING
  *           ^                                     ^               |
@@ -21,15 +21,14 @@ import java.util.List;
  *           |                                     |               |
  *           +--(terminated, memory freed)---- TERMINATED   WAITING (I/O)
  *
- * SIMPLIFICATIONS (stated honestly - this is a teaching model, not a real OS):
+ * SIMPLIFICATIONS:
  *   - Jobs are loaded CONTIGUOUSLY with first-fit; there is no paging or
  *     segmentation inside this simulation.
  *   - All jobs "arrive" at time 0, in the order entered.
- *   - There is exactly one CPU and one idealized I/O device. Each job performs
- *     ONE I/O operation at the halfway point of its burst, lasting
- *     IO_DURATION ticks. The device never fails and never has to queue
- *     several jobs at once (jobs overlap waiting trivially because each does
- *     I/O only once).
+ *   - There is one CPU and one simple I/O device. Each job performs ONE I/O
+ *     operation at the halfway point of its burst, lasting IO_DURATION ticks.
+ *     The device never fails and there is never more than one job doing I/O
+ *     at the same time.
  *   - A "tick" is an abstract time unit, not a real millisecond.
  *   - When two things could happen in the same tick, this order is used:
  *     (1) load jobs into memory, (2) give the CPU to a ready job,
@@ -38,7 +37,7 @@ import java.util.List;
 public class MultiprogrammingSimulator {
 
     private static final int IO_DURATION = 3;   // ticks of the one simulated I/O per job
-    private static final int MAX_TICKS = 10000; // safety belt: stop if something goes wrong
+    private static final int MAX_TICKS = 10000; // safety limit in case of a bug
 
     /** Our tiny "job control block". */
     private static class Job {
@@ -183,8 +182,9 @@ public class MultiprogrammingSimulator {
             }
 
             // (4) CPU: the current job runs for exactly one tick.
-            // Remember WHO is using the CPU during this tick — the job may
-            // finish/yield at the end of the tick, but it still used it.
+            // Keep whoever is using the CPU this tick, because the job may
+            // finish or yield at the end of the tick and would then disappear
+            // from the state columns even though it used this tick.
             Job runningThisTick = current;
             if (current != null) {
                 Job j = current;

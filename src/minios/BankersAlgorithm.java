@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * BankersAlgorithm - checks whether the system is in a SAFE state.
  *
- * THE IDEA IN PLAIN ENGLISH
+ * HOW IT WORKS
  *   Each process may eventually need up to Max[i] of every resource, but it
  *   currently HOLDS Allocation[i]. So it may still ASK for:
  *       Need[i] = Max[i] - Allocation[i]

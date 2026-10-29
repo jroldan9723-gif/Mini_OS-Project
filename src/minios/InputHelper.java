@@ -4,16 +4,12 @@ package minios;
 import java.util.Scanner;
 
 /**
- * InputHelper - a small, safe wrapper around Scanner.
+ * InputHelper - wrapper around Scanner for reading input safely.
  *
- * WHY DOES THIS CLASS EXIST?
- * Scanner.nextInt() crashes the program (throws an exception) when the user
- * types "abc" instead of a number. Every method below simply asks again until
- * the user types something valid, so a typo never crashes the simulator.
- *
- * All input in the simulator goes through this class. The class never reads
- * with nextInt()/nextDouble() directly - it always reads a whole line of text
- * and then converts it, which is the trick that makes retrying possible.
+ * Scanner.nextInt() throws an exception when the user types "abc" instead of
+ * a number, which would crash the program. So instead of using nextInt() we
+ * always read a whole line and parse it ourselves; if the line is not valid
+ * we simply ask again. That way a typo never crashes the simulator.
  */
 public class InputHelper {
 

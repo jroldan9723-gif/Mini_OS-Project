@@ -80,8 +80,6 @@ public class PageReplacementSimulator {
         System.out.printf("  %-9s %11d%n", "LRU", lru.faults);
         System.out.printf("  %-9s %11d%n", "Optimal", opt.faults);
         System.out.println();
-        System.out.println("  Fun fact: Optimal is THE best possible result - no other");
-        System.out.println("  algorithm can produce fewer faults on this reference string.");
     }
 
     // ------------------------------------------------------------------

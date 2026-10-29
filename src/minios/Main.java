@@ -59,8 +59,7 @@ public class Main {
             System.out.println();
         }
 
-        System.out.println("Goodbye! Remember: this simulator only demonstrates selected");
-        System.out.println("OS concepts for study purposes - it is not a real operating system.");
+        System.out.println("Goodbye!");
     }
 
     /** Prints the main menu. */

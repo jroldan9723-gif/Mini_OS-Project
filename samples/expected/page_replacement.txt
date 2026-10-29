@@ -81,8 +81,6 @@ COMPARISON
   LRU                 9
   Optimal             7
 
-  Fun fact: Optimal is THE best possible result - no other
-  algorithm can produce fewer faults on this reference string.
 
   1) Run all three algorithms on a reference string
   0) Back to main menu
@@ -100,5 +98,4 @@ COMPARISON
 ----------------------------------------------
 Your choice: 
 
-Goodbye! Remember: this simulator only demonstrates selected
-OS concepts for study purposes - it is not a real operating system.
+Goodbye!

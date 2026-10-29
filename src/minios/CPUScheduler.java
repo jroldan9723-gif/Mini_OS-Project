@@ -14,7 +14,7 @@ import java.util.List;
  *   2. SJF         Shortest Job First       (non-preemptive, shortest burst)
  *   3. Round Robin (RR)                     (preemptive, fixed time quantum)
  *
- * KEY FORMULAS (textbook definitions)
+ * KEY FORMULAS
  *   Turnaround time = completion time - arrival time
  *   Waiting time    = turnaround time - burst time
  *   (Because turnaround = time in system = burst + waiting.)

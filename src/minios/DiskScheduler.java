@@ -18,13 +18,13 @@ import java.util.List;
  *             other end and continues in the SAME direction (so wait times
  *             are more even).
  *
- * ASSUMPTIONS / CONVENTIONS (check them against your course notes!)
+ * ASSUMPTIONS
  *   - Cylinders are numbered 0 .. maxCylinder.
  *   - SSTF ties (same distance) are broken by the LOWER cylinder number.
  *   - SCAN travels to the disk edge only when there are still requests on the
  *     other side to fetch (classic SCAN otherwise behaves like LOOK here).
- *   - For C-SCAN we COUNT the return jump (end -> other end) as head
- *     movement. Some textbooks do NOT count it; the output says so.
+ *   - For C-SCAN the return jump (end -> other end) is counted as head
+ *     movement. Some books leave it out; the output says which we used.
  *   - A request that happens to equal the current head position costs 0.
  */
 public class DiskScheduler {

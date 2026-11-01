@@ -88,18 +88,4 @@ public class InputHelper {
             }
         }
     }
-
-    /** Asks a yes/no question. Keeps asking until the answer starts with 'y' or 'n'. */
-    public boolean readYesNo(String prompt) {
-        while (true) {
-            String line = readLine(prompt).trim().toLowerCase();
-            if (line.startsWith("y")) {
-                return true;
-            }
-            if (line.startsWith("n")) {
-                return false;
-            }
-            System.out.println("  [!] Please answer with y (yes) or n (no).");
-        }
-    }
 }

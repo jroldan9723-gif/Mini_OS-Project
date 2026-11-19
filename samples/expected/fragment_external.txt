@@ -21,15 +21,20 @@ FRAGMENTATION - internal vs external
   0) Back to main menu
   Choose an option: 
 EXTERNAL FRAGMENTATION: free space exists, but it is split into holes.
-Total memory (KB): How many jobs to allocate first?   Name of job 1 (e.g. A):   Size of A (KB):   A allocated.
+Allocation strategy:
+  1) First-Fit  (first partition/hole that fits)
+  2) Best-Fit   (smallest one that fits)
+  3) Worst-Fit  (largest one that fits)
+  4) Compare all three on the same data
+  Choose a strategy: Total memory (KB): How many jobs to allocate first?   Name of job 1 (e.g. A):   Size of A (KB):   Name of job 2 (e.g. A):   Size of B (KB):   Name of job 3 (e.g. A):   Size of C (KB): How many jobs to free?   Name of the job to free: New request size (KB):   A allocated.
   Memory map: [A 0-400] [HOLE 400-1000]
-  Name of job 2 (e.g. A):   Size of B (KB):   B allocated.
+  B allocated.
   Memory map: [A 0-400] [B 400-500] [HOLE 500-1000]
-  Name of job 3 (e.g. A):   Size of C (KB):   C allocated.
+  C allocated.
   Memory map: [A 0-400] [B 400-500] [C 500-800] [HOLE 800-1000]
-How many jobs to free?   Name of the job to free:   B freed.
+  B freed.
   Memory map: [A 0-400] [HOLE 400-500] [C 500-800] [HOLE 800-1000]
-New request size (KB): 
+
 Request of 250 KB:
   Total free memory : 300 KB
   Largest single hole: 200 KB

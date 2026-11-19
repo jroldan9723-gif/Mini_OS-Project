@@ -16,12 +16,14 @@
 Your choice:   [!] "oops" is not a whole number. Please try again.
 Your choice: 
 CPU SCHEDULING
-Assumption: every process arrives at time 0.
+Options 1-4 assume every process arrives at time 0.
+SRTF (option 5) asks for an arrival time per process.
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
   3) Round Robin (preemptive, fixed time quantum)
   4) Compare all three on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
   0) Back to main menu
   Choose an option:   [!] "three" is not a whole number. Please try again.
   Choose an option: 
@@ -44,6 +46,7 @@ Average turnaround time: 12.75
   2) SJF         (Shortest Job First, non-preemptive)
   3) Round Robin (preemptive, fixed time quantum)
   4) Compare all three on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
   0) Back to main menu
   Choose an option: 
 ---------------- MAIN MENU --------------------

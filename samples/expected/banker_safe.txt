@@ -17,6 +17,7 @@ Your choice:
 BANKER'S ALGORITHM (deadlock avoidance)
 
   1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
   0) Back to main menu
   Choose an option: 
 Number of processes: Number of resource types: Allocation matrix - one row per process, 3 number(s) per row (space separated).
@@ -41,6 +42,7 @@ RESULT: SAFE STATE - the OS can satisfy every process in some order.
 Safe sequence: P2 -> P4 -> P1 -> P3 -> P5
 
   1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
   0) Back to main menu
   Choose an option: 
 ---------------- MAIN MENU --------------------

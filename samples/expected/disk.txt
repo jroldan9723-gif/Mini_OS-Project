@@ -20,10 +20,12 @@ DISK SCHEDULING
   2) SSTF   (Shortest Seek Time First)
   3) SCAN   (elevator)
   4) C-SCAN (circular elevator)
-  5) Compare all four on the same requests
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
   0) Back to main menu
   Choose an option: 
-Highest cylinder number (disk = 0..max): Initial head position (0..199): Number of pending requests: Request queue (8 cylinder number(s), space separated): Initial direction for SCAN / C-SCAN (1 = toward higher cylinders, 2 = toward lower): FCFS (First-Come, First-Served)
+Highest cylinder number (disk = 0..max): Initial head position (0..199): Number of pending requests: Request queue (8 cylinder number(s), space separated): Initial direction for SCAN / C-SCAN / LOOK / C-LOOK (1 = toward higher cylinders, 2 = toward lower): FCFS (First-Come, First-Served)
   Order of service : 53 -> 98 -> 183 -> 37 -> 122 -> 14 -> 124 -> 65 -> 67
   Total head movement: 640 cylinders
 
@@ -39,18 +41,30 @@ C-SCAN (circular elevator)
   Order of service : 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 (end of disk) -> 0 (wrap) -> 14 -> 37
   Total head movement: 382 cylinders
 
+LOOK
+  Order of service : 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 37 -> 14
+  Total head movement: 299 cylinders
+
+C-LOOK
+  Order of service : 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 14 (jump) -> 37
+  Total head movement: 322 cylinders
+
 SUMMARY (total head movement)
   FCFS  : 640 cylinders
   SSTF  : 236 cylinders
   SCAN  : 331 cylinders
   C-SCAN: 382 cylinders  (includes the return jump - some books exclude it)
-  Smallest movement in this run: 236 cylinders.
+  LOOK  : 299 cylinders
+  C-LOOK: 322 cylinders  (includes the jump - some books exclude it)
+  Smallest movement in this run: 236 cylinders (SSTF (Shortest Seek Time First)).
 
   1) FCFS
   2) SSTF   (Shortest Seek Time First)
   3) SCAN   (elevator)
   4) C-SCAN (circular elevator)
-  5) Compare all four on the same requests
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
   0) Back to main menu
   Choose an option: 
 ---------------- MAIN MENU --------------------

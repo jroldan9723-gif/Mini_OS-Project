@@ -21,7 +21,12 @@ FRAGMENTATION - internal vs external
   0) Back to main menu
   Choose an option: 
 INTERNAL FRAGMENTATION: space wasted INSIDE a partition.
-Number of fixed partitions:   Size of partition 1 (KB):   Size of partition 2 (KB):   Size of partition 3 (KB):   Size of partition 4 (KB): Number of processes:   Size of P1 (KB):   Size of P2 (KB):   Size of P3 (KB):   Size of P4 (KB): 
+Allocation strategy:
+  1) First-Fit  (first partition/hole that fits)
+  2) Best-Fit   (smallest one that fits)
+  3) Worst-Fit  (largest one that fits)
+  4) Compare all three on the same data
+  Choose a strategy: Number of fixed partitions:   Size of partition 1 (KB):   Size of partition 2 (KB):   Size of partition 3 (KB):   Size of partition 4 (KB): Number of processes:   Size of P1 (KB):   Size of P2 (KB):   Size of P3 (KB):   Size of P4 (KB): 
 Allocation result (first-fit):
   Partition | Size | Process | Wasted (internal frag)
   ----------|------|---------|----------------------

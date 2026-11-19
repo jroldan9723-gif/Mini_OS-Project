@@ -8,31 +8,40 @@ import java.util.List;
  * MultiprogrammingSimulator - several jobs share ONE CPU and ONE memory.
  *
  * WHAT THIS DEMONSTRATES
- *   - Jobs wait in a JOB QUEUE until there is enough free MEMORY to load them.
+ *   - Every job has an ARRIVAL TIME. Before it arrives it does not exist for
+ *     the OS (state NOT ARRIVED); at its arrival time it enters the JOB QUEUE.
+ *   - Jobs wait in the JOB QUEUE until there is enough free MEMORY to load them.
  *   - Loaded jobs sit in the READY state until the CPU is free.
  *   - The CPU runs one job at a time and switches away after a time quantum
  *     (Round Robin), so every loaded job makes progress.
- *   - A job can leave the CPU to WAIT for a simulated I/O operation and later
+ *   - A job can leave the CPU to WAIT for the single I/O device and later
  *     come back to READY - the usual job states:
  *
- *        JOB QUEUE --(loaded, memory found)--> READY --(CPU)--> RUNNING
+ *        NOT ARRIVED --(arrival time)--> JOB QUEUE --(memory found)--> READY
+ *                                                              READY --(CPU)--> RUNNING
  *           ^                                     ^               |
  *           |                                     +---(quantum)---+
  *           |                                     |               |
- *           +--(terminated, memory freed)---- TERMINATED   WAITING (I/O)
+ *           +--(terminated, memory freed)---- TERMINATED   WAITING (I/O or I/O queue)
  *
  * SIMPLIFICATIONS:
  *   - Jobs are loaded CONTIGUOUSLY with first-fit; there is no paging or
  *     segmentation inside this simulation.
- *   - All jobs "arrive" at time 0, in the order entered.
- *   - There is one CPU and one simple I/O device. Each job performs ONE I/O
- *     operation at the halfway point of its burst, lasting IO_DURATION ticks.
- *     The device never fails and there is never more than one job doing I/O
- *     at the same time.
+ *   - There is one CPU and ONE I/O device: only one job can use the device
+ *     at a time, other jobs line up in an I/O queue. Each job performs ONE
+ *     I/O operation at the halfway point of its burst, lasting IO_DURATION
+ *     ticks on the device.
  *   - A "tick" is an abstract time unit, not a real millisecond.
- *   - When two things could happen in the same tick, this order is used:
- *     (1) load jobs into memory, (2) give the CPU to a ready job,
- *     (3) progress I/O, (4) run the current job for one tick.
+ *   - When things could happen in the same tick, this order is used:
+ *     (1) jobs arrive, (2) load jobs into memory, (3) give the CPU to a
+ *     ready job, (4) progress the I/O device, (5) run the current job for
+ *     one tick.
+ *
+ * TIME DEFINITIONS used in the final report:
+ *   Turnaround = finished at - arrival time.
+ *   Waiting    = ticks spent in the JOB QUEUE, READY queue or I/O queue
+ *                (time running and time actually on the I/O device do NOT
+ *                count as waiting).
  */
 public class MultiprogrammingSimulator {
 
@@ -44,18 +53,23 @@ public class MultiprogrammingSimulator {
         String name;
         int mem;          // kilobytes of RAM this job needs while loaded
         int burst;        // total CPU ticks the job needs
+        int arrivalTime;  // tick at which the job appears (enters the job queue)
         int executed = 0; // CPU ticks received so far
         int quantumUsed = 0; // CPU ticks since the job last got the CPU
         int remainingIo = 0; // ticks left of I/O (0 = not doing I/O now)
         boolean ioDone = false;
-        String state = "JOB QUEUE"; // JOB QUEUE | READY | RUNNING | WAITING (I/O) | TERMINATED
+        // NOT ARRIVED | JOB QUEUE | READY | RUNNING | WAITING (I/O) |
+        // WAITING (I/O queue) | TERMINATED
+        String state = "NOT ARRIVED";
         int loadedAt = -1;
         int finishedAt = -1;
+        int waitTicks = 0; // ticks spent waiting (queue / ready / I/O queue)
 
-        Job(String name, int mem, int burst) {
+        Job(String name, int mem, int burst, int arrivalTime) {
             this.name = name;
             this.mem = mem;
             this.burst = burst;
+            this.arrivalTime = arrivalTime;
         }
 
         /** The tick at which the job starts its one I/O: half its burst, rounded up. */
@@ -119,7 +133,8 @@ public class MultiprogrammingSimulator {
             }
             int size = in.readIntInRange("  Memory needed by " + name + " (KB): ", 1, memSize);
             int burst = in.readIntInRange("  CPU burst of " + name + " (ticks): ", 1, 1000);
-            jobs.add(new Job(name, size, burst));
+            int arrival = in.readIntInRange("  Arrival time of " + name + " (ticks): ", 0, 10000);
+            jobs.add(new Job(name, size, burst, arrival));
         }
 
         int quantum = in.readIntInRange("Time quantum for the CPU (ticks): ", 1, 100);
@@ -129,36 +144,50 @@ public class MultiprogrammingSimulator {
         System.out.println("  - first-fit contiguous loading, memory = " + memSize + " KB");
         System.out.println("  - Round Robin on the CPU, quantum = " + quantum + " tick(s)");
         System.out.println("  - each job does ONE I/O of " + IO_DURATION
-                + " ticks at the halfway point of its burst");
+                + " ticks at the halfway point of its burst, one job at a time on the device");
+        System.out.println("  - a job only exists for the OS once its arrival time is reached");
         System.out.println();
-        System.out.println("Tick | State after the tick:  CPU | READY (queue order) | WAITING | JOB QUEUE | memory");
-        System.out.println("-----+--------------------------------------------------------------+-----------------------");
+        System.out.println("Tick | CPU | READY (queue order) | WAITING | I/O device | JOB QUEUE | not arrived | memory");
+        System.out.println("-----+-----+---------------------+---------+------------+-----------+-------------+-------");
 
-        // ---- initial state: every job is waiting for memory -----------------
-        List<Job> jobQueue = new ArrayList<>(jobs); // not yet loaded
+        // ---- initial state: nobody has arrived yet ---------------------------
         List<Job> ready = new ArrayList<>();        // loaded, waiting for the CPU
         List<Alloc> memory = new ArrayList<>();     // occupied chunks, kept sorted
         Job current = null;                         // the job using the CPU (null = CPU idle)
+        Job ioJob = null;                           // the ONE job on the I/O device
+        List<Job> ioQueue = new ArrayList<>();      // jobs waiting for the device
         int time = 0;
         int terminated = 0;
 
         while (terminated < jobs.size() && time < MAX_TICKS) {
             List<String> events = new ArrayList<>();
+            boolean memoryChanged = false;
 
-            // (1) LOADER: try to load waiting jobs (in order) while space fits.
-            for (int i = 0; i < jobQueue.size(); ) {
-                Job j = jobQueue.get(i);
+            // (0) ARRIVALS: jobs appear (and may enter the job queue) at
+            // their arrival time. Jobs that have not arrived are invisible
+            // to the loader and to the CPU.
+            for (Job j : jobs) {
+                if ("NOT ARRIVED".equals(j.state) && j.arrivalTime <= time) {
+                    j.state = "JOB QUEUE";
+                    events.add(j.name + " arrived -> JOB QUEUE");
+                }
+            }
+
+            // (1) LOADER: try to load waiting jobs (in job order) while space fits.
+            for (Job j : jobs) {
+                if (!"JOB QUEUE".equals(j.state)) {
+                    continue;
+                }
                 int hole = firstFit(memory, j.mem, memSize);
                 if (hole >= 0) {
                     insertSorted(memory, new Alloc(j.name, hole, j.mem));
-                    jobQueue.remove(i);
                     j.state = "READY";
                     j.loadedAt = time;
                     ready.add(j);
                     events.add(j.name + " LOADED (" + j.mem + " KB at " + hole + ")");
-                } else {
-                    i++; // no room yet - this job keeps waiting for memory
+                    memoryChanged = true;
                 }
+                // no room yet: this job keeps waiting for memory
             }
 
             // (2) DISPATCHER: if the CPU is idle, give it to the first ready job.
@@ -169,16 +198,24 @@ public class MultiprogrammingSimulator {
                 events.add(current.name + " -> RUNNING");
             }
 
-            // (3) I/O: one tick passes for every job that was already doing I/O.
-            for (Job j : jobs) {
-                if ("WAITING (I/O)".equals(j.state)) {
-                    j.remainingIo--;
-                    if (j.remainingIo == 0) {
-                        j.state = "READY";
-                        ready.add(j);
-                        events.add(j.name + " I/O finished -> READY");
-                    }
+            // (3) I/O DEVICE: exactly one tick for the job that is on the
+            // device; when it finishes, the next queued job takes the device.
+            Job ioThisTick = ioJob; // the job that is ON THE DEVICE this tick
+            if (ioJob != null) {
+                ioJob.remainingIo--;
+                if (ioJob.remainingIo == 0) {
+                    events.add(ioJob.name + " I/O finished - device free");
+                    ioJob.state = "READY";
+                    ready.add(ioJob);
+                    ioJob = null;
                 }
+            }
+            if (ioJob == null && !ioQueue.isEmpty()) {
+                Job next = ioQueue.remove(0);
+                next.remainingIo = IO_DURATION;
+                ioJob = next;
+                next.state = "WAITING (I/O)";
+                events.add(next.name + " starts I/O (" + IO_DURATION + " ticks) - device in use");
             }
 
             // (4) CPU: the current job runs for exactly one tick.
@@ -199,12 +236,22 @@ public class MultiprogrammingSimulator {
                     events.add(j.name + " FINISHED (memory freed)");
                     terminated++;
                     current = null;
+                    memoryChanged = true;
                 } else if (j.executed == j.ioPoint() && !j.ioDone) {
-                    // Halfway point reached: this job goes to the I/O device.
+                    // Halfway point reached: this job wants the I/O device.
                     j.ioDone = true;
-                    j.remainingIo = IO_DURATION;
-                    j.state = "WAITING (I/O)";
-                    events.add(j.name + " starts I/O (" + IO_DURATION + " ticks)");
+                    if (ioJob == null) {
+                        j.remainingIo = IO_DURATION;
+                        ioJob = j;
+                        j.state = "WAITING (I/O)";
+                        events.add(j.name + " starts I/O (" + IO_DURATION + " ticks) - device in use");
+                    } else {
+                        // Device is busy: wait in the I/O queue (NOT ready).
+                        j.state = "WAITING (I/O queue)";
+                        ioQueue.add(j);
+                        events.add(j.name + " waits for the I/O device (in use by "
+                                + ioJob.name + ")");
+                    }
                     current = null;
                 } else if (j.quantumUsed >= quantum) {
                     // Out of time slice: back of the ready queue.
@@ -215,10 +262,26 @@ public class MultiprogrammingSimulator {
                 }
             }
 
+            // Waiting-time bookkeeping: a job is WAITING during this tick
+            // when it has arrived, is not finished, and used neither the CPU
+            // nor the I/O device this tick (it sat in the job queue, the
+            // ready queue or the I/O queue). This keeps the identity
+            // turnaround = waiting + burst + I/O time exact.
+            for (Job j : jobs) {
+                if (j == runningThisTick || j == ioThisTick
+                        || "NOT ARRIVED".equals(j.state) || "TERMINATED".equals(j.state)) {
+                    continue;
+                }
+                j.waitTicks++;
+            }
+
             // ---- print this tick's snapshot --------------------------------
-            String snap = snapshot(runningThisTick, ready, jobs, memory);
+            String snap = snapshot(runningThisTick, ready, jobs, memory, ioJob);
             String evts = events.isEmpty() ? "-" : join(events);
             System.out.printf("%-4d | %s | %s%n", time, snap, evts);
+            if (memoryChanged) {
+                printMemoryLayout(memory, memSize, jobs); // shows holes + fragmentation
+            }
             time++;
         }
 
@@ -229,19 +292,38 @@ public class MultiprogrammingSimulator {
         }
 
         // ---- final report ---------------------------------------------------
+        int busyTicks = 0;
+        double sumTurnaround = 0;
+        double sumWaiting = 0;
+        for (Job j : jobs) {
+            busyTicks += j.burst;
+            sumTurnaround += (j.finishedAt - j.arrivalTime);
+            sumWaiting += j.waitTicks;
+        }
+
         System.out.println();
         System.out.println("All jobs finished at tick " + time + ".");
         System.out.println();
-        System.out.printf("%-6s %8s %6s %9s %10s %11s%n",
-                "Job", "Mem(KB)", "Burst", "Loaded at", "Finished at", "Turnaround");
-        System.out.println("------ -------- ------ --------- ---------- -----------");
+        System.out.printf("%-6s %8s %8s %6s %10s %12s %11s %8s%n",
+                "Job", "Arrival", "Mem(KB)", "Burst", "Loaded at", "Finished at",
+                "Turnaround", "Waiting");
+        System.out.println("------ -------- -------- ------ ---------- ------------ ----------- --------");
         for (Job j : jobs) {
-            System.out.printf("%-6s %8d %6d %9d %10d %11d%n",
-                    j.name, j.mem, j.burst, j.loadedAt, j.finishedAt, j.finishedAt);
+            System.out.printf("%-6s %8d %8d %6d %10d %12d %11d %8d%n",
+                    j.name, j.arrivalTime, j.mem, j.burst, j.loadedAt, j.finishedAt,
+                    j.finishedAt - j.arrivalTime, j.waitTicks);
         }
         System.out.println();
-        System.out.println("Note: 'Loaded at' is how long the job waited in the job queue");
-        System.out.println("for memory; turnaround = finish time (all jobs arrived at 0).");
+        System.out.println("Total simulation time  : " + time + " ticks");
+        System.out.printf("Average turnaround time: %.2f ticks%n", sumTurnaround / jobs.size());
+        System.out.printf("Average waiting time   : %.2f ticks%n", sumWaiting / jobs.size());
+        System.out.printf("CPU utilization        : %.2f%% (%d busy ticks out of %d)%n",
+                100.0 * busyTicks / time, busyTicks, time);
+        System.out.println("Completed jobs         : " + terminated + " / " + jobs.size());
+        System.out.println();
+        System.out.println("Note: turnaround = finished at - arrival time. Waiting time counts");
+        System.out.println("the ticks spent in the job queue, the ready queue or the I/O queue;");
+        System.out.println("time running and time actually on the I/O device are not waiting.");
     }
 
     // ------------------------------------------------------------------
@@ -250,7 +332,7 @@ public class MultiprogrammingSimulator {
 
     /** One-line description of every job's state at the END of this tick. */
     private static String snapshot(Job runningThisTick, List<Job> ready, List<Job> jobs,
-                                   List<Alloc> memory) {
+                                   List<Alloc> memory, Job ioJob) {
         // CPU column: whoever consumed this tick's time slice (may have
         // finished or yielded at the very end of the tick).
         StringBuilder cpu;
@@ -272,36 +354,92 @@ public class MultiprogrammingSimulator {
 
         StringBuilder waiting = new StringBuilder();
         StringBuilder queued = new StringBuilder();
+        StringBuilder notYet = new StringBuilder();
         for (Job j : jobs) { // original job order (TERMINATED jobs are not listed)
-            StringBuilder bucket = null;
-            String extra = "";
             if ("WAITING (I/O)".equals(j.state)) {
-                bucket = waiting;
-                extra = " (" + j.remainingIo + ")";
+                appendComma(waiting, j.name + " (I/O, " + j.remainingIo + " left)");
+            } else if ("WAITING (I/O queue)".equals(j.state)) {
+                appendComma(waiting, j.name + " (I/O queue)");
             } else if ("JOB QUEUE".equals(j.state)) {
-                bucket = queued;
-            }
-            if (bucket != null) {
-                if (bucket.length() > 0) {
-                    bucket.append(", ");
-                }
-                bucket.append(j.name).append(extra);
+                appendComma(queued, j.name);
+            } else if ("NOT ARRIVED".equals(j.state)) {
+                appendComma(notYet, j.name + "@" + j.arrivalTime);
             }
         }
 
         StringBuilder mem = new StringBuilder();
         for (Alloc a : memory) {
-            if (mem.length() > 0) {
-                mem.append(", ");
-            }
-            mem.append(a.name);
+            appendComma(mem, a.name);
         }
+
+        String device = ioJob == null ? "free" : ioJob.name + " (" + ioJob.remainingIo + " left)";
 
         return "CPU: " + cpu
                 + " | READY: " + (readyList.length() == 0 ? "-" : readyList)
                 + " | WAITING: " + (waiting.length() == 0 ? "-" : waiting)
+                + " | I/O device: " + device
                 + " | QUEUE: " + (queued.length() == 0 ? "-" : queued)
+                + " | not arrived: " + (notYet.length() == 0 ? "-" : notYet)
                 + " | MEM: " + (mem.length() == 0 ? "-" : mem);
+    }
+
+    /** Appends "value" to a comma-separated list (creates the first entry). */
+    private static void appendComma(StringBuilder sb, String value) {
+        if (sb.length() > 0) {
+            sb.append(", ");
+        }
+        sb.append(value);
+    }
+
+    /**
+     * Prints the memory layout with addresses and sizes, the free totals and
+     * (when it applies) the external fragmentation situation. Called whenever
+     * the layout changes (a job was loaded or finished).
+     */
+    private static void printMemoryLayout(List<Alloc> memory, int memSize, List<Job> jobs) {
+        StringBuilder sb = new StringBuilder("    memory: ");
+        int cursor = 0;
+        for (Alloc a : memory) {
+            if (a.start > cursor) {
+                sb.append("[free ").append(cursor).append('-').append(a.start).append("] ");
+            }
+            sb.append('[').append(a.name).append(' ').append(a.start).append('-')
+              .append(a.end()).append(", ").append(a.size).append(" KB] ");
+            cursor = a.end();
+        }
+        if (cursor < memSize) {
+            sb.append("[free ").append(cursor).append('-').append(memSize).append("] ");
+        }
+
+        int totalFree = 0;
+        int largestHole = 0;
+        cursor = 0;
+        for (Alloc a : memory) { // holes before, between and after blocks
+            int hole = a.start - cursor;
+            totalFree += hole;
+            largestHole = Math.max(largestHole, hole);
+            cursor = a.end();
+        }
+        int tail = memSize - cursor;
+        totalFree += tail;
+        largestHole = Math.max(largestHole, tail);
+
+        sb.append("| free total ").append(totalFree).append(" KB, largest hole ")
+          .append(largestHole).append(" KB");
+        System.out.println(sb);
+
+        // External fragmentation: jobs waiting for memory that would fit in
+        // the TOTAL free space but not in any SINGLE hole.
+        StringBuilder frag = new StringBuilder();
+        for (Job j : jobs) {
+            if ("JOB QUEUE".equals(j.state) && j.mem <= totalFree && j.mem > largestHole) {
+                appendComma(frag, j.name + " (needs " + j.mem + " KB)");
+            }
+        }
+        if (frag.length() > 0) {
+            System.out.println("    external fragmentation: " + frag
+                    + " would fit in total free memory but not in any single hole");
+        }
     }
 
     private static String join(List<String> events) {

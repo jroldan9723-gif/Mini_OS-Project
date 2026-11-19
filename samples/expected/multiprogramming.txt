@@ -19,45 +19,61 @@ MULTIPROGRAMMING - jobs sharing memory and the CPU
   1) Start a new multiprogramming simulation
   0) Back to main menu
   Choose an option: 
-Main memory size (KB): How many jobs?   Name of job 1 (e.g. J1):   Memory needed by J1 (KB):   CPU burst of J1 (ticks):   Name of job 2 (e.g. J1):   Memory needed by J2 (KB):   CPU burst of J2 (ticks):   Name of job 3 (e.g. J1):   Memory needed by J3 (KB):   CPU burst of J3 (ticks):   Name of job 4 (e.g. J1):   Memory needed by J4 (KB):   CPU burst of J4 (ticks): Time quantum for the CPU (ticks): 
+Main memory size (KB): How many jobs?   Name of job 1 (e.g. J1):   Memory needed by J1 (KB):   CPU burst of J1 (ticks):   Arrival time of J1 (ticks):   Name of job 2 (e.g. J1):   Memory needed by J2 (KB):   CPU burst of J2 (ticks):   Arrival time of J2 (ticks):   Name of job 3 (e.g. J1):   Memory needed by J3 (KB):   CPU burst of J3 (ticks):   Arrival time of J3 (ticks):   Name of job 4 (e.g. J1):   Memory needed by J4 (KB):   CPU burst of J4 (ticks):   Arrival time of J4 (ticks): Time quantum for the CPU (ticks): 
 Simulation rules:
   - first-fit contiguous loading, memory = 100 KB
   - Round Robin on the CPU, quantum = 2 tick(s)
-  - each job does ONE I/O of 3 ticks at the halfway point of its burst
+  - each job does ONE I/O of 3 ticks at the halfway point of its burst, one job at a time on the device
+  - a job only exists for the OS once its arrival time is reached
 
-Tick | State after the tick:  CPU | READY (queue order) | WAITING | JOB QUEUE | memory
------+--------------------------------------------------------------+-----------------------
-0    | CPU: J1 (6 left) | READY: J2, J3 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 LOADED (40 KB at 0); J2 LOADED (30 KB at 40); J3 LOADED (25 KB at 70); J1 -> RUNNING
-1    | CPU: J1 (5 left) | READY: J2, J3, J1 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 quantum expired -> READY
-2    | CPU: J2 (3 left) | READY: J3, J1 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J2 -> RUNNING
-3    | CPU: J2 (2 left) | READY: J3, J1 | WAITING: J2 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J2 starts I/O (3 ticks)
-4    | CPU: J3 (4 left) | READY: J1 | WAITING: J2 (2) | QUEUE: J4 | MEM: J1, J2, J3 | J3 -> RUNNING
-5    | CPU: J3 (3 left) | READY: J1, J3 | WAITING: J2 (1) | QUEUE: J4 | MEM: J1, J2, J3 | J3 quantum expired -> READY
-6    | CPU: J1 (4 left) | READY: J3, J2 | WAITING: - | QUEUE: J4 | MEM: J1, J2, J3 | J1 -> RUNNING; J2 I/O finished -> READY
-7    | CPU: J1 (3 left) | READY: J3, J2 | WAITING: J1 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J1 starts I/O (3 ticks)
-8    | CPU: J3 (2 left) | READY: J2 | WAITING: J1 (2), J3 (3) | QUEUE: J4 | MEM: J1, J2, J3 | J3 -> RUNNING; J3 starts I/O (3 ticks)
-9    | CPU: J2 (1 left) | READY: - | WAITING: J1 (1), J3 (2) | QUEUE: J4 | MEM: J1, J2, J3 | J2 -> RUNNING
-10   | CPU: J2 (0 left) | READY: J1 | WAITING: J3 (1) | QUEUE: J4 | MEM: J1, J3 | J1 I/O finished -> READY; J2 FINISHED (memory freed)
-11   | CPU: J1 (2 left) | READY: J4, J3 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J4 LOADED (20 KB at 40); J1 -> RUNNING; J3 I/O finished -> READY
-12   | CPU: J1 (1 left) | READY: J4, J3, J1 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J1 quantum expired -> READY
-13   | CPU: J4 (2 left) | READY: J3, J1 | WAITING: - | QUEUE: - | MEM: J1, J4, J3 | J4 -> RUNNING
-14   | CPU: J4 (1 left) | READY: J3, J1 | WAITING: J4 (3) | QUEUE: - | MEM: J1, J4, J3 | J4 starts I/O (3 ticks)
-15   | CPU: J3 (1 left) | READY: J1 | WAITING: J4 (2) | QUEUE: - | MEM: J1, J4, J3 | J3 -> RUNNING
-16   | CPU: J3 (0 left) | READY: J1 | WAITING: J4 (1) | QUEUE: - | MEM: J1, J4 | J3 FINISHED (memory freed)
-17   | CPU: J1 (0 left) | READY: J4 | WAITING: - | QUEUE: - | MEM: J4 | J1 -> RUNNING; J4 I/O finished -> READY; J1 FINISHED (memory freed)
-18   | CPU: J4 (0 left) | READY: - | WAITING: - | QUEUE: - | MEM: - | J4 -> RUNNING; J4 FINISHED (memory freed)
+Tick | CPU | READY (queue order) | WAITING | I/O device | JOB QUEUE | not arrived | memory
+-----+-----+---------------------+---------+------------+-----------+-------------+-------
+0    | CPU: J1 (6 left) | READY: J3 | WAITING: - | I/O device: free | QUEUE: - | not arrived: J2@2, J4@5 | MEM: J1, J3 | J1 arrived -> JOB QUEUE; J3 arrived -> JOB QUEUE; J1 LOADED (40 KB at 0); J3 LOADED (25 KB at 40); J1 -> RUNNING
+    memory: [J1 0-40, 40 KB] [J3 40-65, 25 KB] [free 65-100] | free total 35 KB, largest hole 35 KB
+1    | CPU: J1 (5 left) | READY: J3, J1 | WAITING: - | I/O device: free | QUEUE: - | not arrived: J2@2, J4@5 | MEM: J1, J3 | J1 quantum expired -> READY
+2    | CPU: J3 (4 left) | READY: J1, J2 | WAITING: - | I/O device: free | QUEUE: - | not arrived: J4@5 | MEM: J1, J3, J2 | J2 arrived -> JOB QUEUE; J2 LOADED (30 KB at 65); J3 -> RUNNING
+    memory: [J1 0-40, 40 KB] [J3 40-65, 25 KB] [J2 65-95, 30 KB] [free 95-100] | free total 5 KB, largest hole 5 KB
+3    | CPU: J3 (3 left) | READY: J1, J2, J3 | WAITING: - | I/O device: free | QUEUE: - | not arrived: J4@5 | MEM: J1, J3, J2 | J3 quantum expired -> READY
+4    | CPU: J1 (4 left) | READY: J2, J3 | WAITING: - | I/O device: free | QUEUE: - | not arrived: J4@5 | MEM: J1, J3, J2 | J1 -> RUNNING
+5    | CPU: J1 (3 left) | READY: J2, J3 | WAITING: J1 (I/O, 3 left) | I/O device: J1 (3 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J4 arrived -> JOB QUEUE; J1 starts I/O (3 ticks) - device in use
+6    | CPU: J2 (3 left) | READY: J3 | WAITING: J1 (I/O, 2 left) | I/O device: J1 (2 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J2 -> RUNNING
+7    | CPU: J2 (2 left) | READY: J3 | WAITING: J1 (I/O, 1 left), J2 (I/O queue) | I/O device: J1 (1 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J2 waits for the I/O device (in use by J1)
+8    | CPU: J3 (2 left) | READY: J1 | WAITING: J2 (I/O, 3 left), J3 (I/O queue) | I/O device: J2 (3 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J3 -> RUNNING; J1 I/O finished - device free; J2 starts I/O (3 ticks) - device in use; J3 waits for the I/O device (in use by J2)
+9    | CPU: J1 (2 left) | READY: - | WAITING: J2 (I/O, 2 left), J3 (I/O queue) | I/O device: J2 (2 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J1 -> RUNNING
+10   | CPU: J1 (1 left) | READY: J1 | WAITING: J2 (I/O, 1 left), J3 (I/O queue) | I/O device: J2 (1 left) | QUEUE: J4 | not arrived: - | MEM: J1, J3, J2 | J1 quantum expired -> READY
+11   | CPU: J1 (0 left) | READY: J2 | WAITING: J3 (I/O, 3 left) | I/O device: J3 (3 left) | QUEUE: J4 | not arrived: - | MEM: J3, J2 | J1 -> RUNNING; J2 I/O finished - device free; J3 starts I/O (3 ticks) - device in use; J1 FINISHED (memory freed)
+    memory: [free 0-40] [J3 40-65, 25 KB] [J2 65-95, 30 KB] [free 95-100] | free total 45 KB, largest hole 40 KB
+12   | CPU: J2 (1 left) | READY: J4 | WAITING: J3 (I/O, 2 left) | I/O device: J3 (2 left) | QUEUE: - | not arrived: - | MEM: J4, J3, J2 | J4 LOADED (20 KB at 0); J2 -> RUNNING
+    memory: [J4 0-20, 20 KB] [free 20-40] [J3 40-65, 25 KB] [J2 65-95, 30 KB] [free 95-100] | free total 25 KB, largest hole 20 KB
+13   | CPU: J2 (0 left) | READY: J4 | WAITING: J3 (I/O, 1 left) | I/O device: J3 (1 left) | QUEUE: - | not arrived: - | MEM: J4, J3 | J2 FINISHED (memory freed)
+    memory: [J4 0-20, 20 KB] [free 20-40] [J3 40-65, 25 KB] [free 65-100] | free total 55 KB, largest hole 35 KB
+14   | CPU: J4 (2 left) | READY: J3 | WAITING: - | I/O device: free | QUEUE: - | not arrived: - | MEM: J4, J3 | J4 -> RUNNING; J3 I/O finished - device free
+15   | CPU: J4 (1 left) | READY: J3 | WAITING: J4 (I/O, 3 left) | I/O device: J4 (3 left) | QUEUE: - | not arrived: - | MEM: J4, J3 | J4 starts I/O (3 ticks) - device in use
+16   | CPU: J3 (1 left) | READY: - | WAITING: J4 (I/O, 2 left) | I/O device: J4 (2 left) | QUEUE: - | not arrived: - | MEM: J4, J3 | J3 -> RUNNING
+17   | CPU: J3 (0 left) | READY: - | WAITING: J4 (I/O, 1 left) | I/O device: J4 (1 left) | QUEUE: - | not arrived: - | MEM: J4 | J3 FINISHED (memory freed)
+    memory: [J4 0-20, 20 KB] [free 20-100] | free total 80 KB, largest hole 80 KB
+18   | CPU: idle | READY: J4 | WAITING: - | I/O device: free | QUEUE: - | not arrived: - | MEM: J4 | J4 I/O finished - device free
+19   | CPU: J4 (0 left) | READY: - | WAITING: - | I/O device: free | QUEUE: - | not arrived: - | MEM: - | J4 -> RUNNING; J4 FINISHED (memory freed)
+    memory: [free 0-100] | free total 100 KB, largest hole 100 KB
 
-All jobs finished at tick 19.
+All jobs finished at tick 20.
 
-Job     Mem(KB)  Burst Loaded at Finished at  Turnaround
------- -------- ------ --------- ---------- -----------
-J1           40      7         0         18          18
-J2           30      4         0         11          11
-J3           25      5         0         17          17
-J4           20      3        11         19          19
+Job     Arrival  Mem(KB)  Burst  Loaded at  Finished at  Turnaround  Waiting
+------ -------- -------- ------ ---------- ------------ ----------- --------
+J1            0       40      7          0           12          12        2
+J2            2       30      4          2           14          12        5
+J3            0       25      5          0           18          18       10
+J4            5       20      3         12           20          15        9
 
-Note: 'Loaded at' is how long the job waited in the job queue
-for memory; turnaround = finish time (all jobs arrived at 0).
+Total simulation time  : 20 ticks
+Average turnaround time: 14.25 ticks
+Average waiting time   : 6.50 ticks
+CPU utilization        : 95.00% (19 busy ticks out of 20)
+Completed jobs         : 4 / 4
+
+Note: turnaround = finished at - arrival time. Waiting time counts
+the ticks spent in the job queue, the ready queue or the I/O queue;
+time running and time actually on the I/O device are not waiting.
 
   1) Start a new multiprogramming simulation
   0) Back to main menu

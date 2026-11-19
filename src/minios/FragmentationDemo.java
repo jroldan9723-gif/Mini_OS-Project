@@ -17,11 +17,19 @@ import java.util.List;
  *   holes. A new request that fits in the TOTAL free space but not in any
  *   SINGLE hole has to wait (or the OS must compact memory).
  *
+ * ALLOCATION STRATEGIES (both demos support all three)
+ *   First-Fit : take the first partition / hole large enough.
+ *   Best-Fit  : take the smallest partition / hole that fits.
+ *   Worst-Fit : take the largest partition / hole that fits.
+ *   The demos also offer a comparison mode that runs all three on exactly
+ *   the same data (each run works on its own copy of the memory layout).
+ *
  * ASSUMPTIONS
- *   - Internal demo: fixed partitions, one process per partition, first-fit
- *     (each process goes into the first free partition large enough).
- *   - External demo: one contiguous memory block, variable-size allocation,
- *     first-fit; jobs keep contiguous space (no paging in this demo).
+ *   - Internal demo: fixed partitions, one process per partition.
+ *   - External demo: one contiguous memory block, variable-size allocation;
+ *     jobs keep contiguous space (no paging in this demo).
+ *   - Equal-size candidates are broken by the lowest partition / earliest
+ *     hole, so the result is always deterministic.
  */
 public class FragmentationDemo {
 
@@ -63,13 +71,36 @@ public class FragmentationDemo {
     }
 
     // ------------------------------------------------------------------
+    // Strategy selection (shared by both demos)
+    // ------------------------------------------------------------------
+    private static int askStrategy(InputHelper in) {
+        System.out.println("Allocation strategy:");
+        System.out.println("  1) First-Fit  (first partition/hole that fits)");
+        System.out.println("  2) Best-Fit   (smallest one that fits)");
+        System.out.println("  3) Worst-Fit  (largest one that fits)");
+        System.out.println("  4) Compare all three on the same data");
+        return in.readIntInRange("  Choose a strategy: ", 1, 4);
+    }
+
+    private static String strategyName(int strategy) {
+        if (strategy == 2) {
+            return "best-fit";
+        }
+        if (strategy == 3) {
+            return "worst-fit";
+        }
+        return "first-fit";
+    }
+
+    // ------------------------------------------------------------------
     // 1) INTERNAL FRAGMENTATION
     // ------------------------------------------------------------------
     private static void internalDemo(InputHelper in) {
         System.out.println("INTERNAL FRAGMENTATION: space wasted INSIDE a partition.");
+        int strategy = askStrategy(in);
+
         int nPartitions = in.readIntInRange("Number of fixed partitions: ", 1, 10);
         int[] partitionSize = new int[nPartitions];
-        boolean[] used = new boolean[nPartitions];
         for (int i = 0; i < nPartitions; i++) {
             partitionSize[i] = in.readIntInRange("  Size of partition " + (i + 1) + " (KB): ", 1, 100000);
         }
@@ -82,40 +113,86 @@ public class FragmentationDemo {
             procSize[i] = in.readIntInRange("  Size of " + procName[i] + " (KB): ", 1, 100000);
         }
 
-        // First-fit: each process takes the FIRST free partition big enough.
-        String[] placedIn = new String[nProcs];      // partition label or null
-        int[] placedSize = new int[nProcs];
-        for (int i = 0; i < nProcs; i++) {
-            for (int p = 0; p < nPartitions; p++) {
-                if (!used[p] && partitionSize[p] >= procSize[i]) {
-                    used[p] = true;
-                    placedIn[i] = "partition " + (p + 1);
-                    placedSize[i] = p;
-                    break;
+        if (strategy == 4) {
+            // Compare: same data, three separate runs (assignInternal only
+            // reads the arrays, so every run starts fresh).
+            System.out.println();
+            System.out.println("COMPARISON - same partitions and processes for every strategy");
+            int[] totals = new int[4]; // indexed 1..3
+            for (int s = 1; s <= 3; s++) {
+                System.out.println();
+                totals[s] = printInternalResult(procName, partitionSize, procSize,
+                        assignInternal(partitionSize, procSize, s), s);
+            }
+            System.out.println("Summary (total internal fragmentation):");
+            for (int s = 1; s <= 3; s++) {
+                System.out.println("  " + strategyName(s) + ": " + totals[s] + " KB");
+            }
+        } else {
+            System.out.println();
+            printInternalResult(procName, partitionSize, procSize,
+                    assignInternal(partitionSize, procSize, strategy), strategy);
+        }
+    }
+
+    /**
+     * Places every process into a partition using the chosen strategy.
+     * Returns, for each process, the index of its partition (-1 = no free
+     * partition fits, the process has to wait). One process per partition.
+     */
+    private static int[] assignInternal(int[] partitionSize, int[] procSize, int strategy) {
+        int[] assigned = new int[procSize.length];
+        boolean[] used = new boolean[partitionSize.length];
+
+        for (int i = 0; i < procSize.length; i++) {
+            assigned[i] = -1;
+            for (int p = 0; p < partitionSize.length; p++) {
+                if (used[p] || partitionSize[p] < procSize[i]) {
+                    continue; // taken, or too small
                 }
+                if (assigned[i] == -1) {
+                    assigned[i] = p;
+                    if (strategy == 1) {
+                        break; // First-Fit: the first one that fits wins
+                    }
+                } else if (strategy == 2 && partitionSize[p] < partitionSize[assigned[i]]) {
+                    assigned[i] = p; // Best-Fit: keep looking for a smaller one
+                } else if (strategy == 3 && partitionSize[p] > partitionSize[assigned[i]]) {
+                    assigned[i] = p; // Worst-Fit: keep looking for a larger one
+                }
+                // equal sizes keep the earlier (lower) partition number
+            }
+            if (assigned[i] >= 0) {
+                used[assigned[i]] = true;
             }
         }
+        return assigned;
+    }
 
-        System.out.println();
-        System.out.println("Allocation result (first-fit):");
+    /** Prints the allocation table for one strategy and returns the total waste. */
+    private static int printInternalResult(String[] procName, int[] partitionSize, int[] procSize,
+                                           int[] assigned, int strategy) {
+        System.out.println("Allocation result (" + strategyName(strategy) + "):");
         System.out.println("  Partition | Size | Process | Wasted (internal frag)");
         System.out.println("  ----------|------|---------|----------------------");
+        boolean[] used = new boolean[partitionSize.length];
         int totalWasted = 0;
-        for (int i = 0; i < nProcs; i++) {
-            if (placedIn[i] == null) {
+        for (int i = 0; i < procSize.length; i++) {
+            if (assigned[i] < 0) {
                 System.out.printf("  %-9s | %4s | %-7s | %s%n", "(any)", "-", procName[i],
                         "did not fit in any free partition (waits)");
             } else {
-                int wasted = partitionSize[placedSize[i]] - procSize[i];
+                used[assigned[i]] = true;
+                int wasted = partitionSize[assigned[i]] - procSize[i];
                 totalWasted += wasted;
                 System.out.printf("  %-9s | %4d | %-7s | %4d KB%n",
-                        "partition " + (placedSize[i] + 1), partitionSize[placedSize[i]],
+                        "partition " + (assigned[i] + 1), partitionSize[assigned[i]],
                         procName[i], wasted);
             }
         }
         // Partitions that no process entered are not "fragmentation", they are
         // simply unused - but note them so the picture is complete.
-        for (int p = 0; p < nPartitions; p++) {
+        for (int p = 0; p < partitionSize.length; p++) {
             if (!used[p]) {
                 System.out.printf("  %-9s | %4d | %-7s | %s%n",
                         "partition " + (p + 1), partitionSize[p], "-", "empty (no process)");
@@ -124,6 +201,7 @@ public class FragmentationDemo {
         System.out.println();
         System.out.println("Total internal fragmentation (wasted inside partitions): "
                 + totalWasted + " KB");
+        return totalWasted;
     }
 
     // ------------------------------------------------------------------
@@ -131,24 +209,56 @@ public class FragmentationDemo {
     // ------------------------------------------------------------------
     private static void externalDemo(InputHelper in) {
         System.out.println("EXTERNAL FRAGMENTATION: free space exists, but it is split into holes.");
-        int memSize = in.readIntInRange("Total memory (KB): ", 1, 1000000);
-        List<Alloc> memory = new ArrayList<>(); // always kept sorted by start address
+        int strategy = askStrategy(in);
 
+        int memSize = in.readIntInRange("Total memory (KB): ", 1, 1000000);
+
+        // Read the whole scenario first, so the comparison mode can replay
+        // exactly the same data for each of the three strategies.
         int nAlloc = in.readIntInRange("How many jobs to allocate first? ", 1, 20);
+        String[] jobNames = new String[nAlloc];
+        int[] jobSizes = new int[nAlloc];
         for (int i = 0; i < nAlloc; i++) {
-            String name = in.readLine("  Name of job " + (i + 1) + " (e.g. A): ").trim();
-            int size = in.readIntInRange("  Size of " + name + " (KB): ", 1, memSize);
-            if (!allocate(memory, name, size, memSize)) {
-                System.out.println("  [!] " + name + " (" + size + " KB) does not fit anywhere; skipped.");
-            } else {
-                System.out.println("  " + name + " allocated.");
-                printMemoryMap(memory, memSize);
-            }
+            jobNames[i] = in.readLine("  Name of job " + (i + 1) + " (e.g. A): ").trim();
+            jobSizes[i] = in.readIntInRange("  Size of " + jobNames[i] + " (KB): ", 1, memSize);
         }
 
         int nFree = in.readIntInRange("How many jobs to free? ", 0, 20);
+        String[] freeNames = new String[nFree];
         for (int i = 0; i < nFree; i++) {
-            String name = in.readLine("  Name of the job to free: ").trim();
+            freeNames[i] = in.readLine("  Name of the job to free: ").trim();
+        }
+
+        int request = in.readIntInRange("New request size (KB): ", 1, memSize);
+
+        if (strategy == 4) {
+            System.out.println();
+            System.out.println("COMPARISON - same jobs, frees and request for every strategy");
+            for (int s = 1; s <= 3; s++) {
+                List<Alloc> memory = buildScenario(memSize, jobNames, jobSizes, freeNames, s);
+                int[] stats = freeStats(memory, memSize);
+                System.out.println();
+                System.out.println("--- " + strategyName(s) + " ---");
+                printMemoryMap(memory, memSize);
+                System.out.println("  Total free: " + stats[0] + " KB, largest hole: "
+                        + stats[1] + " KB, request of " + request + " KB: "
+                        + requestVerdict(stats[0], stats[1], request));
+            }
+            return;
+        }
+
+        // Single strategy: play the scenario step by step (like before).
+        List<Alloc> memory = new ArrayList<>(); // always kept sorted by start address
+        for (int i = 0; i < nAlloc; i++) {
+            if (!allocate(memory, jobNames[i], jobSizes[i], memSize, strategy)) {
+                System.out.println("  [!] " + jobNames[i] + " (" + jobSizes[i]
+                        + " KB) does not fit anywhere; skipped.");
+            } else {
+                System.out.println("  " + jobNames[i] + " allocated.");
+                printMemoryMap(memory, memSize);
+            }
+        }
+        for (String name : freeNames) {
             if (free(memory, name)) {
                 System.out.println("  " + name + " freed.");
                 printMemoryMap(memory, memSize);
@@ -158,19 +268,9 @@ public class FragmentationDemo {
         }
 
         // A new request: this is where external fragmentation shows up.
-        int request = in.readIntInRange("New request size (KB): ", 1, memSize);
-        int totalFree = 0;
-        int largestHole = 0;
-        int cursor = 0;
-        for (Alloc a : memory) { // gaps before, between and after allocations are holes
-            int hole = a.start - cursor;
-            totalFree += hole;
-            largestHole = Math.max(largestHole, hole);
-            cursor = a.end();
-        }
-        int tail = memSize - cursor;
-        totalFree += tail;
-        largestHole = Math.max(largestHole, tail);
+        int[] stats = freeStats(memory, memSize);
+        int totalFree = stats[0];
+        int largestHole = stats[1];
 
         System.out.println();
         System.out.println("Request of " + request + " KB:");
@@ -191,21 +291,88 @@ public class FragmentationDemo {
         }
     }
 
-    /** First-fit allocation into the single contiguous memory block. Returns false if no hole fits. */
-    private static boolean allocate(List<Alloc> memory, String name, int size, int memSize) {
+    /** Replays the whole scenario for one strategy; used by the comparison mode. */
+    private static List<Alloc> buildScenario(int memSize, String[] jobNames, int[] jobSizes,
+                                             String[] freeNames, int strategy) {
+        List<Alloc> memory = new ArrayList<>();
+        for (int i = 0; i < jobNames.length; i++) {
+            allocate(memory, jobNames[i], jobSizes[i], memSize, strategy);
+        }
+        for (String name : freeNames) {
+            free(memory, name);
+        }
+        return memory;
+    }
+
+    /**
+     * Picks a hole for the job with the chosen strategy and inserts it.
+     * Returns false if no hole is large enough (the job cannot be placed).
+     */
+    private static boolean allocate(List<Alloc> memory, String name, int size, int memSize,
+                                    int strategy) {
+        // Collect every hole: gaps between blocks and the tail of memory.
+        List<int[]> holes = new ArrayList<>(); // each entry: {start, size}
         int cursor = 0;
         for (Alloc a : memory) {
-            if (a.start - cursor >= size) { // hole between previous block and this one
-                insertSorted(memory, new Alloc(name, cursor, size));
-                return true;
+            if (a.start - cursor > 0) {
+                holes.add(new int[] {cursor, a.start - cursor});
             }
             cursor = a.end();
         }
-        if (memSize - cursor >= size) { // hole at the end of memory
-            insertSorted(memory, new Alloc(name, cursor, size));
-            return true;
+        if (memSize - cursor > 0) {
+            holes.add(new int[] {cursor, memSize - cursor});
         }
-        return false;
+
+        int best = -1;
+        for (int i = 0; i < holes.size(); i++) {
+            if (holes.get(i)[1] < size) {
+                continue; // too small
+            }
+            if (best == -1) {
+                best = i;
+                if (strategy == 1) {
+                    break; // First-Fit: the first hole in address order wins
+                }
+            } else if (strategy == 2 && holes.get(i)[1] < holes.get(best)[1]) {
+                best = i; // Best-Fit: keep the smallest fitting hole
+            } else if (strategy == 3 && holes.get(i)[1] > holes.get(best)[1]) {
+                best = i; // Worst-Fit: keep the largest fitting hole
+            }
+            // equal sizes keep the earlier hole (lower address)
+        }
+        if (best == -1) {
+            return false;
+        }
+        insertSorted(memory, new Alloc(name, holes.get(best)[0], size));
+        return true;
+    }
+
+    /** @return {total free memory, largest single hole} in KB. */
+    private static int[] freeStats(List<Alloc> memory, int memSize) {
+        int totalFree = 0;
+        int largestHole = 0;
+        int cursor = 0;
+        for (Alloc a : memory) { // gaps before, between and after allocations are holes
+            int hole = a.start - cursor;
+            totalFree += hole;
+            largestHole = Math.max(largestHole, hole);
+            cursor = a.end();
+        }
+        int tail = memSize - cursor;
+        totalFree += tail;
+        largestHole = Math.max(largestHole, tail);
+        return new int[] {totalFree, largestHole};
+    }
+
+    /** Short verdict used by the comparison mode. */
+    private static String requestVerdict(int totalFree, int largestHole, int request) {
+        if (largestHole >= request) {
+            return "fits";
+        }
+        if (totalFree >= request) {
+            return "NO FIT -> external fragmentation";
+        }
+        return "not enough memory";
     }
 
     /** Removes the allocation with this name (creates a hole). Returns false if not found. */

@@ -19,7 +19,7 @@ SEGMENTATION - logical to physical address translation
   1) Build a segment table and translate addresses
   0) Back to main menu
   Choose an option: 
-How many segments?   Base address of segment 0:   Limit (size) of segment 0:   Base address of segment 1:   Limit (size) of segment 1:   Base address of segment 2:   Limit (size) of segment 2:   Base address of segment 3:   Limit (size) of segment 3: Physical memory (RAM) size in bytes: 
+How many segments? Physical memory (RAM) size in bytes:   Base address of segment 0:   Limit (size) of segment 0:   Base address of segment 1:   Limit (size) of segment 1:   Base address of segment 2:   Limit (size) of segment 2:   Base address of segment 3:   Limit (size) of segment 3: 
 Segment table in use:
   Segment |   Base | Limit | Ends at
   --------|--------|-------|--------

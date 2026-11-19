@@ -22,6 +22,10 @@ import java.util.List;
  *   UNSAFE (unsafe does not mean deadlock has happened - it means deadlock
  *   COULD happen and the OS must refuse the request).
  *
+ *   The Resource Request Algorithm (option 2) applies the same rules to one
+ *   request: the request is granted only if the state AFTER the tentative
+ *   allocation is still safe; otherwise the allocation is undone.
+ *
  * ASSUMPTIONS
  *   - Processes are labelled P1..Pn and resources R1..Rm (1-based labels).
  *   - All numbers are non-negative, and Max >= Allocation for every cell.
@@ -29,58 +33,72 @@ import java.util.List;
  */
 public class BankersAlgorithm {
 
+    // The current system state, kept between menu choices so that option 2
+    // (resource request) works on the data that option 1 loaded.
+    private static boolean loaded = false;
+    private static int curN;
+    private static int curM;
+    private static int[][] curAlloc;
+    private static int[][] curMax;
+    private static int[] curAvail;
+
     /** Shows the feature submenu until the user goes back. */
     public static void run(InputHelper in) {
         System.out.println("BANKER'S ALGORITHM (deadlock avoidance)");
         while (true) {
             System.out.println();
             System.out.println("  1) Enter data and check for a safe state");
+            System.out.println("  2) Resource request (give a process more resources)");
             System.out.println("  0) Back to main menu");
-            int choice = in.readIntInRange("  Choose an option: ", 0, 1);
+            int choice = in.readIntInRange("  Choose an option: ", 0, 2);
             if (choice == 0) {
                 return;
             }
             System.out.println();
-            runOnce(in);
+            if (choice == 1) {
+                runOnce(in);
+            } else {
+                requestMode(in);
+            }
         }
     }
 
-    /** Reads one full problem instance and prints the safety check. */
-    private static void runOnce(InputHelper in) {
-        int n;
-        int m;
-        int[][] allocation;
-        int[][] max;
-        int[] available;
-
+    /** Reads and validates one full problem instance into the current-state fields. */
+    private static void loadData(InputHelper in) {
         // Keep re-reading until the numbers are consistent, so a mistake
         // in one row does not force restarting the whole program.
         while (true) {
-            n = in.readIntInRange("Number of processes: ", 1, 10);
-            m = in.readIntInRange("Number of resource types: ", 1, 10);
+            curN = in.readIntInRange("Number of processes: ", 1, 10);
+            curM = in.readIntInRange("Number of resource types: ", 1, 10);
 
             System.out.println("Allocation matrix - one row per process, "
-                    + m + " number(s) per row (space separated).");
-            allocation = readMatrix(in, "Allocation", n, m);
+                    + curM + " number(s) per row (space separated).");
+            curAlloc = readMatrix(in, "Allocation", curN, curM);
             System.out.println("Maximum-need matrix - same format.");
-            max = readMatrix(in, "Max", n, m);
-            available = in.readIntArray("Available resources (" + m + " number(s)): ", m);
+            curMax = readMatrix(in, "Max", curN, curM);
+            curAvail = in.readIntArray("Available resources (" + curM + " number(s)): ", curM);
 
-            String error = validate(allocation, max, available);
+            String error = validate(curAlloc, curMax, curAvail);
             if (error == null) {
                 break;
             }
             System.out.println("[!] " + error);
             System.out.println("    Please enter the data again.\n");
         }
+        loaded = true;
+    }
+
+    /** Reads one full problem instance and prints the safety check. */
+    private static void runOnce(InputHelper in) {
+        loadData(in);
+        int n = curN;
+        int m = curM;
+        int[][] allocation = curAlloc;
+        int[][] max = curMax;
+        int[] available = curAvail;
 
         // Need = Max - Allocation
-        int[][] need = new int[n][m];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                need[i][j] = max[i][j] - allocation[i][j];
-            }
-        }
+        int[][] need = computeNeed(allocation, max);
 
         printMatrix("Need matrix (Max - Allocation)", need, m);
 
@@ -120,6 +138,109 @@ public class BankersAlgorithm {
             System.out.println("        a deadlock could occur if requests are granted.");
             System.out.println("Processes that could not be guaranteed to finish: " + stuck);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Resource Request Algorithm (Dijkstra)
+    // ------------------------------------------------------------------
+    /**
+     * Lets the user make a resource request from one process:
+     *   1. request must exist, be non-negative, <= Need and <= Available
+     *   2. pretend to allocate: Available -= request, Allocation += request
+     *   3. run the SAME safety algorithm as option 1
+     *   4. safe   -> keep the new values (request granted)
+     *      unsafe -> undo the pretend allocation (request denied)
+     */
+    private static void requestMode(InputHelper in) {
+        if (!loaded) {
+            System.out.println("(No data yet - please enter the system data first.)");
+            System.out.println();
+            loadData(in);
+        }
+        int n = curN;
+        int m = curM;
+
+        int p = in.readIntInRange("Process making the request (1.." + n + "): ", 1, n);
+        int[] request = in.readIntArray("Request for P" + p + " (" + m + " number(s)): ", m);
+        int idx = p - 1;
+        int[][] need = computeNeed(curAlloc, curMax);
+
+        System.out.println();
+        System.out.println("Request from P" + p + ": " + fmt(request));
+        System.out.println("Remaining need of P" + p + ": " + fmt(need[idx]));
+        System.out.println("Available right now        : " + fmt(curAvail));
+
+        // --- validation: none of these checks may change any value ---
+        for (int j = 0; j < m; j++) {
+            if (request[j] < 0) {
+                System.out.println("Request is INVALID: resource R" + (j + 1) + " is negative.");
+                System.out.println("System state unchanged.");
+                return;
+            }
+        }
+        for (int j = 0; j < m; j++) {
+            if (request[j] > need[idx][j]) {
+                System.out.println("Request is INVALID: it exceeds the remaining need of P"
+                        + p + " (" + fmt(need[idx]) + ").");
+                System.out.println("System state unchanged.");
+                return;
+            }
+        }
+        for (int j = 0; j < m; j++) {
+            if (request[j] > curAvail[j]) {
+                System.out.println("Request is VALID but the resources are NOT available"
+                        + " (R" + (j + 1) + " needs " + request[j] + ", only "
+                        + curAvail[j] + " free).");
+                System.out.println("System state unchanged.");
+                return;
+            }
+        }
+        System.out.println("Request is valid and the resources are available.");
+
+        // --- pretend to allocate, then ask the safety algorithm ---
+        for (int j = 0; j < m; j++) {
+            curAvail[j] -= request[j];
+            curAlloc[idx][j] += request[j];
+        }
+
+        List<Integer> safeOrder = new ArrayList<>();
+        StringBuilder log = new StringBuilder();
+        boolean safe = checkSafe(computeNeed(curAlloc, curMax), curAlloc, curAvail, safeOrder, log);
+
+        System.out.println();
+        System.out.println("Safety check after granting the request:");
+        if (log.length() == 0) {
+            System.out.println("  (no remaining process fits in the tentative work - nothing can run)");
+        }
+        System.out.print(log);
+
+        if (safe) {
+            System.out.println("Result: SAFE - the request is GRANTED.");
+            System.out.println();
+            System.out.println("Available now: " + fmt(curAvail));
+            printMatrix("Updated allocation", curAlloc, m);
+            printMatrix("Updated need (Max - Allocation)", computeNeed(curAlloc, curMax), m);
+        } else {
+            // Undo the pretend allocation - nothing may change on denial.
+            for (int j = 0; j < m; j++) {
+                curAvail[j] += request[j];
+                curAlloc[idx][j] -= request[j];
+            }
+            System.out.println("Result: UNSAFE - the request is DENIED and the");
+            System.out.println("        original Available / Allocation values are restored.");
+            System.out.println("Available still: " + fmt(curAvail));
+        }
+    }
+
+    /** Need = Max - Allocation. */
+    private static int[][] computeNeed(int[][] allocation, int[][] max) {
+        int[][] need = new int[allocation.length][max[0].length];
+        for (int i = 0; i < allocation.length; i++) {
+            for (int j = 0; j < allocation[0].length; j++) {
+                need[i][j] = max[i][j] - allocation[i][j];
+            }
+        }
+        return need;
     }
 
     /**

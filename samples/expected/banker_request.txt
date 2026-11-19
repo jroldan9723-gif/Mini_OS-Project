@@ -1,0 +1,92 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+BANKER'S ALGORITHM (deadlock avoidance)
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+(No data yet - please enter the system data first.)
+
+Number of processes: Number of resource types: Allocation matrix - one row per process, 3 number(s) per row (space separated).
+  Allocation for P1 (3 number(s)):   Allocation for P2 (3 number(s)):   Allocation for P3 (3 number(s)):   Allocation for P4 (3 number(s)):   Allocation for P5 (3 number(s)): Maximum-need matrix - same format.
+  Max for P1 (3 number(s)):   Max for P2 (3 number(s)):   Max for P3 (3 number(s)):   Max for P4 (3 number(s)):   Max for P5 (3 number(s)): Available resources (3 number(s)): Process making the request (1..5): Request for P2 (3 number(s)): 
+Request from P2: [1,1,1]
+Remaining need of P2: [1,2,2]
+Available right now        : [3,3,2]
+Request is valid and the resources are available.
+
+Safety check after granting the request:
+  P2: need [0,1,1] <= work [2,2,1]  -> runs, returns [3,1,1], work = [5,3,2]
+  P4: need [0,1,1] <= work [5,3,2]  -> runs, returns [2,1,1], work = [7,4,3]
+  P1: need [7,4,3] <= work [7,4,3]  -> runs, returns [0,1,0], work = [7,5,3]
+  P3: need [6,0,0] <= work [7,5,3]  -> runs, returns [3,0,2], work = [10,5,5]
+  P5: need [4,3,1] <= work [10,5,5]  -> runs, returns [0,0,2], work = [10,5,7]
+Result: SAFE - the request is GRANTED.
+
+Available now: [2,2,1]
+Updated allocation:
+           R1    R2    R3
+   P1       0     1     0
+   P2       3     1     1
+   P3       3     0     2
+   P4       2     1     1
+   P5       0     0     2
+
+Updated need (Max - Allocation):
+           R1    R2    R3
+   P1       7     4     3
+   P2       0     1     1
+   P3       6     0     0
+   P4       0     1     1
+   P5       4     3     1
+
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+Process making the request (1..5): Request for P1 (3 number(s)): 
+Request from P1: [0,2,1]
+Remaining need of P1: [7,4,3]
+Available right now        : [2,2,1]
+Request is valid and the resources are available.
+
+Safety check after granting the request:
+  (no remaining process fits in the tentative work - nothing can run)
+Result: UNSAFE - the request is DENIED and the
+        original Available / Allocation values are restored.
+Available still: [2,2,1]
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

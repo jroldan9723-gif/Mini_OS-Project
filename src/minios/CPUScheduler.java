@@ -13,25 +13,30 @@ import java.util.List;
  *   1. FCFS        First-Come, First-Served (non-preemptive, arrival order)
  *   2. SJF         Shortest Job First       (non-preemptive, shortest burst)
  *   3. Round Robin (RR)                     (preemptive, fixed time quantum)
+ *   5. SRTF        Shortest Remaining Time  (preemptive SJF, arrival times)
  *
  * KEY FORMULAS
  *   Turnaround time = completion time - arrival time
  *   Waiting time    = turnaround time - burst time
+ *   Response time   = first start time - arrival time
  *   (Because turnaround = time in system = burst + waiting.)
  *
  * ASSUMPTIONS / SIMPLIFICATIONS
- *   - Every process arrives at time 0 (all jobs are ready from the start).
- *     This keeps the arithmetic easy to verify by hand.
+ *   - Options 1-4 assume every process arrives at time 0 (all jobs are ready
+ *     from the start) so the arithmetic is easy to verify by hand.
+ *     SRTF (option 5) asks for an arrival time per process instead.
  *   - SJF is the NON-preemptive version (once a job starts it runs to completion).
  *   - Burst times are positive whole numbers ("time units" of 1 ms, 1 tick, ...).
  *   - FCFS runs processes in the order they were entered.
+ *   - SRTF ties (equal remaining time): earlier arrival first, then lower P-number.
  */
 public class CPUScheduler {
 
     /** One simulated process - our tiny "process control block" (PCB). */
     static class Process {
-        int id;    // 1, 2, 3, ... (displayed as P1, P2, P3, ...)
-        int burst; // total CPU time the process needs
+        int id;       // 1, 2, 3, ... (displayed as P1, P2, P3, ...)
+        int burst;    // total CPU time the process needs
+        int arrival;  // when the process arrives (0 for options 1-4, entered for SRTF)
 
         Process(int id, int burst) {
             this.id = id;
@@ -77,19 +82,28 @@ public class CPUScheduler {
     /** Entry point: shows the CPU-scheduling submenu until the user goes back. */
     public static void run(InputHelper in) {
         System.out.println("CPU SCHEDULING");
-        System.out.println("Assumption: every process arrives at time 0.");
+        System.out.println("Options 1-4 assume every process arrives at time 0.");
+        System.out.println("SRTF (option 5) asks for an arrival time per process.");
         while (true) {
             System.out.println();
             System.out.println("  1) FCFS        (First-Come, First-Served)");
             System.out.println("  2) SJF         (Shortest Job First, non-preemptive)");
             System.out.println("  3) Round Robin (preemptive, fixed time quantum)");
             System.out.println("  4) Compare all three on the same processes");
+            System.out.println("  5) SRTF        (Shortest Remaining Time First, preemptive)");
             System.out.println("  0) Back to main menu");
-            int choice = in.readIntInRange("  Choose an option: ", 0, 4);
+            int choice = in.readIntInRange("  Choose an option: ", 0, 5);
             if (choice == 0) {
                 return;
             }
             System.out.println();
+
+            if (choice == 5) {
+                // SRTF needs arrival times, so it has its own input routine.
+                List<Process> procs = readSrtfProcesses(in);
+                printSrtfResult(procs, srtf(procs));
+                continue;
+            }
 
             List<Process> procs = readProcesses(in);
 
@@ -119,6 +133,20 @@ public class CPUScheduler {
         for (int i = 0; i < n; i++) {
             int burst = in.readIntInRange("  CPU burst time for P" + (i + 1) + ": ", 1, 1000);
             procs.add(new Process(i + 1, burst));
+        }
+        return procs;
+    }
+
+    /** SRTF input: every process gets an arrival time as well as a burst time. */
+    private static List<Process> readSrtfProcesses(InputHelper in) {
+        int n = in.readIntInRange("How many processes? ", 1, 20);
+        List<Process> procs = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int arrival = in.readIntInRange("  Arrival time of P" + (i + 1) + ": ", 0, 1000);
+            int burst = in.readIntInRange("  CPU burst time for P" + (i + 1) + ": ", 1, 1000);
+            Process p = new Process(i + 1, burst);
+            p.arrival = arrival;
+            procs.add(p);
         }
         return procs;
     }
@@ -214,6 +242,160 @@ public class CPUScheduler {
             }
         }
         return r;
+    }
+
+    // ------------------------------------------------------------------
+    // SRTF (Shortest Remaining Time First): preemptive SJF with arrival
+    // times. Every tick we look at all processes that have arrived and are
+    // not finished, and run the one with the smallest remaining burst.
+    // If a newly arrived process is shorter than what is left of the current
+    // one, the current process is preempted (its remaining time is kept).
+    // ------------------------------------------------------------------
+    static class SrtfResult {
+        int[] completion; // time each process finishes
+        int[] turnaround; // completion - arrival
+        int[] waiting;    // turnaround - burst
+        int[] response;   // first start - arrival
+        List<int[]> segments; // Gantt segments: {processIndex (-1 = idle), start, end}
+        List<Integer> order;  // execution order of the process indices (idle skipped)
+
+        SrtfResult(int n) {
+            completion = new int[n];
+            turnaround = new int[n];
+            waiting = new int[n];
+            response = new int[n];
+            segments = new ArrayList<>();
+            order = new ArrayList<>();
+        }
+    }
+
+    static SrtfResult srtf(List<Process> procs) {
+        int n = procs.size();
+        SrtfResult r = new SrtfResult(n);
+        int[] remaining = new int[n];
+        int[] firstStart = new int[n];
+        for (int i = 0; i < n; i++) {
+            remaining[i] = procs.get(i).burst;
+            firstStart[i] = -1; // not started yet
+        }
+
+        // Simulate one tick at a time. owner[i] = which process ran at tick i
+        // (-1 = CPU idle because nothing has arrived yet).
+        List<Integer> owner = new ArrayList<>();
+        int time = 0;
+        int finished = 0;
+        while (finished < n) {
+            int pick = -1;
+            for (int i = 0; i < n; i++) {
+                if (remaining[i] == 0 || procs.get(i).arrival > time) {
+                    continue; // done, or has not arrived yet
+                }
+                if (pick == -1
+                        || remaining[i] < remaining[pick]
+                        || (remaining[i] == remaining[pick]
+                            && procs.get(i).arrival < procs.get(pick).arrival)
+                        || (remaining[i] == remaining[pick]
+                            && procs.get(i).arrival == procs.get(pick).arrival
+                            && procs.get(i).id < procs.get(pick).id)) {
+                    pick = i; // shortest remaining, tie: earlier arrival, then lower id
+                }
+            }
+
+            if (pick == -1) {
+                owner.add(-1); // nobody to run: CPU idle for this tick
+                time++;
+                continue;
+            }
+
+            owner.add(pick);
+            if (firstStart[pick] < 0) {
+                firstStart[pick] = time;
+            }
+            remaining[pick]--;
+            time++;
+            if (remaining[pick] == 0) {
+                r.completion[pick] = time;
+                finished++;
+            }
+        }
+
+        // Compress the per-tick owners into Gantt segments.
+        int tick = 0;
+        while (tick < owner.size()) {
+            int who = owner.get(tick);
+            int start = tick;
+            while (tick < owner.size() && owner.get(tick) == who) {
+                tick++;
+            }
+            r.segments.add(new int[] {who, start, tick});
+            if (who >= 0) {
+                r.order.add(who);
+            }
+        }
+
+        // Performance numbers, using the required formulas.
+        for (int i = 0; i < n; i++) {
+            r.turnaround[i] = r.completion[i] - procs.get(i).arrival;
+            r.waiting[i] = r.turnaround[i] - procs.get(i).burst;
+            r.response[i] = firstStart[i] - procs.get(i).arrival;
+        }
+        return r;
+    }
+
+    private static void printSrtfResult(List<Process> procs, SrtfResult r) {
+        System.out.println();
+        System.out.println("Algorithm: SRTF (Shortest Remaining Time First, preemptive)");
+
+        StringBuilder order = new StringBuilder();
+        for (int k = 0; k < r.order.size(); k++) {
+            if (k > 0) {
+                order.append(" -> ");
+            }
+            order.append(procs.get(r.order.get(k)).name());
+        }
+        System.out.println("Execution order: " + order);
+
+        // Gantt chart: every segment with its start and end time. A process
+        // segment is marked "preempted" when it still had work left at the end.
+        System.out.println();
+        System.out.println("Gantt chart:");
+        StringBuilder gantt = new StringBuilder("  ");
+        for (int i = 0; i < r.segments.size(); i++) {
+            int[] seg = r.segments.get(i);
+            String label;
+            if (seg[0] < 0) {
+                label = "idle";
+            } else {
+                label = procs.get(seg[0]).name();
+                if (r.completion[seg[0]] > seg[2]) {
+                    label += " (preempted)"; // runs again later
+                }
+            }
+            if (i > 0) {
+                gantt.append(" | ");
+            }
+            gantt.append(seg[1]).append("-").append(seg[2]).append(" ").append(label);
+        }
+        System.out.println(gantt);
+
+        System.out.println();
+        System.out.printf("%-8s %8s %6s %11s %11s %8s %9s%n",
+                "Process", "Arrival", "Burst", "Completion", "Turnaround", "Waiting", "Response");
+        System.out.println("-------- -------- ------ ----------- ----------- -------- ---------");
+        double sumTat = 0;
+        double sumWt = 0;
+        double sumRt = 0;
+        for (int i = 0; i < procs.size(); i++) {
+            System.out.printf("%-8s %8d %6d %11d %11d %8d %9d%n",
+                    procs.get(i).name(), procs.get(i).arrival, procs.get(i).burst,
+                    r.completion[i], r.turnaround[i], r.waiting[i], r.response[i]);
+            sumTat += r.turnaround[i];
+            sumWt += r.waiting[i];
+            sumRt += r.response[i];
+        }
+        System.out.printf("Average turnaround time: %.2f%n", sumTat / procs.size());
+        System.out.printf("Average waiting time   : %.2f%n", sumWt / procs.size());
+        System.out.printf("Average response time  : %.2f%n", sumRt / procs.size());
     }
 
     // ------------------------------------------------------------------

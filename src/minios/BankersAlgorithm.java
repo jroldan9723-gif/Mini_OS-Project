@@ -1,40 +1,10 @@
-// File: src/minios/BankersAlgorithm.java
 package minios;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * BankersAlgorithm - checks whether the system is in a SAFE state.
- *
- * HOW IT WORKS
- *   Each process may eventually need up to Max[i] of every resource, but it
- *   currently HOLDS Allocation[i]. So it may still ASK for:
- *       Need[i] = Max[i] - Allocation[i]
- *
- *   The safety rule: pretend the currently available resources are free cash
- *   ("Work"). We may let a process finish ONLY if Need[i] <= Work for every
- *   resource. When it finishes, it returns everything it held:
- *       Work = Work + Allocation[i]
- *   If we can keep finding such a process until EVERY process has finished,
- *   the system is SAFE and the order we found is called a SAFE SEQUENCE.
- *   If we get stuck with processes that can never be satisfied, the system is
- *   UNSAFE (unsafe does not mean deadlock has happened - it means deadlock
- *   COULD happen and the OS must refuse the request).
- *
- *   The Resource Request Algorithm (option 2) applies the same rules to one
- *   request: the request is granted only if the state AFTER the tentative
- *   allocation is still safe; otherwise the allocation is undone.
- *
- * ASSUMPTIONS
- *   - Processes are labelled P1..Pn and resources R1..Rm (1-based labels).
- *   - All numbers are non-negative, and Max >= Allocation for every cell.
- *   - A process releases ALL its resources when it finishes (classic model).
- */
 public class BankersAlgorithm {
 
-    // The current system state, kept between menu choices so that option 2
-    // (resource request) works on the data that option 1 loaded.
     private static boolean loaded = false;
     private static int curN;
     private static int curM;
@@ -42,7 +12,6 @@ public class BankersAlgorithm {
     private static int[][] curMax;
     private static int[] curAvail;
 
-    /** Shows the feature submenu until the user goes back. */
     public static void run(InputHelper in) {
         System.out.println("BANKER'S ALGORITHM (deadlock avoidance)");
         while (true) {
@@ -63,10 +32,8 @@ public class BankersAlgorithm {
         }
     }
 
-    /** Reads and validates one full problem instance into the current-state fields. */
     private static void loadData(InputHelper in) {
-        // Keep re-reading until the numbers are consistent, so a mistake
-        // in one row does not force restarting the whole program.
+
         while (true) {
             curN = in.readIntInRange("Number of processes: ", 1, 10);
             curM = in.readIntInRange("Number of resource types: ", 1, 10);
@@ -88,7 +55,6 @@ public class BankersAlgorithm {
         loaded = true;
     }
 
-    /** Reads one full problem instance and prints the safety check. */
     private static void runOnce(InputHelper in) {
         loadData(in);
         int n = curN;
@@ -97,12 +63,10 @@ public class BankersAlgorithm {
         int[][] max = curMax;
         int[] available = curAvail;
 
-        // Need = Max - Allocation
         int[][] need = computeNeed(allocation, max);
 
         printMatrix("Need matrix (Max - Allocation)", need, m);
 
-        // Run the safety algorithm, keeping a step-by-step log for the user.
         List<Integer> safeOrder = new ArrayList<>();
         StringBuilder log = new StringBuilder();
         boolean safe = checkSafe(need, allocation, available, safeOrder, log);
@@ -123,7 +87,7 @@ public class BankersAlgorithm {
             }
             System.out.println();
         } else {
-            // Report which processes could not be guaranteed to finish.
+
             StringBuilder stuck = new StringBuilder();
             for (int i = 0; i < n; i++) {
                 if (!safeOrder.contains(i)) {
@@ -140,17 +104,6 @@ public class BankersAlgorithm {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Resource Request Algorithm (Dijkstra)
-    // ------------------------------------------------------------------
-    /**
-     * Lets the user make a resource request from one process:
-     *   1. request must exist, be non-negative, <= Need and <= Available
-     *   2. pretend to allocate: Available -= request, Allocation += request
-     *   3. run the SAME safety algorithm as option 1
-     *   4. safe   -> keep the new values (request granted)
-     *      unsafe -> undo the pretend allocation (request denied)
-     */
     private static void requestMode(InputHelper in) {
         if (!loaded) {
             System.out.println("(No data yet - please enter the system data first.)");
@@ -170,7 +123,6 @@ public class BankersAlgorithm {
         System.out.println("Remaining need of P" + p + ": " + fmt(need[idx]));
         System.out.println("Available right now        : " + fmt(curAvail));
 
-        // --- validation: none of these checks may change any value ---
         for (int j = 0; j < m; j++) {
             if (request[j] < 0) {
                 System.out.println("Request is INVALID: resource R" + (j + 1) + " is negative.");
@@ -197,7 +149,6 @@ public class BankersAlgorithm {
         }
         System.out.println("Request is valid and the resources are available.");
 
-        // --- pretend to allocate, then ask the safety algorithm ---
         for (int j = 0; j < m; j++) {
             curAvail[j] -= request[j];
             curAlloc[idx][j] += request[j];
@@ -221,7 +172,7 @@ public class BankersAlgorithm {
             printMatrix("Updated allocation", curAlloc, m);
             printMatrix("Updated need (Max - Allocation)", computeNeed(curAlloc, curMax), m);
         } else {
-            // Undo the pretend allocation - nothing may change on denial.
+
             for (int j = 0; j < m; j++) {
                 curAvail[j] += request[j];
                 curAlloc[idx][j] -= request[j];
@@ -232,7 +183,6 @@ public class BankersAlgorithm {
         }
     }
 
-    /** Need = Max - Allocation. */
     private static int[][] computeNeed(int[][] allocation, int[][] max) {
         int[][] need = new int[allocation.length][max[0].length];
         for (int i = 0; i < allocation.length; i++) {
@@ -243,23 +193,16 @@ public class BankersAlgorithm {
         return need;
     }
 
-    /**
-     * The safety algorithm itself.
-     *
-     * @return true  if every process can finish (safe sequence stored in safeOrder)
-     *         false if we get stuck (safeOrder then lists the processes that
-     *               could be finished before getting stuck)
-     */
     private static boolean checkSafe(int[][] need, int[][] allocation, int[] available,
                                      List<Integer> safeOrder, StringBuilder log) {
         int n = allocation.length;
         int m = available.length;
-        int[] work = available.clone();   // resources that become free as processes finish
+        int[] work = available.clone();
         boolean[] finished = new boolean[n];
         int done = 0;
 
         while (done < n) {
-            // Find the first unfinished process whose Need fits inside Work.
+
             int pick = -1;
             for (int i = 0; i < n; i++) {
                 if (finished[i]) {
@@ -279,10 +222,9 @@ public class BankersAlgorithm {
             }
 
             if (pick == -1) {
-                return false; // stuck: no remaining process can be satisfied
+                return false;
             }
 
-            // Pretend this process runs and returns all its resources.
             finished[pick] = true;
             safeOrder.add(pick);
             done++;
@@ -298,9 +240,6 @@ public class BankersAlgorithm {
         return true;
     }
 
-    // ------------------------------------------------------------------
-    // Input helpers / validation
-    // ------------------------------------------------------------------
     private static int[][] readMatrix(InputHelper in, String label, int n, int m) {
         int[][] matrix = new int[n][m];
         for (int i = 0; i < n; i++) {
@@ -309,7 +248,6 @@ public class BankersAlgorithm {
         return matrix;
     }
 
-    /** Returns null when the data is valid, otherwise a message explaining the problem. */
     private static String validate(int[][] allocation, int[][] max, int[] available) {
         for (int i = 0; i < allocation.length; i++) {
             for (int j = 0; j < allocation[0].length; j++) {
@@ -331,7 +269,7 @@ public class BankersAlgorithm {
                 return "Available count for R" + (j + 1) + " is negative.";
             }
         }
-        return null; // valid
+        return null;
     }
 
     private static void printMatrix(String title, int[][] matrix, int m) {
@@ -351,7 +289,6 @@ public class BankersAlgorithm {
         System.out.println();
     }
 
-    /** Formats a vector as "[1,2,2]" for the step-by-step log. */
     private static String fmt(int[] values) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < values.length; i++) {

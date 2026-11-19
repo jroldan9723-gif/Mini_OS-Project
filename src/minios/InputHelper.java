@@ -1,16 +1,7 @@
-// File: src/minios/InputHelper.java
 package minios;
 
 import java.util.Scanner;
 
-/**
- * InputHelper - wrapper around Scanner for reading input safely.
- *
- * Scanner.nextInt() throws an exception when the user types "abc" instead of
- * a number, which would crash the program. So instead of using nextInt() we
- * always read a whole line and parse it ourselves; if the line is not valid
- * we simply ask again. That way a typo never crashes the simulator.
- */
 public class InputHelper {
 
     private final Scanner scanner;
@@ -19,11 +10,6 @@ public class InputHelper {
         this.scanner = scanner;
     }
 
-    /**
-     * Reads one whole line of text (without the trailing newline).
-     * If the input ends unexpectedly (for example a piped test file finished),
-     * the program says goodbye and exits politely instead of crashing.
-     */
     public String readLine(String prompt) {
         System.out.print(prompt);
         if (!scanner.hasNextLine()) {
@@ -34,7 +20,6 @@ public class InputHelper {
         return scanner.nextLine();
     }
 
-    /** Reads a whole number. Keeps asking until the user types a valid integer. */
     public int readInt(String prompt) {
         while (true) {
             String line = readLine(prompt).trim();
@@ -46,7 +31,6 @@ public class InputHelper {
         }
     }
 
-    /** Reads an integer that must be between min and max (inclusive). */
     public int readIntInRange(String prompt, int min, int max) {
         while (true) {
             int value = readInt(prompt);
@@ -57,7 +41,6 @@ public class InputHelper {
         }
     }
 
-    /** Reads exactly "count" whole numbers separated by spaces on ONE line. */
     public int[] readIntArray(String prompt, int count) {
         while (true) {
             String line = readLine(prompt).trim();

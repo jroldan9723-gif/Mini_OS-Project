@@ -1,39 +1,10 @@
-// File: src/minios/FragmentationDemo.java
 package minios;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * FragmentationDemo - explains and demonstrates the two kinds of fragmentation.
- *
- * INTERNAL fragmentation = memory wasted INSIDE an allocated block.
- *   Classic example: fixed-size partitions. A 80 KB process placed in a
- *   100 KB partition wastes 20 KB - that 20 KB cannot be used by anybody.
- *
- * EXTERNAL fragmentation = free memory exists, but it is scattered in HOLES
- *   that are each too small for the new request.
- *   Classic example: allocate A, B, C side by side; free B; now there are two
- *   holes. A new request that fits in the TOTAL free space but not in any
- *   SINGLE hole has to wait (or the OS must compact memory).
- *
- * ALLOCATION STRATEGIES (both demos support all three)
- *   First-Fit : take the first partition / hole large enough.
- *   Best-Fit  : take the smallest partition / hole that fits.
- *   Worst-Fit : take the largest partition / hole that fits.
- *   The demos also offer a comparison mode that runs all three on exactly
- *   the same data (each run works on its own copy of the memory layout).
- *
- * ASSUMPTIONS
- *   - Internal demo: fixed partitions, one process per partition.
- *   - External demo: one contiguous memory block, variable-size allocation;
- *     jobs keep contiguous space (no paging in this demo).
- *   - Equal-size candidates are broken by the lowest partition / earliest
- *     hole, so the result is always deterministic.
- */
 public class FragmentationDemo {
 
-    /** One allocated chunk in the external-fragmentation demo. */
     private static class Alloc {
         String name;
         int start;
@@ -46,7 +17,7 @@ public class FragmentationDemo {
         }
 
         int end() {
-            return start + size; // one past the last byte, so ranges do not overlap
+            return start + size;
         }
     }
 
@@ -70,9 +41,6 @@ public class FragmentationDemo {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Strategy selection (shared by both demos)
-    // ------------------------------------------------------------------
     private static int askStrategy(InputHelper in) {
         System.out.println("Allocation strategy:");
         System.out.println("  1) First-Fit  (first partition/hole that fits)");
@@ -92,9 +60,6 @@ public class FragmentationDemo {
         return "first-fit";
     }
 
-    // ------------------------------------------------------------------
-    // 1) INTERNAL FRAGMENTATION
-    // ------------------------------------------------------------------
     private static void internalDemo(InputHelper in) {
         System.out.println("INTERNAL FRAGMENTATION: space wasted INSIDE a partition.");
         int strategy = askStrategy(in);
@@ -114,11 +79,10 @@ public class FragmentationDemo {
         }
 
         if (strategy == 4) {
-            // Compare: same data, three separate runs (assignInternal only
-            // reads the arrays, so every run starts fresh).
+
             System.out.println();
             System.out.println("COMPARISON - same partitions and processes for every strategy");
-            int[] totals = new int[4]; // indexed 1..3
+            int[] totals = new int[4];
             for (int s = 1; s <= 3; s++) {
                 System.out.println();
                 totals[s] = printInternalResult(procName, partitionSize, procSize,
@@ -135,11 +99,6 @@ public class FragmentationDemo {
         }
     }
 
-    /**
-     * Places every process into a partition using the chosen strategy.
-     * Returns, for each process, the index of its partition (-1 = no free
-     * partition fits, the process has to wait). One process per partition.
-     */
     private static int[] assignInternal(int[] partitionSize, int[] procSize, int strategy) {
         int[] assigned = new int[procSize.length];
         boolean[] used = new boolean[partitionSize.length];
@@ -148,19 +107,19 @@ public class FragmentationDemo {
             assigned[i] = -1;
             for (int p = 0; p < partitionSize.length; p++) {
                 if (used[p] || partitionSize[p] < procSize[i]) {
-                    continue; // taken, or too small
+                    continue;
                 }
                 if (assigned[i] == -1) {
                     assigned[i] = p;
                     if (strategy == 1) {
-                        break; // First-Fit: the first one that fits wins
+                        break;
                     }
                 } else if (strategy == 2 && partitionSize[p] < partitionSize[assigned[i]]) {
-                    assigned[i] = p; // Best-Fit: keep looking for a smaller one
+                    assigned[i] = p;
                 } else if (strategy == 3 && partitionSize[p] > partitionSize[assigned[i]]) {
-                    assigned[i] = p; // Worst-Fit: keep looking for a larger one
+                    assigned[i] = p;
                 }
-                // equal sizes keep the earlier (lower) partition number
+
             }
             if (assigned[i] >= 0) {
                 used[assigned[i]] = true;
@@ -169,7 +128,6 @@ public class FragmentationDemo {
         return assigned;
     }
 
-    /** Prints the allocation table for one strategy and returns the total waste. */
     private static int printInternalResult(String[] procName, int[] partitionSize, int[] procSize,
                                            int[] assigned, int strategy) {
         System.out.println("Allocation result (" + strategyName(strategy) + "):");
@@ -190,8 +148,7 @@ public class FragmentationDemo {
                         procName[i], wasted);
             }
         }
-        // Partitions that no process entered are not "fragmentation", they are
-        // simply unused - but note them so the picture is complete.
+
         for (int p = 0; p < partitionSize.length; p++) {
             if (!used[p]) {
                 System.out.printf("  %-9s | %4d | %-7s | %s%n",
@@ -204,17 +161,12 @@ public class FragmentationDemo {
         return totalWasted;
     }
 
-    // ------------------------------------------------------------------
-    // 2) EXTERNAL FRAGMENTATION
-    // ------------------------------------------------------------------
     private static void externalDemo(InputHelper in) {
         System.out.println("EXTERNAL FRAGMENTATION: free space exists, but it is split into holes.");
         int strategy = askStrategy(in);
 
         int memSize = in.readIntInRange("Total memory (KB): ", 1, 1000000);
 
-        // Read the whole scenario first, so the comparison mode can replay
-        // exactly the same data for each of the three strategies.
         int nAlloc = in.readIntInRange("How many jobs to allocate first? ", 1, 20);
         String[] jobNames = new String[nAlloc];
         int[] jobSizes = new int[nAlloc];
@@ -247,8 +199,7 @@ public class FragmentationDemo {
             return;
         }
 
-        // Single strategy: play the scenario step by step (like before).
-        List<Alloc> memory = new ArrayList<>(); // always kept sorted by start address
+        List<Alloc> memory = new ArrayList<>();
         for (int i = 0; i < nAlloc; i++) {
             if (!allocate(memory, jobNames[i], jobSizes[i], memSize, strategy)) {
                 System.out.println("  [!] " + jobNames[i] + " (" + jobSizes[i]
@@ -267,7 +218,6 @@ public class FragmentationDemo {
             }
         }
 
-        // A new request: this is where external fragmentation shows up.
         int[] stats = freeStats(memory, memSize);
         int totalFree = stats[0];
         int largestHole = stats[1];
@@ -291,7 +241,6 @@ public class FragmentationDemo {
         }
     }
 
-    /** Replays the whole scenario for one strategy; used by the comparison mode. */
     private static List<Alloc> buildScenario(int memSize, String[] jobNames, int[] jobSizes,
                                              String[] freeNames, int strategy) {
         List<Alloc> memory = new ArrayList<>();
@@ -304,14 +253,10 @@ public class FragmentationDemo {
         return memory;
     }
 
-    /**
-     * Picks a hole for the job with the chosen strategy and inserts it.
-     * Returns false if no hole is large enough (the job cannot be placed).
-     */
     private static boolean allocate(List<Alloc> memory, String name, int size, int memSize,
                                     int strategy) {
-        // Collect every hole: gaps between blocks and the tail of memory.
-        List<int[]> holes = new ArrayList<>(); // each entry: {start, size}
+
+        List<int[]> holes = new ArrayList<>();
         int cursor = 0;
         for (Alloc a : memory) {
             if (a.start - cursor > 0) {
@@ -326,19 +271,19 @@ public class FragmentationDemo {
         int best = -1;
         for (int i = 0; i < holes.size(); i++) {
             if (holes.get(i)[1] < size) {
-                continue; // too small
+                continue;
             }
             if (best == -1) {
                 best = i;
                 if (strategy == 1) {
-                    break; // First-Fit: the first hole in address order wins
+                    break;
                 }
             } else if (strategy == 2 && holes.get(i)[1] < holes.get(best)[1]) {
-                best = i; // Best-Fit: keep the smallest fitting hole
+                best = i;
             } else if (strategy == 3 && holes.get(i)[1] > holes.get(best)[1]) {
-                best = i; // Worst-Fit: keep the largest fitting hole
+                best = i;
             }
-            // equal sizes keep the earlier hole (lower address)
+
         }
         if (best == -1) {
             return false;
@@ -347,12 +292,11 @@ public class FragmentationDemo {
         return true;
     }
 
-    /** @return {total free memory, largest single hole} in KB. */
     private static int[] freeStats(List<Alloc> memory, int memSize) {
         int totalFree = 0;
         int largestHole = 0;
         int cursor = 0;
-        for (Alloc a : memory) { // gaps before, between and after allocations are holes
+        for (Alloc a : memory) {
             int hole = a.start - cursor;
             totalFree += hole;
             largestHole = Math.max(largestHole, hole);
@@ -364,7 +308,6 @@ public class FragmentationDemo {
         return new int[] {totalFree, largestHole};
     }
 
-    /** Short verdict used by the comparison mode. */
     private static String requestVerdict(int totalFree, int largestHole, int request) {
         if (largestHole >= request) {
             return "fits";
@@ -375,7 +318,6 @@ public class FragmentationDemo {
         return "not enough memory";
     }
 
-    /** Removes the allocation with this name (creates a hole). Returns false if not found. */
     private static boolean free(List<Alloc> memory, String name) {
         for (int i = 0; i < memory.size(); i++) {
             if (memory.get(i).name.equalsIgnoreCase(name)) {
@@ -394,7 +336,6 @@ public class FragmentationDemo {
         memory.add(pos, a);
     }
 
-    /** Prints e.g. [A 0-400] [HOLE 400-500] [C 500-800] [HOLE 800-1000]. */
     private static void printMemoryMap(List<Alloc> memory, int memSize) {
         StringBuilder sb = new StringBuilder("  Memory map: ");
         int cursor = 0;

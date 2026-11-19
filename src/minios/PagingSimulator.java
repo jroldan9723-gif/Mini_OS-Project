@@ -1,26 +1,5 @@
-// File: src/minios/PagingSimulator.java
 package minios;
 
-/**
- * PagingSimulator - shows how a logical (virtual) address is translated into
- * a physical address using a PAGE TABLE.
- *
- * THE TRANSLATION (the classic formula):
- *     page number   = logicalAddress / pageSize     (integer division)
- *     offset        = logicalAddress % pageSize     (the remainder)
- *     physical      = frameNumber * pageSize + offset
- *
- * If the chosen page is not currently in RAM (frame number = -1 in our page
- * table) we report a PAGE FAULT - in a real OS the kernel would then load the
- * page from disk. If the address is larger than the logical address space we
- * report an invalid address.
- *
- * ASSUMPTIONS
- *   - The logical address space has "numberOfPages" pages, numbered from 0.
- *   - The page table is entered manually (frame number per page).
- *   - Frame -1 means "page is on disk, not in RAM" (page fault).
- *   - Pages and frames are the same size (that is what makes paging simple).
- */
 public class PagingSimulator {
 
     public static void run(InputHelper in) {
@@ -41,7 +20,7 @@ public class PagingSimulator {
     private static void runOnce(InputHelper in) {
         int pageSize = in.readIntInRange("Page size (bytes, e.g. 1024): ", 1, 1_000_000);
         int numPages = in.readIntInRange("Number of pages in the logical address space: ", 1, 1000);
-        // long so pageSize * numPages can never overflow (int would wrap around)
+
         long logicalSize = (long) pageSize * numPages;
 
         System.out.println("Logical address space = " + numPages + " pages x "
@@ -63,7 +42,6 @@ public class PagingSimulator {
             frameOfPage[p] = frame;
         }
 
-        // Show the page table back to the user (like the OS would keep it).
         System.out.println();
         System.out.println("Page table in use:");
         System.out.println("  Page | Frame");
@@ -73,7 +51,6 @@ public class PagingSimulator {
         }
         System.out.println();
 
-        // Query loop: translate addresses until the user types -1.
         while (true) {
             int addr = in.readInt("Logical address to translate (-1 to stop): ");
             if (addr == -1) {
@@ -101,7 +78,7 @@ public class PagingSimulator {
             }
 
             int frame = frameOfPage[pageNo];
-            long physical = (long) frame * pageSize + offset; // long: frame * pageSize can exceed int
+            long physical = (long) frame * pageSize + offset;
             System.out.println("  " + addr + " -> page " + pageNo + ", offset " + offset
                     + " -> frame " + frame + " -> physical address " + physical
                     + "   (" + frame + " x " + pageSize + " + " + offset + ")");

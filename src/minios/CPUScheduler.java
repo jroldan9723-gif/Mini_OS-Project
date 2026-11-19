@@ -1,4 +1,3 @@
-// File: src/minios/CPUScheduler.java
 package minios;
 
 import java.util.ArrayList;
@@ -6,37 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * CPUScheduler - simulates how a CPU decides which ready process runs next.
- *
- * ALGORITHMS IMPLEMENTED
- *   1. FCFS        First-Come, First-Served (non-preemptive, arrival order)
- *   2. SJF         Shortest Job First       (non-preemptive, shortest burst)
- *   3. Round Robin (RR)                     (preemptive, fixed time quantum)
- *   5. SRTF        Shortest Remaining Time  (preemptive SJF, arrival times)
- *
- * KEY FORMULAS
- *   Turnaround time = completion time - arrival time
- *   Waiting time    = turnaround time - burst time
- *   Response time   = first start time - arrival time
- *   (Because turnaround = time in system = burst + waiting.)
- *
- * ASSUMPTIONS / SIMPLIFICATIONS
- *   - Options 1-4 assume every process arrives at time 0 (all jobs are ready
- *     from the start) so the arithmetic is easy to verify by hand.
- *     SRTF (option 5) asks for an arrival time per process instead.
- *   - SJF is the NON-preemptive version (once a job starts it runs to completion).
- *   - Burst times are positive whole numbers ("time units" of 1 ms, 1 tick, ...).
- *   - FCFS runs processes in the order they were entered.
- *   - SRTF ties (equal remaining time): earlier arrival first, then lower P-number.
- */
 public class CPUScheduler {
 
-    /** One simulated process - our tiny "process control block" (PCB). */
     static class Process {
-        int id;       // 1, 2, 3, ... (displayed as P1, P2, P3, ...)
-        int burst;    // total CPU time the process needs
-        int arrival;  // when the process arrives (0 for options 1-4, entered for SRTF)
+        int id;
+        int burst;
+        int arrival;
 
         Process(int id, int burst) {
             this.id = id;
@@ -48,12 +22,11 @@ public class CPUScheduler {
         }
     }
 
-    /** The outcome of one scheduling algorithm: times per process + order of execution. */
     static class Result {
-        String algorithm;   // e.g. "FCFS"
-        int[] waiting;      // waiting time, indexed like the input list
-        int[] turnaround;   // turnaround time, indexed like the input list
-        List<Integer> order; // execution order (process indices); RR: one entry per time slice
+        String algorithm;
+        int[] waiting;
+        int[] turnaround;
+        List<Integer> order;
 
         Result(String algorithm, int n) {
             this.algorithm = algorithm;
@@ -79,7 +52,6 @@ public class CPUScheduler {
         }
     }
 
-    /** Entry point: shows the CPU-scheduling submenu until the user goes back. */
     public static void run(InputHelper in) {
         System.out.println("CPU SCHEDULING");
         System.out.println("Options 1-4 assume every process arrives at time 0.");
@@ -99,7 +71,7 @@ public class CPUScheduler {
             System.out.println();
 
             if (choice == 5) {
-                // SRTF needs arrival times, so it has its own input routine.
+
                 List<Process> procs = readSrtfProcesses(in);
                 printSrtfResult(procs, srtf(procs));
                 continue;
@@ -126,7 +98,6 @@ public class CPUScheduler {
         }
     }
 
-    /** Reads the number of processes and each burst time (each value is re-asked if invalid). */
     private static List<Process> readProcesses(InputHelper in) {
         int n = in.readIntInRange("How many processes? ", 1, 20);
         List<Process> procs = new ArrayList<>();
@@ -137,7 +108,6 @@ public class CPUScheduler {
         return procs;
     }
 
-    /** SRTF input: every process gets an arrival time as well as a burst time. */
     private static List<Process> readSrtfProcesses(InputHelper in) {
         int n = in.readIntInRange("How many processes? ", 1, 20);
         List<Process> procs = new ArrayList<>();
@@ -151,31 +121,22 @@ public class CPUScheduler {
         return procs;
     }
 
-    // ------------------------------------------------------------------
-    // FCFS: run processes in input (arrival) order, one after another.
-    // ------------------------------------------------------------------
     static Result fcfs(List<Process> procs) {
         Result r = new Result("FCFS (First-Come, First-Served)", procs.size());
-        int currentTime = 0; // when the CPU becomes free again
+        int currentTime = 0;
         for (int i = 0; i < procs.size(); i++) {
             Process p = procs.get(i);
-            r.waiting[i] = currentTime;          // waited until the CPU was free
-            r.turnaround[i] = currentTime + p.burst; // completion time (arrival = 0)
-            currentTime += p.burst;              // CPU busy until this process finishes
+            r.waiting[i] = currentTime;
+            r.turnaround[i] = currentTime + p.burst;
+            currentTime += p.burst;
             r.order.add(i);
         }
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // SJF (non-preemptive): sort by burst, then behave like FCFS.
-    // Shortest burst first => provably smallest average waiting time
-    // when all processes arrive at the same time.
-    // ------------------------------------------------------------------
     static Result sjf(List<Process> procs) {
         Result r = new Result("SJF (Shortest Job First, non-preemptive)", procs.size());
 
-        // Indices sorted by burst time (ties broken by lower id, to stay deterministic).
         List<Integer> execOrder = new ArrayList<>();
         for (int i = 0; i < procs.size(); i++) {
             execOrder.add(i);
@@ -186,9 +147,9 @@ public class CPUScheduler {
                 Process pa = procs.get(a);
                 Process pb = procs.get(b);
                 if (pa.burst != pb.burst) {
-                    return pa.burst - pb.burst; // shorter job first
+                    return pa.burst - pb.burst;
                 }
-                return pa.id - pb.id;          // tie: earlier P-number first
+                return pa.id - pb.id;
             }
         });
 
@@ -203,21 +164,15 @@ public class CPUScheduler {
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // Round Robin: everyone waits in a queue and gets at most "quantum"
-    // time units at a time. If the process is not finished, it goes to the
-    // back of the queue (this is what makes RR "fair").
-    // ------------------------------------------------------------------
     static Result roundRobin(List<Process> procs, int quantum) {
         Result r = new Result("Round Robin (quantum = " + quantum + ")", procs.size());
         int n = procs.size();
 
-        int[] remaining = new int[n]; // burst time still left for each process
+        int[] remaining = new int[n];
         for (int i = 0; i < n; i++) {
             remaining[i] = procs.get(i).burst;
         }
 
-        // All processes arrive at time 0, so the ready queue starts in input order.
         java.util.ArrayDeque<Integer> queue = new java.util.ArrayDeque<>();
         for (int i = 0; i < n; i++) {
             queue.add(i);
@@ -226,38 +181,31 @@ public class CPUScheduler {
         int currentTime = 0;
         int finished = 0;
         while (finished < n) {
-            int i = queue.poll();               // next process in line
-            int slice = Math.min(quantum, remaining[i]); // run at most one quantum
-            r.order.add(i);                     // record this time slice
+            int i = queue.poll();
+            int slice = Math.min(quantum, remaining[i]);
+            r.order.add(i);
             currentTime += slice;
             remaining[i] -= slice;
 
             if (remaining[i] == 0) {
-                // Finished: turnaround = completion time (arrival = 0).
+
                 r.turnaround[i] = currentTime;
                 r.waiting[i] = currentTime - procs.get(i).burst;
                 finished++;
             } else {
-                queue.add(i); // not done yet -> back of the ready queue
+                queue.add(i);
             }
         }
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // SRTF (Shortest Remaining Time First): preemptive SJF with arrival
-    // times. Every tick we look at all processes that have arrived and are
-    // not finished, and run the one with the smallest remaining burst.
-    // If a newly arrived process is shorter than what is left of the current
-    // one, the current process is preempted (its remaining time is kept).
-    // ------------------------------------------------------------------
     static class SrtfResult {
-        int[] completion; // time each process finishes
-        int[] turnaround; // completion - arrival
-        int[] waiting;    // turnaround - burst
-        int[] response;   // first start - arrival
-        List<int[]> segments; // Gantt segments: {processIndex (-1 = idle), start, end}
-        List<Integer> order;  // execution order of the process indices (idle skipped)
+        int[] completion;
+        int[] turnaround;
+        int[] waiting;
+        int[] response;
+        List<int[]> segments;
+        List<Integer> order;
 
         SrtfResult(int n) {
             completion = new int[n];
@@ -276,11 +224,9 @@ public class CPUScheduler {
         int[] firstStart = new int[n];
         for (int i = 0; i < n; i++) {
             remaining[i] = procs.get(i).burst;
-            firstStart[i] = -1; // not started yet
+            firstStart[i] = -1;
         }
 
-        // Simulate one tick at a time. owner[i] = which process ran at tick i
-        // (-1 = CPU idle because nothing has arrived yet).
         List<Integer> owner = new ArrayList<>();
         int time = 0;
         int finished = 0;
@@ -288,7 +234,7 @@ public class CPUScheduler {
             int pick = -1;
             for (int i = 0; i < n; i++) {
                 if (remaining[i] == 0 || procs.get(i).arrival > time) {
-                    continue; // done, or has not arrived yet
+                    continue;
                 }
                 if (pick == -1
                         || remaining[i] < remaining[pick]
@@ -297,12 +243,12 @@ public class CPUScheduler {
                         || (remaining[i] == remaining[pick]
                             && procs.get(i).arrival == procs.get(pick).arrival
                             && procs.get(i).id < procs.get(pick).id)) {
-                    pick = i; // shortest remaining, tie: earlier arrival, then lower id
+                    pick = i;
                 }
             }
 
             if (pick == -1) {
-                owner.add(-1); // nobody to run: CPU idle for this tick
+                owner.add(-1);
                 time++;
                 continue;
             }
@@ -319,7 +265,6 @@ public class CPUScheduler {
             }
         }
 
-        // Compress the per-tick owners into Gantt segments.
         int tick = 0;
         while (tick < owner.size()) {
             int who = owner.get(tick);
@@ -333,7 +278,6 @@ public class CPUScheduler {
             }
         }
 
-        // Performance numbers, using the required formulas.
         for (int i = 0; i < n; i++) {
             r.turnaround[i] = r.completion[i] - procs.get(i).arrival;
             r.waiting[i] = r.turnaround[i] - procs.get(i).burst;
@@ -355,8 +299,6 @@ public class CPUScheduler {
         }
         System.out.println("Execution order: " + order);
 
-        // Gantt chart: every segment with its start and end time. A process
-        // segment is marked "preempted" when it still had work left at the end.
         System.out.println();
         System.out.println("Gantt chart:");
         StringBuilder gantt = new StringBuilder("  ");
@@ -368,7 +310,7 @@ public class CPUScheduler {
             } else {
                 label = procs.get(seg[0]).name();
                 if (r.completion[seg[0]] > seg[2]) {
-                    label += " (preempted)"; // runs again later
+                    label += " (preempted)";
                 }
             }
             if (i > 0) {
@@ -398,9 +340,6 @@ public class CPUScheduler {
         System.out.printf("Average response time  : %.2f%n", sumRt / procs.size());
     }
 
-    // ------------------------------------------------------------------
-    // Pretty printing
-    // ------------------------------------------------------------------
     private static void printResult(List<Process> procs, Result r) {
         System.out.println();
         System.out.println("Algorithm: " + r.algorithm);
@@ -440,7 +379,6 @@ public class CPUScheduler {
         System.out.printf("  RR   : %.2f / %.2f%n", rrR.avgWaiting(), rrR.avgTurnaround());
     }
 
-    /** Turns a list of process indices into "P1 -> P2 -> P3". */
     private static String names(List<Process> procs, List<Integer> order) {
         StringBuilder sb = new StringBuilder();
         for (int k = 0; k < order.size(); k++) {

@@ -1,43 +1,15 @@
-// File: src/minios/PageReplacementSimulator.java
 package minios;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * PageReplacementSimulator - when a needed page is not in RAM, the OS must
- * evict ("replace") some page that IS in RAM. This class compares four
- * classic replacement policies on the same reference string:
- *
- *   FIFO      (First-In First-Out) : evict the page that entered memory first.
- *   LRU       (Least Recently Used) : evict the page that was used least recently.
- *   Optimal   (OPT / Belady's)      : evict the page that will be used furthest
- *                                     in the future (theoretical best - a real
- *                                     OS cannot know the future, it is used as
- *                                     a benchmark).
- *   LFU       (Least Frequently Used): evict the page with the lowest access
- *                                     frequency (ties: least recently used).
- *
- * After every reference we print the state of the frames and whether the
- * reference was a PAGE FAULT (had to load a page) or a HIT (page already
- * there - no replacement needed). LFU also shows the frequency of every
- * page in memory and which page was replaced.
- *
- * ASSUMPTIONS
- *   - Frames start empty.
- *   - FIFO advances its replacement pointer only when a fault occurs.
- *   - Optimal ties (equal future distance) pick the lower-numbered slot.
- *   - LFU resets a page's counter to 1 when the page is loaded (the access
- *     that caused the load counts), and breaks frequency ties by LRU.
- */
 public class PageReplacementSimulator {
 
-    /** One algorithm's result: a row per reference + the fault count. */
     private static class Result {
         String algorithm;
-        List<String> rows = new ArrayList<>(); // pre-formatted lines for the table
+        List<String> rows = new ArrayList<>();
         int faults = 0;
-        boolean showFreqs = false; // LFU table has extra frequency columns
+        boolean showFreqs = false;
 
         Result(String algorithm) {
             this.algorithm = algorithm;
@@ -102,7 +74,6 @@ public class PageReplacementSimulator {
         printComparisonRow("Optimal", opt, total);
         printComparisonRow("LFU", lfu, total);
 
-        // Which algorithm produced the fewest faults in THIS test?
         Result[] all = {fifo, lru, opt, lfu};
         String[] labels = {"FIFO", "LRU", "Optimal", "LFU"};
         int best = fifo.faults;
@@ -129,13 +100,10 @@ public class PageReplacementSimulator {
                 label, r.faults, r.hits(total), r.faultRate(total), r.hitRate(total));
     }
 
-    // ------------------------------------------------------------------
-    // FIFO: keep a circular pointer to the OLDEST page; replace it on a fault.
-    // ------------------------------------------------------------------
     private static Result runFifo(int[] refs, int frames) {
         Result r = new Result("FIFO");
-        Integer[] slots = new Integer[frames]; // null = empty frame
-        int next = 0; // circular replacement pointer
+        Integer[] slots = new Integer[frames];
+        int next = 0;
 
         for (int ref : refs) {
             int pos = indexOf(slots, ref);
@@ -143,19 +111,14 @@ public class PageReplacementSimulator {
                 r.rows.add(formatRow(ref, slots, "HIT"));
             } else {
                 r.faults++;
-                slots[next] = ref;               // evict whatever lives at 'next'
-                next = (next + 1) % frames;      // pointer moves only on a FAULT
+                slots[next] = ref;
+                next = (next + 1) % frames;
                 r.rows.add(formatRow(ref, slots, "FAULT"));
             }
         }
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // LRU: replace the page whose last use is furthest in the past.
-    // We keep a "clock" that increases on every reference; each frame stores
-    // the clock value of its last use.
-    // ------------------------------------------------------------------
     private static Result runLru(int[] refs, int frames) {
         Result r = new Result("LRU");
         Integer[] slots = new Integer[frames];
@@ -165,7 +128,7 @@ public class PageReplacementSimulator {
         for (int ref : refs) {
             int pos = indexOf(slots, ref);
             if (pos >= 0) {
-                lastUse[pos] = clock++; // touched again -> most recently used
+                lastUse[pos] = clock++;
                 r.rows.add(formatRow(ref, slots, "HIT"));
             } else {
                 r.faults++;
@@ -181,10 +144,6 @@ public class PageReplacementSimulator {
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // Optimal: replace the page that will be used furthest in the future
-    // (or never again). Looks ahead in the reference string.
-    // ------------------------------------------------------------------
     private static Result runOptimal(int[] refs, int frames) {
         Result r = new Result("Optimal");
         Integer[] slots = new Integer[frames];
@@ -207,24 +166,18 @@ public class PageReplacementSimulator {
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // LFU: replace the page with the lowest access frequency. The counter
-    // is reset to 1 when a page is loaded (the faulting access counts) and
-    // incremented on every hit. Frequency ties go to the least recently
-    // used page, so the choice is always deterministic.
-    // ------------------------------------------------------------------
     private static Result runLfu(int[] refs, int frames) {
         Result r = new Result("LFU");
         r.showFreqs = true;
         Integer[] slots = new Integer[frames];
-        int[] freq = new int[frames];    // how often each loaded page was accessed
-        int[] lastUse = new int[frames]; // for the LRU tie-break
+        int[] freq = new int[frames];
+        int[] lastUse = new int[frames];
         int clock = 1;
 
         for (int ref : refs) {
             int pos = indexOf(slots, ref);
             if (pos >= 0) {
-                freq[pos]++;               // hit: frequency goes up
+                freq[pos]++;
                 lastUse[pos] = clock++;
                 r.rows.add(formatLfuRow(ref, slots, freq, -1, "HIT"));
             } else {
@@ -233,9 +186,9 @@ public class PageReplacementSimulator {
                 if (victim < 0) {
                     victim = lowestFrequency(slots, freq, lastUse);
                 }
-                int replaced = slots[victim] == null ? -1 : slots[victim]; // -1 = empty frame
+                int replaced = slots[victim] == null ? -1 : slots[victim];
                 slots[victim] = ref;
-                freq[victim] = 1;          // fresh counter for the newly loaded page
+                freq[victim] = 1;
                 lastUse[victim] = clock++;
                 r.rows.add(formatLfuRow(ref, slots, freq, replaced, "FAULT"));
             }
@@ -243,7 +196,6 @@ public class PageReplacementSimulator {
         return r;
     }
 
-    /** LFU victim = lowest frequency; ties broken by least recently used. */
     private static int lowestFrequency(Integer[] slots, int[] freq, int[] lastUse) {
         int victim = 0;
         for (int i = 1; i < slots.length; i++) {
@@ -255,10 +207,6 @@ public class PageReplacementSimulator {
         return victim;
     }
 
-    // ------------------------------------------------------------------
-    // Small helpers shared by the algorithms
-    // ------------------------------------------------------------------
-    /** Position of a page in the frames, or -1 if it is not loaded. */
     private static int indexOf(Integer[] slots, int page) {
         for (int i = 0; i < slots.length; i++) {
             if (slots[i] != null && slots[i] == page) {
@@ -268,7 +216,6 @@ public class PageReplacementSimulator {
         return -1;
     }
 
-    /** First empty (null) frame, or -1 if all frames are full. */
     private static int pickEmpty(Integer[] slots) {
         for (int i = 0; i < slots.length; i++) {
             if (slots[i] == null) {
@@ -278,7 +225,6 @@ public class PageReplacementSimulator {
         return -1;
     }
 
-    /** LRU victim = frame with the smallest last-use stamp. */
     private static int leastRecentlyUsed(Integer[] slots, int[] lastUse) {
         int victim = 0;
         for (int i = 1; i < slots.length; i++) {
@@ -289,16 +235,11 @@ public class PageReplacementSimulator {
         return victim;
     }
 
-    /**
-     * Optimal victim = the frame whose page appears furthest in the future.
-     * If a page never appears again, its distance is Integer.MAX_VALUE, so it
-     * is chosen immediately.
-     */
     private static int optimalVictim(Integer[] slots, int[] refs, int fromIndex) {
         int victim = 0;
-        int farthest = -1; // how far ahead we found the next use
+        int farthest = -1;
         for (int i = 0; i < slots.length; i++) {
-            int next = Integer.MAX_VALUE; // assume "never used again"
+            int next = Integer.MAX_VALUE;
             for (int k = fromIndex; k < refs.length; k++) {
                 if (refs[k] == slots[i]) {
                     next = k;
@@ -313,11 +254,6 @@ public class PageReplacementSimulator {
         return victim;
     }
 
-    /**
-     * Formats one table row, e.g.:
-     * "     7 |     7     -     - | FAULT "
-     * (column widths are kept equal so the table lines up).
-     */
     private static String formatRow(int ref, Integer[] slots, String outcome) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("  %3d | ", ref));
@@ -328,11 +264,6 @@ public class PageReplacementSimulator {
         return sb.toString();
     }
 
-    /**
-     * LFU table row: reference, frames, frequency of every loaded page,
-     * the page that was replaced (if any) and HIT / FAULT.
-     * e.g. "    3 |     2     3     1 |   1   2   3 |        1 | FAULT  "
-     */
     private static String formatLfuRow(int ref, Integer[] slots, int[] freq,
                                        int replaced, String outcome) {
         StringBuilder sb = new StringBuilder();

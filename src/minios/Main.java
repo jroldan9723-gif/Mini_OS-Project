@@ -1,32 +1,7 @@
-// File: src/minios/Main.java
 package minios;
 
 import java.util.Scanner;
 
-/**
- * Main - the entry point of the Mini OS Simulator.
- *
- * This program is an EDUCATIONAL DEMONSTRATION of selected operating-system
- * concepts (CPU scheduling, deadlock avoidance, memory management, disk
- * scheduling...). It is NOT a real operating system: it does not touch real
- * hardware, real memory, or real processes - it only simulates the arithmetic
- * and bookkeeping that a real OS would do.
- *
- * STRUCTURE OF THE PROGRAM
- *   Main  -> shows the main menu and starts whichever feature you pick.
- *   Each feature lives in its own class (CPUScheduler, BankersAlgorithm, ...)
- *   and shows a small submenu of its own. All input is done through
- *   InputHelper, which never lets a typo crash the program.
- *
- * HOW TO RUN IT (Eclipse)
- *   1. File > Import > General > Existing Projects into Workspace > Next
- *   2. Select this folder (Mini_OS-Project) as the root and press Finish
- *   3. Open src/minios/Main.java and press Ctrl+F11 (Run)
- *
- * HOW TO RUN IT (command line, from the project folder)
- *   javac -d bin src/minios/*.java
- *   java -cp bin minios.Main
- */
 public class Main {
 
     public static void main(String[] args) {
@@ -54,7 +29,7 @@ public class Main {
                 case 7: DiskScheduler.run(in);            break;
                 case 8: MultiprogrammingSimulator.run(in); break;
                 case 0: running = false;                  break;
-                default: break; // cannot happen: readIntInRange already limits 0..8
+                default: break;
             }
             System.out.println();
         }
@@ -62,7 +37,6 @@ public class Main {
         System.out.println("Goodbye!");
     }
 
-    /** Prints the main menu. */
     private static void printMenu() {
         System.out.println("---------------- MAIN MENU --------------------");
         System.out.println("  1) CPU scheduling   (FCFS, SJF, Round Robin)");

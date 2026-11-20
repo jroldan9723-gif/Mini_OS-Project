@@ -10,6 +10,8 @@ public class InputHelper {
     // Thrown when the input stream ends while the program still needs data.
     // The console app catches it and exits cleanly; the GUI catches it too.
     public static class InputEndedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public InputEndedException(String message) {
             super(message);
         }

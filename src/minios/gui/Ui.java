@@ -14,6 +14,8 @@ public final class Ui {
     // Thrown when a form field does not hold valid data. Each Run button
     // catches it and shows the message as a dialog instead of crashing.
     public static class InputError extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public InputError(String message) {
             super(message);
         }

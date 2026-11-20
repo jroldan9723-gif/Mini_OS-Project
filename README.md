@@ -42,7 +42,8 @@ java -jar MiniOS-Simulator.jar
 
 In Eclipse: import the project (File > Import > General > Existing
 Projects into Workspace), open `src/minios/gui/GuiMain.java` and choose
-Run As > Java Application.
+Run As > Java Application. The full import walkthrough, including the
+JRE version setting, is in `ECLIPSE-SETUP.md`.
 
 ### Console menu (same engine, text mode)
 
@@ -417,6 +418,7 @@ several cases were checked by hand against known results:
 ```
 Mini_OS-Project/
 |-- README.md                      this file
+|-- ECLIPSE-SETUP.md               step-by-step Eclipse import guide
 |-- MiniOS-Simulator.jar           runnable GUI application
 |-- AGENTS.md                      notes for automated contributors
 |-- .project, .classpath           Eclipse project files

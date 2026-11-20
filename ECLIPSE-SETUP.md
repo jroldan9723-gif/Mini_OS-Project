@@ -11,7 +11,7 @@ What you are importing:
 |------|-------|-------|
 | Console classes | 11 | `src/minios/` |
 | GUI classes | 13 | `src/minios/gui/` |
-| Sample tests | 32 inputs + 32 expected outputs | `samples/`, `samples/expected/` |
+| Sample tests | 36 inputs + 36 expected outputs | `samples/`, `samples/expected/` |
 | Runnable JAR | 1 | `MiniOS-Simulator.jar` |
 | External libraries | none | only the JDK is needed |
 
@@ -22,15 +22,26 @@ before you start:
 |-------|------------|
 | `minios.gui.GuiMain` | the GUI application (the one you demonstrate) |
 | `minios.Main` | the console menu version, same engine |
-| `minios.SampleTestRunner` | runs all 32 samples and reports pass or fail |
+| `minios.SampleTestRunner` | runs all 36 samples and reports pass or fail |
 | `minios.gui.GuiInputSelfTest` | checks the GUI input of all 8 tabs |
 
 ---
 
-## Step 1: Delete the old copy first
+## Step 1: Delete the old copy first (only for a fresh import)
 
 The project name inside `.project` is `Mini_OS-Project`. Eclipse refuses to
-import a second project with the same name, so clear the old one out.
+import a second project with the same name, so a second copy has to be
+cleared out first.
+
+**Already have the project in Eclipse and just want the newer code? Skip
+this step.** Copy the new files over the same folder on disk, then in
+Eclipse press **F5** (or right-click the project > **Refresh**) and run
+**Project > Clean...**. Nothing in the project setup changes between
+versions, so re-importing only loses the JDK settings from step 5.
+
+Use the rest of this step when you are importing for the first time, or
+when you downloaded the new ZIP into a different folder and now have two
+copies with the same name.
 
 1. In Eclipse, right-click `Mini_OS-Project` in Package Explorer.
 2. Choose **Delete**.
@@ -335,16 +346,17 @@ bytecode, and the class version error cannot come back after a Clean.
 If the project has red crosses, the build path is still wrong: right-click
 the project, **Build Path > Configure Build Path...**, and repeat step 5.
 
-The sources are plain ASCII, so you do not need to touch the text file
-encoding. If you ever see odd characters in comments, set
-**Properties > Resource > Text file encoding > UTF-8** as a precaution.
+The sources are plain ASCII and the repository already carries
+`.settings/org.eclipse.core.resources.prefs`, which tells Eclipse to use
+UTF-8. If you ever see odd characters in comments, set
+**Properties > Resource > Text file encoding > UTF-8** by hand.
 
 ## Step 7: Run the GUI
 
 1. Expand `src > minios > gui`.
 2. Right-click `GuiMain.java` and choose **Run As > Java Application**.
-3. A window titled *Mini OS Simulator - educational demonstration (not a
-   real OS)* opens with eight tabs.
+3. A window titled *Mini OS Simulator* opens with eight tabs and the note
+   that it does not control real hardware.
 4. On any tab press **Load example**, then **Run**. The report appears in
    the lower pane.
 
@@ -380,14 +392,14 @@ project folder instead:
 java -cp bin minios.Main < samples\cpu_srtf.txt
 ```
 
-## Step 9: Run the 32-sample regression test
+## Step 9: Run the 36-sample regression test
 
 1. Right-click `src/minios/SampleTestRunner.java`, choose **Run As > Java
    Application**.
 2. The Console ends with:
 
 ```
-Result: 32 passed, 0 failed, 32 total.
+Result: 36 passed, 0 failed, 36 total.
 ```
 
 What it does: for every file in `samples/`, it starts a fresh Java process,
@@ -466,8 +478,8 @@ if you move the project:
 ```
 Mini_OS-Project/
   src/                  source code
-  samples/              32 inputs
-  samples/expected/     32 expected outputs
+  samples/              36 inputs
+  samples/expected/     36 expected outputs
   MiniOS-Simulator.jar  runnable GUI
 ```
 
@@ -478,7 +490,7 @@ regression test will report that it cannot find the samples.
 
 1. Project imported, **Problems** view empty.
 2. `GuiMain` runs and all eight tabs respond to Load example then Run.
-3. `SampleTestRunner` prints `32 passed, 0 failed`.
+3. `SampleTestRunner` prints `36 passed, 0 failed`.
 4. `GuiInputSelfTest` prints `ALL GUI CHECKS PASSED`.
 5. `java -jar MiniOS-Simulator.jar` opens the same GUI.
 6. `samples/` and `samples/expected/` are both still present.

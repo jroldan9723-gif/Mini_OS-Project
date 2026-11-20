@@ -1,5 +1,8 @@
 package minios.gui;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
@@ -23,64 +26,86 @@ public class CpuPanel extends ModulePanel {
         "Priority (non-preemptive, smaller number = higher priority)"
     });
     private final JTextField quantum = Ui.field(6);
-    private final JTextArea bursts = Ui.area(5, 34);
-    private final JTextArea arrivals = Ui.area(5, 34);
-    private final JTextArea priorities = Ui.area(5, 34);
+    private final JTextArea names = Ui.area(3, 34);
+    private final JTextArea arrivals = Ui.area(3, 34);
+    private final JTextArea bursts = Ui.area(3, 34);
+    private final JTextArea priorities = Ui.area(3, 34);
 
     public CpuPanel() {
         super("CPU scheduling",
-                "Enter burst times as a list (spaces or one per line). SRTF also needs one "
-                + "arrival time per process; Priority and the comparison need one priority "
-                + "per process (smaller number = higher priority).",
+                "Enter one line (or one number) per process. Names are optional: leave the box "
+                + "empty to use P1, P2, ... Arrivals are times, bursts are CPU times, and "
+                + "priorities are needed for Priority and the comparison (smaller = higher).",
                 CPUScheduler::run);
         addRow("Algorithm:", algorithm);
         addRow("Time quantum (Round Robin / comparison):", quantum);
-        addWideRow(new JLabel("<html><b>Burst times</b> (each 1..1000)</html>"));
-        addWideRow(Ui.scrolled(bursts));
-        addWideRow(new JLabel("<html><b>Arrival times</b> - SRTF only (0 or more)</html>"));
+        addWideRow(new JLabel("<html><b>Process names</b> - optional, one per line</html>"));
+        addWideRow(Ui.scrolled(names));
+        addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
         addWideRow(Ui.scrolled(arrivals));
-        addWideRow(new JLabel("<html><b>Priorities</b> - Priority and comparison only</html>"));
-        addWideRow(Ui.scrolled(priorities));
+        addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
+        addWideRow(Ui.scrolled(bursts));
+        addRow("Priorities (Priority / comparison):", priorities);
     }
 
+    // Validates the form and writes the console script: the menu choice, the
+    // process count, then name / arrival / burst for every process.
     @Override
     public String buildScript() {
         int choice = CHOICES[algorithm.getSelectedIndex()];
         int[] burstTimes = Ui.parseIntList("Burst times", bursts.getText(), 1, 1000);
         int n = burstTimes.length;
 
-        StringBuilder script = new StringBuilder();
-        script.append(choice).append('\n');
+        int[] arrivalTimes = Ui.parseIntList("Arrival times", arrivals.getText(), 0, 1000);
+        if (arrivalTimes.length != n) {
+            throw new Ui.InputError("Need one arrival time per process (expected "
+                    + n + ", saw " + arrivalTimes.length + ").");
+        }
 
-        if (choice == 5) {
-            // SRTF: the console asks for arrival, then burst, for each process.
-            int[] arrivalTimes = Ui.parseIntList("Arrival times", arrivals.getText(), 0, 1000);
-            if (arrivalTimes.length != n) {
-                throw new Ui.InputError("SRTF needs one arrival time per burst time (expected "
-                        + n + ", saw " + arrivalTimes.length + ").");
-            }
-            script.append(n).append('\n');
+        String[] nameRows = Ui.lines(names.getText());
+        String[] processNames = new String[n];
+        if (nameRows.length == 0) {
             for (int i = 0; i < n; i++) {
-                script.append(arrivalTimes[i]).append('\n');
-                script.append(burstTimes[i]).append('\n');
+                processNames[i] = "";           // blank line = default name P1, P2, ...
             }
         } else {
-            script.append(n).append('\n');
-            for (int burst : burstTimes) {
-                script.append(burst).append('\n');
+            if (nameRows.length != n) {
+                throw new Ui.InputError("Either leave the names empty or give one name per "
+                        + "process (expected " + n + ", saw " + nameRows.length + ").");
             }
-            if (choice == 3 || choice == 4) {
-                script.append(Ui.parseInt("Time quantum", quantum.getText(), 1, 100)).append('\n');
+            Set<String> seen = new HashSet<>();
+            for (int i = 0; i < n; i++) {
+                String name = nameRows[i];
+                if (name.length() > 10) {
+                    throw new Ui.InputError("Keep process names to 10 characters: \"" + name + "\".");
+                }
+                if (!seen.add(name.toLowerCase())) {
+                    throw new Ui.InputError("There is already a process called " + name + ".");
+                }
+                processNames[i] = name;
             }
-            if (choice == 4 || choice == 6) {
-                int[] pri = Ui.parseIntList("Priorities", priorities.getText());
-                if (pri.length != n) {
-                    throw new Ui.InputError("Expected one priority per process (expected "
-                            + n + ", saw " + pri.length + ").");
-                }
-                for (int value : pri) {
-                    script.append(value).append('\n');
-                }
+        }
+
+        StringBuilder script = new StringBuilder();
+        script.append(choice).append('\n');
+        script.append(n).append('\n');
+        for (int i = 0; i < n; i++) {
+            script.append(processNames[i]).append('\n');
+            script.append(arrivalTimes[i]).append('\n');
+            script.append(burstTimes[i]).append('\n');
+        }
+
+        if (choice == 3 || choice == 4) {
+            script.append(Ui.parseInt("Time quantum", quantum.getText(), 1, 100)).append('\n');
+        }
+        if (choice == 4 || choice == 6) {
+            int[] pri = Ui.parseIntList("Priorities", priorities.getText());
+            if (pri.length != n) {
+                throw new Ui.InputError("Expected one priority per process (expected "
+                        + n + ", saw " + pri.length + ").");
+            }
+            for (int value : pri) {
+                script.append(value).append('\n');
             }
         }
 
@@ -92,8 +117,9 @@ public class CpuPanel extends ModulePanel {
     @Override
     public void loadExample() {
         algorithm.setSelectedIndex(4);
+        names.setText("Web\nDB\nMail\nCache\nLog");
+        arrivals.setText("0\n1\n2\n1\n3");
         bursts.setText("6 3 8 4 5");
-        arrivals.setText("0 2 4 1 3");
         priorities.setText("3 1 2 4 2");
         quantum.setText("2");
     }

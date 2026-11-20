@@ -14,7 +14,7 @@ import minios.MultiprogrammingSimulator;
 public class MultiPanel extends ModulePanel {
 
     private final JTextField memorySize = Ui.field(10);
-    private final JTextArea jobs = Ui.area(7, 34);
+    private final JTextArea jobs = Ui.area(5, 34);
     private final JTextField quantum = Ui.field(6);
 
     public MultiPanel() {
@@ -26,7 +26,7 @@ public class MultiPanel extends ModulePanel {
         addRow("Main memory size (KB):", memorySize);
         addRow("Time quantum for the CPU (ticks):", quantum);
         addWideRow(new JLabel("<html><b>Jobs</b> - \"name mem burst arrival\" per line</html>"));
-        addWideRow(Ui.scrolled(jobs));
+        addLastWideRow(jobs);
     }
 
     // One job per line in the form, four lines per job in the script -

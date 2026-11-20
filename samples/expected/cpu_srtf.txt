@@ -15,8 +15,8 @@
 ----------------------------------------------
 Your choice: 
 CPU SCHEDULING
-Options 1-4 and 6 assume every process arrives at time 0.
-SRTF (option 5) asks for an arrival time per process.
+Every process needs a name (or Enter for a default one),
+an arrival time and a CPU burst time.
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
@@ -26,18 +26,19 @@ SRTF (option 5) asks for an arrival time per process.
   6) Priority    (non-preemptive, smaller number = higher priority)
   0) Back to main menu
   Choose an option: 
-How many processes?   Arrival time of P1:   CPU burst time for P1:   Arrival time of P2:   CPU burst time for P2:   Arrival time of P3:   CPU burst time for P3: 
+How many processes? Names are optional: press Enter to use P1, P2, ...
+  Name of process 1:   Arrival time of P1:   CPU burst time for P1:   Name of process 2:   Arrival time of P2:   CPU burst time for P2:   Name of process 3:   Arrival time of P3:   CPU burst time for P3: 
 Algorithm: SRTF (Shortest Remaining Time First, preemptive)
 Execution order: P1 -> P3 -> P2
 
 Gantt chart:
   0-5 P1 | 5-7 P3 | 7-10 P2
 
-Process   Arrival  Burst  Completion  Turnaround  Waiting  Response
--------- -------- ------ ----------- ----------- -------- ---------
-P1              0      5           5           5        0         0
-P2              2      3          10           8        5         5
-P3              5      2           7           2        0         0
+Process    Arrival Burst Completion Turnaround Waiting Response
+---------- ------- ----- ---------- ---------- ------- --------
+P1               0     5          5          5       0        0
+P2               2     3         10          8       5        5
+P3               5     2          7          2       0        0
 Average turnaround time: 5.00
 Average waiting time   : 1.67
 Average response time  : 1.67

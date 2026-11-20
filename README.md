@@ -138,46 +138,55 @@ checks all eight of them headlessly.
 ### 1. CPU scheduling
 
 Console menu: FCFS, SJF, Round Robin, the four-way comparison, SRTF and
-Priority. Options 1-4 and 6 assume every process arrives at time 0; SRTF
-is the one option that asks for an arrival time per process.
+Priority. Every algorithm asks for all four pieces of data the rubric
+lists: a process name (or Enter for the default P1, P2, ...), an arrival
+time, a CPU burst time, and a priority where the algorithm uses one.
 
 How the algorithms work:
 
-* **FCFS** - run the jobs in the order given. Waiting time of a job is
-  the sum of the bursts before it.
-* **SJF (non-preemptive)** - sort by burst time, shortest first, ties to
-  the smaller process id, then run in that order.
-* **Round Robin** - every ready job gets one slice of the quantum from a
-  queue; a job that is not finished goes to the back. The execution list
+* **FCFS** - the arrived process that came first runs first. If a process
+  has not arrived yet, the CPU sits idle in the Gantt chart until it does.
+* **SJF (non-preemptive)** - whenever the CPU becomes free, the arrived
+  process with the shortest burst runs next. Ties: earlier arrival, then
+  input order.
+* **Round Robin** - processes join the ready queue as they arrive and
+  each gets one slice of the quantum; an unfinished process goes to the
+  back, behind anyone who arrived during its slice. The execution list
   shows one entry per slice, so a name can appear several times.
-* **SRTF (preemptive)** - at every tick the arrived job with the smallest
-  remaining burst runs; ties go to the earlier arrival, then the smaller
-  id. If nobody has arrived, the Gantt chart shows an `idle` segment.
-  Completion, turnaround (`CT - AT`), waiting (`TAT - burst`) and response
-  (`first start - AT`) are reported with averages.
-* **Priority (non-preemptive)** - the job with the smallest priority
-  number runs first (smaller number = higher priority), ties to the
-  smaller id. Waiting and turnaround are accumulated in that order.
+* **SRTF (preemptive)** - at every tick the arrived process with the
+  smallest remaining burst runs; ties go to the earlier arrival, then the
+  input order. If nobody has arrived, the Gantt chart shows `idle`.
+* **Priority (non-preemptive)** - the arrived process with the smallest
+  priority number runs next (smaller number = higher priority). Ties:
+  earlier arrival, then input order.
+
+Every run reports the execution order, a Gantt chart with preemptions and
+idle gaps, and a table of arrival, burst, completion, turnaround
+(`completion - arrival`), waiting (`turnaround - burst`) and response
+(`first start - arrival`) with the three averages.
 
 The comparison option runs FCFS, SJF, Round Robin and Priority on the
 same processes and prints waiting/turnaround per process and per
-algorithm, so it is easy to say which one wins on that data.
+algorithm plus the winner for each average, so it is easy to say which
+one wins on that data.
 
-Sample session (input `samples/cpu_srtf.txt`, full output in
-`samples/expected/cpu_srtf.txt`):
+Sample session (input `samples/cpu_fcfs.txt`, full output in
+`samples/expected/cpu_fcfs.txt`): four named processes arrive at 0, 1, 2
+and 3, so FCFS serves them in arrival order:
 
 ```
 Gantt chart:
-  0-5 P1 | 5-7 P3 | 7-10 P2
+  0-8 Shell | 8-12 Editor | 12-21 Compile | 21-26 Render
 
-Process   Arrival  Burst  Completion  Turnaround  Waiting  Response
--------- -------- ------ ----------- ----------- -------- ---------
-P1              0      5           5           5        0         0
-P2              2      3          10           8        5         5
-P3              5      2           7           2        0         0
-Average turnaround time: 5.00
-Average waiting time   : 1.67
-Average response time  : 1.67
+Process    Arrival Burst Completion Turnaround Waiting Response
+---------- ------- ----- ---------- ---------- ------- --------
+Shell            0     8          8          8       0        0
+Editor           1     4         12         11       7        7
+Compile          2     9         21         19      10       10
+Render           3     5         26         23      18       18
+Average turnaround time: 15.25
+Average waiting time   : 8.75
+Average response time  : 8.75
 ```
 
 ### 2. Banker's algorithm
@@ -329,6 +338,7 @@ again (console) or shows a dialog and runs nothing (GUI).
 | Counts (processes, pages, segments, requests, jobs, ...) | at least 1 (0 allowed where the program says so) | re-prompted; no upper limit is imposed |
 | Burst times, partition sizes, page sizes | positive, program-specific maximum | re-prompted / dialog |
 | Arrival times | 0 or more | re-prompted / dialog |
+| Process names | optional, unique, 10 characters or fewer | re-prompted / dialog |
 | Matrices (banker) | same shape row by row, Max >= Allocation, no negatives | whole data set entered again / dialog |
 | Disk requests | between 0 and max cylinder | whole problem entered again / dialog |
 | Segments | non-overlapping, inside RAM | that segment entered again / dialog |
@@ -353,18 +363,18 @@ java -cp bin minios.SampleTestRunner
 The runner executes every file in `samples/` through the console app in
 a fresh JVM and compares the output with `samples/expected/` (line
 endings are normalized, so it works on Windows and on Linux). Current
-result: **27 of 27 passed**.
+result: **32 of 32 passed**.
 
-| Module | Small inputs | Substantially larger input |
-|--------|--------------|-----------------------------|
-| CPU scheduling | cpu_fcfs, cpu_sjf, cpu_rr, cpu_srtf, cpu_priority, cpu_compare, cpu_invalid_input | cpu_large: 30-process four-way comparison plus 25-process SRTF with arrivals |
-| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | banker_large: 15 processes x 5 resource types |
-| Paging | paging | paging_large: 60-page table, 25 addresses |
-| Segmentation | segmentation, segmentation_overlap | segmentation_large: 18 segments, 14 addresses |
-| Fragmentation | fragment_internal, fragment_external, fragment_compare | fragment_large: 14 jobs, 5 frees, three strategies compared |
-| Page replacement | page_replacement | page_replacement_large: 220 references, 5 frames, four algorithms |
-| Disk scheduling | disk | disk_large: 70 requests, all six algorithms |
-| Multiprogramming | multiprogramming | multiprogramming_large: 12 jobs with staggered arrivals |
+| Module | Small inputs | Boundary inputs | Substantially larger input |
+|--------|--------------|-----------------|-----------------------------|
+| CPU scheduling | cpu_fcfs, cpu_sjf, cpu_rr, cpu_srtf, cpu_priority, cpu_compare, cpu_invalid_input | boundary_cpu_single (one process, burst 1), boundary_cpu_zero_burst (burst 0 rejected, then accepted) | cpu_large: 30-process four-way comparison plus 30-process SRTF, all with arrival times |
+| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | - | banker_large: 15 processes x 5 resource types |
+| Paging | paging | boundary_paging_last_page: last valid address 2047 and the first invalid 2048 | paging_large: 60-page table, 25 addresses |
+| Segmentation | segmentation, segmentation_overlap | boundary_seg_last_byte: segment ending on the last RAM byte, then offset 1024 rejected | segmentation_large: 18 segments, 14 addresses |
+| Fragmentation | fragment_internal, fragment_external, fragment_compare | - | fragment_large: 14 jobs, 5 frees, three strategies compared |
+| Page replacement | page_replacement | boundary_page_one_frame: a single frame, so every miss evicts the only page | page_replacement_large: 220 references, 5 frames, four algorithms |
+| Disk scheduling | disk | - | disk_large: 70 requests, all six algorithms |
+| Multiprogramming | multiprogramming | - | multiprogramming_large: 12 jobs with staggered arrivals |
 
 ### GUI input test
 
@@ -382,8 +392,14 @@ Current result: **ALL GUI CHECKS PASSED** (11 checks).
 Outputs are deterministic (every run was repeated and compared), and
 several cases were checked by hand against known results:
 
-* the SRTF Gantt chart and averages of `cpu_srtf.txt` were worked out on
-  paper first and the program matches;
+* the CPU samples were worked out on paper first and the program matches:
+  FCFS with staggered arrivals gives waiting 0, 7, 10, 18 (average 8.75),
+  SJF serves P1, P3, P2, P4 for an average wait of 4.00, Priority serves
+  P1, P2, P3 for 2.67, and the Round Robin trace (quantum 2) was traced
+  slice by slice down to the last completion;
+* four-way comparison with arrivals 0/1/2 and priorities 2/1/3 gives
+  FCFS 3.33 / SJF 3.33 / RR 5.67 / Priority 3.33 average waiting, with
+  the RR completion times re-derived by hand;
 * the classic banker dataset in `banker_safe.txt` has the known safe
   sequence `P2 -> P4 -> P1 -> P3 -> P5`, and `banker_unsafe.txt` is the
   matching unsafe case;
@@ -433,19 +449,24 @@ Mini_OS-Project/
 |   |       `-- GuiInputSelfTest.java    headless GUI checks
 |   `-- (bin/ appears after Eclipse or javac builds the project)
 `-- samples/
-    |-- *.txt                     27 test inputs (small and large)
-    `-- expected/                 27 reference outputs
+    |-- *.txt                     32 test inputs (small, boundary and large)
+    `-- expected/                 32 reference outputs
 ```
 
 ---
 
 ## Assumptions and limits
 
-* Priority scheduling: smaller number = higher priority, ties go to the
-  smaller process id, no preemption.
-* FCFS, SJF, Round Robin and Priority assume all processes arrive at
-  time 0; only SRTF receives arrival times (stated in the console menu).
-* Round Robin quantum is 1..100 ticks, entered per run.
+* All CPU scheduling algorithms take an arrival time per process. The
+  CPU idles (shown as `idle` in the Gantt chart) until the next arrival
+  when nothing is ready to run.
+* Priority scheduling: smaller number = higher priority, no preemption.
+  Ties are broken by earlier arrival, then input order.
+* Round Robin quantum is 1..100 ticks, entered per run. Processes that
+  arrive during a slice join the ready queue before the preempted
+  process goes back in.
+* Process names are optional (defaults P1, P2, ...), must be unique and
+  at most 10 characters, which keeps the tables aligned.
 * C-SCAN and C-LOOK count their long jump in the total head movement;
   the summary repeats this, because some books exclude it.
 * The multiprogramming simulation uses first-fit loading, one shared I/O
@@ -481,8 +502,11 @@ Likely technical questions and short answers:
 
 * **How does SRTF decide each tick?** It looks at every arrived,
   unfinished process and picks the smallest remaining burst; ties go to
-  the earlier arrival, then the smaller id. A Gantt segment ends when
+  the earlier arrival, then the input order. A Gantt segment ends when
   someone else becomes shorter.
+* **What happens when no process has arrived yet?** The CPU is idle for
+  that stretch; the Gantt chart shows it as `idle` and it no longer adds
+  to anyone's waiting time.
 * **What is a safe sequence?** An order in which every process can
   obtain its maximum need and finish, assuming they run one after
   another and return their resources. If none exists, the state is
@@ -506,7 +530,7 @@ Likely technical questions and short answers:
 | Runnable application | `MiniOS-Simulator.jar` (`java -jar MiniOS-Simulator.jar`) |
 | Dependencies and setup instructions | none beyond a JDK; see "Running the program" |
 | Documentation of modules and algorithms | this README, section "Modules and algorithms" |
-| Sample inputs and outputs | `samples/` and `samples/expected/` (27 pairs) |
+| Sample inputs and outputs | `samples/` and `samples/expected/` (32 pairs) |
 | Test evidence, small and large inputs | testing table above; `SampleTestRunner` output |
 | GUI with flexible, user-defined input | list fields with no fixed item limit on every tab |
 | Input validation without crashes | section "Input checking"; `cpu_invalid_input.txt`; GUI dialogs |

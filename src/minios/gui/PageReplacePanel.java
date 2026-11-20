@@ -10,7 +10,7 @@ import minios.PageReplacementSimulator;
 // string and frame count, so only those two things are asked for.
 public class PageReplacePanel extends ModulePanel {
 
-    private final JTextArea references = Ui.area(6, 40);
+    private final JTextArea references = Ui.area(4, 40);
     private final JTextField frames = Ui.field(6);
 
     public PageReplacePanel() {
@@ -21,7 +21,7 @@ public class PageReplacePanel extends ModulePanel {
                 PageReplacementSimulator::run);
         addRow("Number of frames in RAM:", frames);
         addWideRow(new JLabel("<html><b>Reference string</b> - page numbers, any length</html>"));
-        addWideRow(Ui.scrolled(references));
+        addLastWideRow(references);
     }
 
     // The console expects the reference string on a single line with the

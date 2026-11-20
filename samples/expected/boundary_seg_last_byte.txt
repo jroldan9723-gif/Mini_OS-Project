@@ -1,0 +1,47 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+SEGMENTATION - logical to physical address translation
+
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+How many segments? Physical memory (RAM) size in bytes:   Base address of segment 0:   Limit (size) of segment 0: 
+Segment table in use:
+  Segment |   Base | Limit | Ends at
+  --------|--------|-------|--------
+        0 |      0 |  1024 |    1023
+
+Segment number (-1 to stop):   Offset inside that segment:   0:1023 -> base 0 + offset 1023 = physical address 1023
+Segment number (-1 to stop):   Offset inside that segment:   0:1024 -> SEGMENTATION FAULT: offset 1024 is past the end of segment 0 (limit = 1024).
+Segment number (-1 to stop): 
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

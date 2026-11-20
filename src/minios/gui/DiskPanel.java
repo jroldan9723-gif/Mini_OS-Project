@@ -22,7 +22,7 @@ public class DiskPanel extends ModulePanel {
     });
     private final JTextField maxCylinder = Ui.field(8);
     private final JTextField head = Ui.field(8);
-    private final JTextArea requests = Ui.area(6, 34);
+    private final JTextArea requests = Ui.area(4, 34);
     private final JComboBox<String> direction = new JComboBox<>(new String[]{
         "Toward higher cylinders",
         "Toward lower cylinders"
@@ -38,7 +38,7 @@ public class DiskPanel extends ModulePanel {
         addRow("Initial head position:", head);
         addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
         addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"));
-        addWideRow(Ui.scrolled(requests));
+        addLastWideRow(requests);
     }
 
     // Queue values are checked against the disk limits up front, because

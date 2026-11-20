@@ -16,8 +16,8 @@ public class BankerPanel extends ModulePanel {
         "Safety check (enter the system data)",
         "Resource request (give a process more resources)"
     });
-    private final JTextArea allocation = Ui.area(6, 34);
-    private final JTextArea maximum = Ui.area(6, 34);
+    private final JTextArea allocation = Ui.area(4, 34);
+    private final JTextArea maximum = Ui.area(4, 34);
     final JTextField available = Ui.field(24);
     private final JTextField process = Ui.field(6);
     private final JTextField request = Ui.field(24);
@@ -36,7 +36,7 @@ public class BankerPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"));
         addWideRow(Ui.scrolled(allocation));
         addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"));
-        addWideRow(Ui.scrolled(maximum));
+        addLastWideRow(maximum);
         addRow("Available resources:", available);
         addRow("Process making the request (1..n):", process);
         addRow("Request vector:", request);

@@ -39,12 +39,11 @@ public class CpuPanel extends ModulePanel {
 
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: name (optional), arrival time, burst time. "
-                + "The greyed-out boxes are not used by the chosen algorithm.",
+                "One line per process: ID (optional), arrival time, burst time. Greyed-out boxes are unused.",
                 CPUScheduler::run);
         addRow("Algorithm:", algorithm);
         quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
-        addWideRow(new JLabel("<html><b>Process names</b> - optional, one per line</html>"));
+        addWideRow(new JLabel("<html><b>Process IDs</b> - optional, one per line (defaults P1, P2, ...)</html>"));
         addWideRow(Ui.scrolled(names));
         addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
         addWideRow(Ui.scrolled(arrivals));

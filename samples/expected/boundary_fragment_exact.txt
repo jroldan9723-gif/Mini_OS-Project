@@ -1,0 +1,55 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+FRAGMENTATION - internal vs external
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+INTERNAL FRAGMENTATION: space wasted INSIDE a partition.
+Allocation strategy:
+  1) First-Fit  (first partition/hole that fits)
+  2) Best-Fit   (smallest one that fits)
+  3) Worst-Fit  (largest one that fits)
+  4) Compare all three on the same data
+  Choose a strategy: Number of fixed partitions:   Size of partition 1 (KB):   Size of partition 2 (KB): Number of processes:   Size of P1 (KB):   Size of P2 (KB): 
+Allocation result (first-fit):
+  Partition | Size | Process | Wasted (internal frag)
+  ----------|------|---------|----------------------
+  partition 1 |  100 | P1      |    0 KB
+  partition 2 |   50 | P2      |    0 KB
+
+Total internal fragmentation (wasted inside partitions): 0 KB
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

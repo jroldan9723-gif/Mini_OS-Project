@@ -362,18 +362,18 @@ java -cp bin minios.SampleTestRunner
 The runner executes every file in `samples/` through the console app in
 a fresh JVM and compares the output with `samples/expected/` (line
 endings are normalized, so it works on Windows and on Linux). Current
-result: **32 of 32 passed**.
+result: **36 of 36 passed**.
 
 | Module | Small inputs | Boundary inputs | Substantially larger input |
 |--------|--------------|-----------------|-----------------------------|
 | CPU scheduling | cpu_fcfs, cpu_sjf, cpu_rr, cpu_srtf, cpu_priority, cpu_compare, cpu_invalid_input | boundary_cpu_single (one process, burst 1), boundary_cpu_zero_burst (burst 0 rejected, then accepted) | cpu_large: 30-process four-way comparison plus 30-process SRTF, all with arrival times |
-| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | - | banker_large: 15 processes x 5 resource types |
+| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | boundary_banker_tiny: one process, one resource type | banker_large: 15 processes x 5 resource types |
 | Paging | paging | boundary_paging_last_page: last valid address 2047 and the first invalid 2048 | paging_large: 60-page table, 25 addresses |
 | Segmentation | segmentation, segmentation_overlap | boundary_seg_last_byte: segment ending on the last RAM byte, then offset 1024 rejected | segmentation_large: 18 segments, 14 addresses |
-| Fragmentation | fragment_internal, fragment_external, fragment_compare | - | fragment_large: 14 jobs, 5 frees, three strategies compared |
+| Fragmentation | fragment_internal, fragment_external, fragment_compare | boundary_fragment_exact: process exactly filling its partition (0 KB waste) | fragment_large: 14 jobs, 5 frees, three strategies compared |
 | Page replacement | page_replacement | boundary_page_one_frame: a single frame, so every miss evicts the only page | page_replacement_large: 220 references, 5 frames, four algorithms |
-| Disk scheduling | disk | - | disk_large: 70 requests, all six algorithms |
-| Multiprogramming | multiprogramming | - | multiprogramming_large: 12 jobs with staggered arrivals |
+| Disk scheduling | disk | boundary_disk_ends: request under the head (0 movement) and the far end of the disk | disk_large: 70 requests, all six algorithms |
+| Multiprogramming | multiprogramming | boundary_multi_single: a single job, minimum memory and quantum | multiprogramming_large: 12 jobs with staggered arrivals |
 
 ### GUI input test
 
@@ -449,8 +449,8 @@ Mini_OS-Project/
 |   |       `-- GuiInputSelfTest.java    headless GUI checks
 |   `-- (bin/ appears after Eclipse or javac builds the project)
 `-- samples/
-    |-- *.txt                     32 test inputs (small, boundary and large)
-    `-- expected/                 32 reference outputs
+    |-- *.txt                     36 test inputs (small, boundary and large)
+    `-- expected/                 36 reference outputs
 ```
 
 ---
@@ -530,7 +530,7 @@ Likely technical questions and short answers:
 | Runnable application | `MiniOS-Simulator.jar` (`java -jar MiniOS-Simulator.jar`) |
 | Dependencies and setup instructions | none beyond a JDK; see "Running the program" |
 | Documentation of modules and algorithms | this README, section "Modules and algorithms" |
-| Sample inputs and outputs | `samples/` and `samples/expected/` (32 pairs) |
+| Sample inputs and outputs | `samples/` and `samples/expected/` (36 pairs) |
 | Test evidence, small and large inputs | testing table above; `SampleTestRunner` output |
 | GUI with flexible, user-defined input | list fields with no fixed item limit on every tab |
 | Input validation without crashes | section "Input checking"; `cpu_invalid_input.txt`; GUI dialogs |

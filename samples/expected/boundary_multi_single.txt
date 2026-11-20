@@ -1,0 +1,66 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+MULTIPROGRAMMING - jobs sharing memory and the CPU
+
+  1) Start a new multiprogramming simulation
+  0) Back to main menu
+  Choose an option: 
+Main memory size (KB): How many jobs?   Name of job 1 (e.g. J1):   Memory needed by J1 (KB):   CPU burst of J1 (ticks):   Arrival time of J1 (ticks): Time quantum for the CPU (ticks): 
+Simulation rules:
+  - first-fit contiguous loading, memory = 10 KB
+  - Round Robin on the CPU, quantum = 1 tick(s)
+  - each job does ONE I/O of 3 ticks at the halfway point of its burst, one job at a time on the device
+  - a job only exists for the OS once its arrival time is reached
+
+Tick | CPU | READY (queue order) | WAITING | I/O device | JOB QUEUE | not arrived | memory
+-----+-----+---------------------+---------+------------+-----------+-------------+-------
+0    | CPU: J1 (0 left) | READY: - | WAITING: - | I/O device: free | QUEUE: - | not arrived: - | MEM: - | J1 arrived -> JOB QUEUE; J1 LOADED (10 KB at 0); J1 -> RUNNING; J1 FINISHED (memory freed)
+    memory: [free 0-10] | free total 10 KB, largest hole 10 KB
+
+All jobs finished at tick 1.
+
+Job     Arrival  Mem(KB)  Burst  Loaded at  Finished at  Turnaround  Waiting
+------ -------- -------- ------ ---------- ------------ ----------- --------
+J1            0       10      1          0            1           1        0
+
+Total simulation time  : 1 ticks
+Average turnaround time: 1.00 ticks
+Average waiting time   : 0.00 ticks
+CPU utilization        : 100.00% (1 busy ticks out of 1)
+Completed jobs         : 1 / 1
+
+Note: turnaround = finished at - arrival time. Waiting time counts
+the ticks spent in the job queue, the ready queue or the I/O queue;
+time running and time actually on the I/O device are not waiting.
+
+  1) Start a new multiprogramming simulation
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

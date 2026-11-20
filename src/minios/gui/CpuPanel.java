@@ -23,9 +23,9 @@ public class CpuPanel extends ModulePanel {
         "Priority (non-preemptive, smaller number = higher priority)"
     });
     private final JTextField quantum = Ui.field(6);
-    private final JTextArea bursts = Ui.area(5, 34);
-    private final JTextArea arrivals = Ui.area(5, 34);
-    private final JTextArea priorities = Ui.area(5, 34);
+    private final JTextArea bursts = Ui.area(3, 34);
+    private final JTextArea arrivals = Ui.area(3, 34);
+    private final JTextArea priorities = Ui.area(3, 34);
 
     public CpuPanel() {
         super("CPU scheduling",
@@ -40,7 +40,7 @@ public class CpuPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Arrival times</b> - SRTF only (0 or more)</html>"));
         addWideRow(Ui.scrolled(arrivals));
         addWideRow(new JLabel("<html><b>Priorities</b> - Priority and comparison only</html>"));
-        addWideRow(Ui.scrolled(priorities));
+        addLastWideRow(priorities);
     }
 
     @Override

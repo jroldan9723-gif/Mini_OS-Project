@@ -22,10 +22,10 @@ public class FragmentationPanel extends ModulePanel {
         "Compare all three on the same data"
     });
     private final JTextField memorySize = Ui.field(10);
-    private final JTextArea partitions = Ui.area(5, 30);
-    private final JTextArea processes = Ui.area(5, 30);
-    private final JTextArea jobs = Ui.area(5, 30);
-    private final JTextArea frees = Ui.area(5, 30);
+    private final JTextArea partitions = Ui.area(3, 30);
+    private final JTextArea processes = Ui.area(3, 30);
+    private final JTextArea jobs = Ui.area(3, 30);
+    private final JTextArea frees = Ui.area(3, 30);
     private final JTextField request = Ui.field(10);
 
     public FragmentationPanel() {
@@ -44,7 +44,7 @@ public class FragmentationPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Jobs</b> - external demo: \"name size\" per line</html>"));
         addWideRow(Ui.scrolled(jobs));
         addWideRow(new JLabel("<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>"));
-        addWideRow(Ui.scrolled(frees));
+        addLastWideRow(frees);
         addRow("New request in KB (external demo):", request);
     }
 

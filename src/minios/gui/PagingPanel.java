@@ -11,8 +11,8 @@ import minios.PagingSimulator;
 public class PagingPanel extends ModulePanel {
 
     private final JTextField pageSize = Ui.field(10);
-    private final JTextArea frames = Ui.area(6, 30);
-    private final JTextArea addresses = Ui.area(6, 30);
+    private final JTextArea frames = Ui.area(4, 30);
+    private final JTextArea addresses = Ui.area(4, 30);
 
     public PagingPanel() {
         super("Paging (logical to physical)",
@@ -24,7 +24,7 @@ public class PagingPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Page table</b> - frame number per page (space or line separated)</html>"));
         addWideRow(Ui.scrolled(frames));
         addWideRow(new JLabel("<html><b>Logical addresses</b> to translate (optional list)</html>"));
-        addWideRow(Ui.scrolled(addresses));
+        addLastWideRow(addresses);
     }
 
     // Validates the form and writes the console script: module menu, page

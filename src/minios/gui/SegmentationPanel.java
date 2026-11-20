@@ -11,8 +11,8 @@ import minios.SegmentationSimulator;
 public class SegmentationPanel extends ModulePanel {
 
     private final JTextField ramSize = Ui.field(12);
-    private final JTextArea segments = Ui.area(6, 30);
-    private final JTextArea addresses = Ui.area(6, 30);
+    private final JTextArea segments = Ui.area(4, 30);
+    private final JTextArea addresses = Ui.area(4, 30);
 
     public SegmentationPanel() {
         super("Segmentation (logical to physical)",
@@ -24,7 +24,7 @@ public class SegmentationPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Segment table</b> - \"base limit\" per line</html>"));
         addWideRow(Ui.scrolled(segments));
         addWideRow(new JLabel("<html><b>Addresses</b> - \"segment offset\" per line</html>"));
-        addWideRow(Ui.scrolled(addresses));
+        addLastWideRow(addresses);
     }
 
     // Checks the segment table the same way the console would (positive

@@ -11,6 +11,10 @@ import minios.BankersAlgorithm;
 // process count and resource count are worked out from the text itself.
 public class BankerPanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     // Package-visible so the self test can drive the form without a window.
     final JComboBox<String> mode = new JComboBox<>(new String[]{
         "Safety check (enter the system data)",

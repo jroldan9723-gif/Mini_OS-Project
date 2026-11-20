@@ -10,6 +10,10 @@ import minios.SegmentationSimulator;
 // line, so the segment count follows from the list itself.
 public class SegmentationPanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     private final JTextField ramSize = Ui.field(12);
     private final JTextArea segments = Ui.area(4, 30);
     private final JTextArea addresses = Ui.area(4, 30);

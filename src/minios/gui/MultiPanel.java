@@ -13,6 +13,10 @@ import minios.MultiprogrammingSimulator;
 // "name memory burst arrival", so the job count comes from the list.
 public class MultiPanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     private final JTextField memorySize = Ui.field(10);
     private final JTextArea jobs = Ui.area(5, 34);
     private final JTextField quantum = Ui.field(6);

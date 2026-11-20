@@ -11,6 +11,10 @@ import minios.DiskScheduler;
 // number of pending requests can be simulated.
 public class DiskPanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
         "FCFS (First-Come, First-Served)",
         "SSTF (Shortest Seek Time First)",

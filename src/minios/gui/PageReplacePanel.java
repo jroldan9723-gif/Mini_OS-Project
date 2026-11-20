@@ -10,6 +10,10 @@ import minios.PageReplacementSimulator;
 // string and frame count, so only those two things are asked for.
 public class PageReplacePanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     private final JTextArea references = Ui.area(4, 40);
     private final JTextField frames = Ui.field(6);
 

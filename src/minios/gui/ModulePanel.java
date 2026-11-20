@@ -22,6 +22,10 @@ import javax.swing.SwingUtilities;
 // the middle. Subclasses add their fields and build the input script.
 abstract class ModulePanel extends JPanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     final JTextArea output = Ui.outputArea();
     private final JPanel form = new JPanel(new GridBagLayout());
     private int formRows = 0;

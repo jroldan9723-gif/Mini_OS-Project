@@ -11,6 +11,10 @@ import minios.FragmentationDemo;
 // fragmentation) and holes in variable memory (external fragmentation).
 public class FragmentationPanel extends ModulePanel {
 
+    // Swing components are serializable by inheritance, but these panels are
+    // never written to a stream; the field only silences the compiler warning.
+    private static final long serialVersionUID = 1L;
+
     private final JComboBox<String> kind = new JComboBox<>(new String[]{
         "Internal (fixed partitions)",
         "External (variable memory, holes)"

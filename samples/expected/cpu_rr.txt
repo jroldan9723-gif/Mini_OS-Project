@@ -15,8 +15,8 @@
 ----------------------------------------------
 Your choice: 
 CPU SCHEDULING
-Options 1-4 and 6 assume every process arrives at time 0.
-SRTF (option 5) asks for an arrival time per process.
+Every process needs a name (or Enter for a default one),
+an arrival time and a CPU burst time.
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
@@ -26,18 +26,23 @@ SRTF (option 5) asks for an arrival time per process.
   6) Priority    (non-preemptive, smaller number = higher priority)
   0) Back to main menu
   Choose an option: 
-How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4: Time quantum (whole time units): 
-Algorithm: Round Robin (quantum = 4)
-Execution order: P1 -> P2 -> P3 -> P4 -> P1 -> P3 -> P4
+How many processes? Names are optional: press Enter to use P1, P2, ...
+  Name of process 1:   Arrival time of P1:   CPU burst time for P1:   Name of process 2:   Arrival time of P2:   CPU burst time for P2:   Name of process 3:   Arrival time of P3:   CPU burst time for P3:   Name of process 4:   Arrival time of P4:   CPU burst time for P4: Time quantum (whole time units): 
+Algorithm: Round Robin (quantum = 2)
+Execution order: P1 -> P2 -> P3 -> P1 -> P2 -> P4 -> P1 -> P4
 
-Process   Burst  Waiting  Turnaround
--------- ------ -------- -----------
-P1            5       11          16
-P2            3        4           7
-P3            8       12          20
-P4            6       16          22
-Average waiting time   : 10.75
-Average turnaround time: 16.25
+Gantt chart:
+  0-2 P1 (preempted) | 2-4 P2 (preempted) | 4-6 P3 | 6-8 P1 (preempted) | 8-10 P2 | 10-12 P4 (preempted) | 12-13 P1 | 13-14 P4
+
+Process    Arrival Burst Completion Turnaround Waiting Response
+---------- ------- ----- ---------- ---------- ------- --------
+P1               0     5         13         13       8        0
+P2               1     4         10          9       5        1
+P3               2     2          6          4       2        2
+P4               6     3         14          8       5        4
+Average turnaround time: 8.50
+Average waiting time   : 5.00
+Average response time  : 1.75
 Note: in Round Robin the execution list shows one entry
       per time slice, so a process can appear several times.
 

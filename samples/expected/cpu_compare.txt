@@ -15,8 +15,8 @@
 ----------------------------------------------
 Your choice: 
 CPU SCHEDULING
-Options 1-4 and 6 assume every process arrives at time 0.
-SRTF (option 5) asks for an arrival time per process.
+Every process needs a name (or Enter for a default one),
+an arrival time and a CPU burst time.
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
@@ -26,23 +26,26 @@ SRTF (option 5) asks for an arrival time per process.
   6) Priority    (non-preemptive, smaller number = higher priority)
   0) Back to main menu
   Choose an option: 
-How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4: Time quantum for Round Robin (whole time units):   Priority of P1 (smaller number = higher priority):   Priority of P2 (smaller number = higher priority):   Priority of P3 (smaller number = higher priority):   Priority of P4 (smaller number = higher priority): 
+How many processes? Names are optional: press Enter to use P1, P2, ...
+  Name of process 1:   Arrival time of P1:   CPU burst time for P1:   Name of process 2:   Arrival time of P2:   CPU burst time for P2:   Name of process 3:   Arrival time of P3:   CPU burst time for P3: Time quantum for Round Robin (whole time units):   Priority of P1 (smaller number = higher priority):   Priority of P2 (smaller number = higher priority):   Priority of P3 (smaller number = higher priority): 
 COMPARISON OF THE FOUR ALGORITHMS
 (W = waiting time, T = turnaround time)
 
-Process  Burst | FCFS     | SJF      | RR       | Priority
-               | W    T   | W    T   | W    T   | W    T  
--------- ----- | -------- | -------- | -------- | --------
-P1           5 | 0 5      | 3 8      | 11 16    | 9 14    
-P2           3 | 5 8      | 0 3      | 4 7      | 0 3     
-P3           8 | 8 16     | 14 22    | 12 20    | 14 22   
-P4           6 | 16 22    | 8 14     | 16 22    | 3 9     
--------- ----- | -------- | -------- | -------- | --------
+Process    Burst | FCFS     | SJF      | RR       | Priority
+                 | W    T   | W    T   | W    T   | W    T  
+---------- ----- | -------- | -------- | -------- | --------
+P1             5 | 0 5      | 0 5      | 7 12     | 0 5     
+P2             3 | 4 7      | 4 7      | 5 8      | 4 7     
+P3             4 | 6 10     | 6 10     | 5 9      | 6 10    
+---------- ----- | -------- | -------- | -------- | --------
 Averages (waiting / turnaround):
-  FCFS     : 7.25 / 12.75
-  SJF      : 6.25 / 11.75
-  RR       : 10.75 / 16.25
-  Priority : 6.50 / 12.00
+  FCFS     : 3.33 / 7.33
+  SJF      : 3.33 / 7.33
+  RR       : 5.67 / 9.67
+  Priority : 3.33 / 7.33
+
+Best average waiting time   : FCFS (3.33)
+Best average turnaround time: FCFS (7.33)
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)

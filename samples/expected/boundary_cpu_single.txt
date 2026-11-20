@@ -1,0 +1,65 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+CPU SCHEDULING
+Every process needs a name (or Enter for a default one),
+an arrival time and a CPU burst time.
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare FCFS, SJF, RR and Priority on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
+  0) Back to main menu
+  Choose an option: 
+How many processes? Names are optional: press Enter to use P1, P2, ...
+  Name of process 1:   Arrival time of Solo:   CPU burst time for Solo: 
+Algorithm: FCFS (First-Come, First-Served)
+Execution order: Solo
+
+Gantt chart:
+  0-1 Solo
+
+Process    Arrival Burst Completion Turnaround Waiting Response
+---------- ------- ----- ---------- ---------- ------- --------
+Solo             0     1          1          1       0        0
+Average turnaround time: 1.00
+Average waiting time   : 0.00
+Average response time  : 0.00
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare FCFS, SJF, RR and Priority on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

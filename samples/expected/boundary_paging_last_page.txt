@@ -1,0 +1,51 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+PAGING - logical to physical address translation
+
+  1) Build a page table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+Page size (bytes, e.g. 1024): Number of pages in the logical address space: Logical address space = 2 pages x 1024 bytes = 2048 bytes (addresses 0..2047)
+Enter the frame number for each page.
+Use -1 for a page that is NOT in memory (it is on disk).
+  Frame for page 0 (-1 .. 100000):   Frame for page 1 (-1 .. 100000): 
+Page table in use:
+  Page | Frame
+  -----|------
+     0 |     0
+     1 |     1
+
+Logical address to translate (-1 to stop):   2047 -> page 1, offset 1023 -> frame 1 -> physical address 2047   (1 x 1024 + 1023)
+Logical address to translate (-1 to stop):   2048 -> INVALID ADDRESS: outside the logical address space (valid addresses are 0..2047).
+Logical address to translate (-1 to stop): 
+  1) Build a page table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

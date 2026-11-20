@@ -1,0 +1,140 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+CPU SCHEDULING
+Options 1-4 and 6 assume every process arrives at time 0.
+SRTF (option 5) asks for an arrival time per process.
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare FCFS, SJF, RR and Priority on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
+  0) Back to main menu
+  Choose an option: 
+How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4:   CPU burst time for P5:   CPU burst time for P6:   CPU burst time for P7:   CPU burst time for P8:   CPU burst time for P9:   CPU burst time for P10:   CPU burst time for P11:   CPU burst time for P12:   CPU burst time for P13:   CPU burst time for P14:   CPU burst time for P15:   CPU burst time for P16:   CPU burst time for P17:   CPU burst time for P18:   CPU burst time for P19:   CPU burst time for P20:   CPU burst time for P21:   CPU burst time for P22:   CPU burst time for P23:   CPU burst time for P24:   CPU burst time for P25:   CPU burst time for P26:   CPU burst time for P27:   CPU burst time for P28:   CPU burst time for P29:   CPU burst time for P30: Time quantum for Round Robin (whole time units):   Priority of P1 (smaller number = higher priority):   Priority of P2 (smaller number = higher priority):   Priority of P3 (smaller number = higher priority):   Priority of P4 (smaller number = higher priority):   Priority of P5 (smaller number = higher priority):   Priority of P6 (smaller number = higher priority):   Priority of P7 (smaller number = higher priority):   Priority of P8 (smaller number = higher priority):   Priority of P9 (smaller number = higher priority):   Priority of P10 (smaller number = higher priority):   Priority of P11 (smaller number = higher priority):   Priority of P12 (smaller number = higher priority):   Priority of P13 (smaller number = higher priority):   Priority of P14 (smaller number = higher priority):   Priority of P15 (smaller number = higher priority):   Priority of P16 (smaller number = higher priority):   Priority of P17 (smaller number = higher priority):   Priority of P18 (smaller number = higher priority):   Priority of P19 (smaller number = higher priority):   Priority of P20 (smaller number = higher priority):   Priority of P21 (smaller number = higher priority):   Priority of P22 (smaller number = higher priority):   Priority of P23 (smaller number = higher priority):   Priority of P24 (smaller number = higher priority):   Priority of P25 (smaller number = higher priority):   Priority of P26 (smaller number = higher priority):   Priority of P27 (smaller number = higher priority):   Priority of P28 (smaller number = higher priority):   Priority of P29 (smaller number = higher priority):   Priority of P30 (smaller number = higher priority): 
+COMPARISON OF THE FOUR ALGORITHMS
+(W = waiting time, T = turnaround time)
+
+Process  Burst | FCFS     | SJF      | RR       | Priority
+               | W    T   | W    T   | W    T   | W    T  
+-------- ----- | -------- | -------- | -------- | --------
+P1           6 | 0 6      | 14 20    | 113 119  | 0 6     
+P2          23 | 6 29     | 202 225  | 439 462  | 513 536 
+P3          40 | 29 69    | 575 615  | 569 609  | 332 372 
+P4          17 | 69 86    | 103 120  | 383 400  | 228 245 
+P5          34 | 86 120   | 427 461  | 558 592  | 102 136 
+P6          11 | 120 131  | 47 58    | 228 239  | 563 574 
+P7          28 | 131 159  | 303 331  | 497 525  | 450 478 
+P8           5 | 159 164  | 9 14     | 139 144  | 258 263 
+P9          22 | 164 186  | 180 202  | 454 476  | 183 205 
+P10         39 | 186 225  | 536 575  | 573 612  | 6 45    
+P11         16 | 225 241  | 87 103   | 326 342  | 536 552 
+P12         33 | 241 274  | 394 427  | 564 597  | 372 405 
+P13         10 | 274 284  | 37 47    | 251 261  | 245 255 
+P14         27 | 284 311  | 276 303  | 509 536  | 136 163 
+P15          4 | 311 315  | 5 9      | 56 60    | 574 578 
+P16         21 | 315 336  | 159 180  | 468 489  | 478 499 
+P17         38 | 336 374  | 498 536  | 576 614  | 263 301 
+P18         15 | 374 389  | 72 87    | 346 361  | 205 220 
+P19         32 | 389 421  | 362 394  | 547 579  | 45 77   
+P20          9 | 421 430  | 28 37    | 273 282  | 552 561 
+P21         26 | 430 456  | 250 276  | 520 546  | 405 431 
+P22          3 | 456 459  | 2 5      | 84 87    | 255 258 
+P23         20 | 459 479  | 139 159  | 424 444  | 163 183 
+P24         37 | 479 516  | 461 498  | 578 615  | 578 615 
+P25         14 | 516 530  | 58 72    | 365 379  | 499 513 
+P26         31 | 530 561  | 331 362  | 555 586  | 301 332 
+P27          8 | 561 569  | 20 28    | 204 212  | 220 228 
+P28         25 | 569 594  | 225 250  | 530 555  | 77 102  
+P29          2 | 594 596  | 0 2      | 111 113  | 561 563 
+P30         19 | 596 615  | 120 139  | 440 459  | 431 450 
+-------- ----- | -------- | -------- | -------- | --------
+Averages (waiting / turnaround):
+  FCFS     : 310.33 / 330.83
+  SJF      : 197.33 / 217.83
+  RR       : 389.33 / 409.83
+  Priority : 317.70 / 338.20
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare FCFS, SJF, RR and Priority on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
+  0) Back to main menu
+  Choose an option: 
+How many processes?   Arrival time of P1:   CPU burst time for P1:   Arrival time of P2:   CPU burst time for P2:   Arrival time of P3:   CPU burst time for P3:   Arrival time of P4:   CPU burst time for P4:   Arrival time of P5:   CPU burst time for P5:   Arrival time of P6:   CPU burst time for P6:   Arrival time of P7:   CPU burst time for P7:   Arrival time of P8:   CPU burst time for P8:   Arrival time of P9:   CPU burst time for P9:   Arrival time of P10:   CPU burst time for P10:   Arrival time of P11:   CPU burst time for P11:   Arrival time of P12:   CPU burst time for P12:   Arrival time of P13:   CPU burst time for P13:   Arrival time of P14:   CPU burst time for P14:   Arrival time of P15:   CPU burst time for P15:   Arrival time of P16:   CPU burst time for P16:   Arrival time of P17:   CPU burst time for P17:   Arrival time of P18:   CPU burst time for P18:   Arrival time of P19:   CPU burst time for P19:   Arrival time of P20:   CPU burst time for P20:   Arrival time of P21:   CPU burst time for P21:   Arrival time of P22:   CPU burst time for P22:   Arrival time of P23:   CPU burst time for P23:   Arrival time of P24:   CPU burst time for P24:   Arrival time of P25:   CPU burst time for P25: 
+Algorithm: SRTF (Shortest Remaining Time First, preemptive)
+Execution order: P1 -> P17 -> P6 -> P8 -> P24 -> P15 -> P22 -> P13 -> P4 -> P20 -> P11 -> P2 -> P18 -> P9 -> P25 -> P16 -> P7 -> P23 -> P14 -> P5 -> P21 -> P12 -> P3 -> P19 -> P10
+
+Gantt chart:
+  0-1 P1 | 1-3 P17 | 3-9 P6 | 9-12 P8 | 12-16 P24 | 16-21 P15 | 21-28 P22 | 28-36 P13 | 36-45 P4 | 45-55 P20 | 55-66 P11 | 66-78 P2 | 78-91 P18 | 91-105 P9 | 105-120 P25 | 120-136 P16 | 136-153 P7 | 153-171 P23 | 171-190 P14 | 190-210 P5 | 210-231 P21 | 231-253 P12 | 253-276 P3 | 276-300 P19 | 300-325 P10
+
+Process   Arrival  Burst  Completion  Turnaround  Waiting  Response
+-------- -------- ------ ----------- ----------- -------- ---------
+P1              0      1           1           1        0         0
+P2              3     12          78          75       63        63
+P3              6     23         276         270      247       247
+P4              9      9          45          36       27        27
+P5              0     20         210         210      190       190
+P6              3      6           9           6        0         0
+P7              6     17         153         147      130       130
+P8              9      3          12           3        0         0
+P9              0     14         105         105       91        91
+P10             3     25         325         322      297       297
+P11             6     11          66          60       49        49
+P12             9     22         253         244      222       222
+P13             0      8          36          36       28        28
+P14             3     19         190         187      168       168
+P15             6      5          21          15       10        10
+P16             9     16         136         127      111       111
+P17             0      2           3           3        1         1
+P18             3     13          91          88       75        75
+P19             6     24         300         294      270       270
+P20             9     10          55          46       36        36
+P21             0     21         231         231      210       210
+P22             3      7          28          25       18        18
+P23             6     18         171         165      147       147
+P24             9      4          16           7        3         3
+P25             0     15         120         120      105       105
+Average turnaround time: 112.92
+Average waiting time   : 99.92
+Average response time  : 99.92
+
+  1) FCFS        (First-Come, First-Served)
+  2) SJF         (Shortest Job First, non-preemptive)
+  3) Round Robin (preemptive, fixed time quantum)
+  4) Compare FCFS, SJF, RR and Priority on the same processes
+  5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

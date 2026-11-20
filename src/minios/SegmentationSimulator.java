@@ -1,5 +1,9 @@
 package minios;
 
+// Segmentation: splits the logical address space into variable-size
+// segments, each with a base address and a limit. A logical address is a
+// segment number plus an offset; the offset must stay below the limit and
+// the resulting physical address must stay inside RAM.
 public class SegmentationSimulator {
 
     public static void run(InputHelper in) {
@@ -17,8 +21,12 @@ public class SegmentationSimulator {
         }
     }
 
+    // One session: enter RAM size and the segment table (each segment is
+    // re-entered until it is valid: positive limit, inside RAM, no overlap
+    // with an earlier segment), then translate addresses until -1.
+    // End addresses are computed as long so big segments cannot overflow.
     private static void runOnce(InputHelper in) {
-        int n = in.readIntInRange("How many segments? ", 1, 20);
+        int n = in.readIntAtLeast("How many segments? ", 1);
         int ramSize = in.readIntInRange("Physical memory (RAM) size in bytes: ", 1, 1_000_000_000);
 
         int[] base = new int[n];
@@ -96,6 +104,8 @@ public class SegmentationSimulator {
         }
     }
 
+    // Returns the index of an earlier segment that would collide with the
+    // candidate [candBase .. candBase + candLimit), or -1 if none does.
     private static int overlapWith(int[] base, int[] limit, int count, int candBase, int candLimit) {
         long candEnd = (long) candBase + candLimit;
         for (int i = 0; i < count; i++) {

@@ -1,5 +1,9 @@
 package minios;
 
+// Paging: splits the logical address space into fixed-size pages that map
+// onto frames of the same size. A logical address becomes page number
+// (address / pageSize) plus offset (address % pageSize), and the page
+// table translates the page number into a frame number.
 public class PagingSimulator {
 
     public static void run(InputHelper in) {
@@ -17,9 +21,12 @@ public class PagingSimulator {
         }
     }
 
+    // One session: page size and page table are entered first (long
+    // arithmetic keeps large address spaces from overflowing), then every
+    // typed address is translated until the user enters -1.
     private static void runOnce(InputHelper in) {
         int pageSize = in.readIntInRange("Page size (bytes, e.g. 1024): ", 1, 1_000_000);
-        int numPages = in.readIntInRange("Number of pages in the logical address space: ", 1, 1000);
+        int numPages = in.readIntAtLeast("Number of pages in the logical address space: ", 1);
 
         long logicalSize = (long) pageSize * numPages;
 

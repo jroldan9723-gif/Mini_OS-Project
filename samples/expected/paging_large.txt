@@ -1,0 +1,132 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+PAGING - logical to physical address translation
+
+  1) Build a page table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+Page size (bytes, e.g. 1024): Number of pages in the logical address space: Logical address space = 60 pages x 256 bytes = 15360 bytes (addresses 0..15359)
+Enter the frame number for each page.
+Use -1 for a page that is NOT in memory (it is on disk).
+  Frame for page 0 (-1 .. 100000):   Frame for page 1 (-1 .. 100000):   Frame for page 2 (-1 .. 100000):   Frame for page 3 (-1 .. 100000):   Frame for page 4 (-1 .. 100000):   Frame for page 5 (-1 .. 100000):   Frame for page 6 (-1 .. 100000):   Frame for page 7 (-1 .. 100000):   Frame for page 8 (-1 .. 100000):   Frame for page 9 (-1 .. 100000):   Frame for page 10 (-1 .. 100000):   Frame for page 11 (-1 .. 100000):   Frame for page 12 (-1 .. 100000):   Frame for page 13 (-1 .. 100000):   Frame for page 14 (-1 .. 100000):   Frame for page 15 (-1 .. 100000):   Frame for page 16 (-1 .. 100000):   Frame for page 17 (-1 .. 100000):   Frame for page 18 (-1 .. 100000):   Frame for page 19 (-1 .. 100000):   Frame for page 20 (-1 .. 100000):   Frame for page 21 (-1 .. 100000):   Frame for page 22 (-1 .. 100000):   Frame for page 23 (-1 .. 100000):   Frame for page 24 (-1 .. 100000):   Frame for page 25 (-1 .. 100000):   Frame for page 26 (-1 .. 100000):   Frame for page 27 (-1 .. 100000):   Frame for page 28 (-1 .. 100000):   Frame for page 29 (-1 .. 100000):   Frame for page 30 (-1 .. 100000):   Frame for page 31 (-1 .. 100000):   Frame for page 32 (-1 .. 100000):   Frame for page 33 (-1 .. 100000):   Frame for page 34 (-1 .. 100000):   Frame for page 35 (-1 .. 100000):   Frame for page 36 (-1 .. 100000):   Frame for page 37 (-1 .. 100000):   Frame for page 38 (-1 .. 100000):   Frame for page 39 (-1 .. 100000):   Frame for page 40 (-1 .. 100000):   Frame for page 41 (-1 .. 100000):   Frame for page 42 (-1 .. 100000):   Frame for page 43 (-1 .. 100000):   Frame for page 44 (-1 .. 100000):   Frame for page 45 (-1 .. 100000):   Frame for page 46 (-1 .. 100000):   Frame for page 47 (-1 .. 100000):   Frame for page 48 (-1 .. 100000):   Frame for page 49 (-1 .. 100000):   Frame for page 50 (-1 .. 100000):   Frame for page 51 (-1 .. 100000):   Frame for page 52 (-1 .. 100000):   Frame for page 53 (-1 .. 100000):   Frame for page 54 (-1 .. 100000):   Frame for page 55 (-1 .. 100000):   Frame for page 56 (-1 .. 100000):   Frame for page 57 (-1 .. 100000):   Frame for page 58 (-1 .. 100000):   Frame for page 59 (-1 .. 100000): 
+Page table in use:
+  Page | Frame
+  -----|------
+     0 | on disk
+     1 |     7
+     2 |    14
+     3 |    21
+     4 |    28
+     5 |    35
+     6 |    42
+     7 |     2
+     8 |     9
+     9 |    16
+    10 |    23
+    11 |    30
+    12 |    37
+    13 | on disk
+    14 |     4
+    15 |    11
+    16 |    18
+    17 |    25
+    18 |    32
+    19 |    39
+    20 |    46
+    21 |     6
+    22 |    13
+    23 |    20
+    24 |    27
+    25 |    34
+    26 | on disk
+    27 |     1
+    28 |     8
+    29 |    15
+    30 |    22
+    31 |    29
+    32 |    36
+    33 |    43
+    34 |     3
+    35 |    10
+    36 |    17
+    37 |    24
+    38 |    31
+    39 | on disk
+    40 |    45
+    41 |     5
+    42 |    12
+    43 |    19
+    44 |    26
+    45 |    33
+    46 |    40
+    47 |     0
+    48 |     7
+    49 |    14
+    50 |    21
+    51 |    28
+    52 | on disk
+    53 |    42
+    54 |     2
+    55 |     9
+    56 |    16
+    57 |    23
+    58 |    30
+    59 |    37
+
+Logical address to translate (-1 to stop):   0 -> page 0, offset 0 -> PAGE FAULT: page 0 is not in memory; the OS would load it from disk first.
+Logical address to translate (-1 to stop):   255 -> page 0, offset 255 -> PAGE FAULT: page 0 is not in memory; the OS would load it from disk first.
+Logical address to translate (-1 to stop):   256 -> page 1, offset 0 -> frame 7 -> physical address 1792   (7 x 256 + 0)
+Logical address to translate (-1 to stop):   511 -> page 1, offset 255 -> frame 7 -> physical address 2047   (7 x 256 + 255)
+Logical address to translate (-1 to stop):   1024 -> page 4, offset 0 -> frame 28 -> physical address 7168   (28 x 256 + 0)
+Logical address to translate (-1 to stop):   4095 -> page 15, offset 255 -> frame 11 -> physical address 3071   (11 x 256 + 255)
+Logical address to translate (-1 to stop):   4096 -> page 16, offset 0 -> frame 18 -> physical address 4608   (18 x 256 + 0)
+Logical address to translate (-1 to stop):   7777 -> page 30, offset 97 -> frame 22 -> physical address 5729   (22 x 256 + 97)
+Logical address to translate (-1 to stop):   12000 -> page 46, offset 224 -> frame 40 -> physical address 10464   (40 x 256 + 224)
+Logical address to translate (-1 to stop):   15360 -> INVALID ADDRESS: outside the logical address space (valid addresses are 0..15359).
+Logical address to translate (-1 to stop):   1 -> page 0, offset 1 -> PAGE FAULT: page 0 is not in memory; the OS would load it from disk first.
+Logical address to translate (-1 to stop):   300 -> page 1, offset 44 -> frame 7 -> physical address 1836   (7 x 256 + 44)
+Logical address to translate (-1 to stop):   513 -> page 2, offset 1 -> frame 14 -> physical address 3585   (14 x 256 + 1)
+Logical address to translate (-1 to stop):   9999 -> page 39, offset 15 -> PAGE FAULT: page 39 is not in memory; the OS would load it from disk first.
+Logical address to translate (-1 to stop):   14336 -> page 56, offset 0 -> frame 16 -> physical address 4096   (16 x 256 + 0)
+Logical address to translate (-1 to stop):   15359 -> page 59, offset 255 -> frame 37 -> physical address 9727   (37 x 256 + 255)
+Logical address to translate (-1 to stop):   20000 -> INVALID ADDRESS: outside the logical address space (valid addresses are 0..15359).
+Logical address to translate (-1 to stop):   100 -> page 0, offset 100 -> PAGE FAULT: page 0 is not in memory; the OS would load it from disk first.
+Logical address to translate (-1 to stop):   7000 -> page 27, offset 88 -> frame 1 -> physical address 344   (1 x 256 + 88)
+Logical address to translate (-1 to stop):   9000 -> page 35, offset 40 -> frame 10 -> physical address 2600   (10 x 256 + 40)
+Logical address to translate (-1 to stop):   11111 -> page 43, offset 103 -> frame 19 -> physical address 4967   (19 x 256 + 103)
+Logical address to translate (-1 to stop):   13000 -> page 50, offset 200 -> frame 21 -> physical address 5576   (21 x 256 + 200)
+Logical address to translate (-1 to stop):   15358 -> page 59, offset 254 -> frame 37 -> physical address 9726   (37 x 256 + 254)
+Logical address to translate (-1 to stop):   999999 -> INVALID ADDRESS: outside the logical address space (valid addresses are 0..15359).
+Logical address to translate (-1 to stop):   6144 -> page 24, offset 0 -> frame 27 -> physical address 6912   (27 x 256 + 0)
+Logical address to translate (-1 to stop): 
+  1) Build a page table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

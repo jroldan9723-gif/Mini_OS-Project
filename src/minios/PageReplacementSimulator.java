@@ -3,8 +3,14 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
+// Page replacement: when a needed page is not in RAM, one frame's page has
+// to be replaced. This class runs FIFO, LRU, Optimal and LFU on the same
+// reference string and frame count, shows every frame change, and compares
+// hits, faults and rates side by side.
 public class PageReplacementSimulator {
 
+    // One algorithm's result: one row of frame states per reference, the
+    // fault count, and whether frequencies must be printed (LFU).
     private static class Result {
         String algorithm;
         List<String> rows = new ArrayList<>();
@@ -44,7 +50,7 @@ public class PageReplacementSimulator {
     }
 
     private static void runOnce(InputHelper in) {
-        int count = in.readIntInRange("How many page references? ", 1, 100);
+        int count = in.readIntAtLeast("How many page references? ", 1);
         int[] refs = in.readIntArray("Reference string (" + count + " page number(s), space separated): ", count);
         for (int r : refs) {
             if (r < 0) {
@@ -52,7 +58,7 @@ public class PageReplacementSimulator {
                 return;
             }
         }
-        int frames = in.readIntInRange("Number of frames in RAM: ", 1, 20);
+        int frames = in.readIntAtLeast("Number of frames in RAM: ", 1);
         System.out.println();
 
         Result fifo = runFifo(refs, frames);
@@ -100,6 +106,8 @@ public class PageReplacementSimulator {
                 label, r.faults, r.hits(total), r.faultRate(total), r.hitRate(total));
     }
 
+    // FIFO: replace the page that has been in memory the longest, using a
+    // circular pointer over the frames (it ignores whether pages are used).
     private static Result runFifo(int[] refs, int frames) {
         Result r = new Result("FIFO");
         Integer[] slots = new Integer[frames];
@@ -119,6 +127,8 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // LRU: replace the page that was used least recently. Every access gets
+    // a growing clock value, so the smallest clock marks the coldest frame.
     private static Result runLru(int[] refs, int frames) {
         Result r = new Result("LRU");
         Integer[] slots = new Integer[frames];
@@ -144,6 +154,10 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // Optimal (Belady): replace the page that will be used farthest in the
+    // future (or never again). It is the theoretical benchmark - a real
+    // system cannot know the future, so the other algorithms try to get
+    // close to this line.
     private static Result runOptimal(int[] refs, int frames) {
         Result r = new Result("Optimal");
         Integer[] slots = new Integer[frames];
@@ -166,6 +180,9 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // LFU: replace the page with the lowest use frequency so far; ties are
+    // broken with LRU (least recently used first). Each frame carries a
+    // frequency counter that starts at 1 whenever the frame is loaded.
     private static Result runLfu(int[] refs, int frames) {
         Result r = new Result("LFU");
         r.showFreqs = true;
@@ -196,6 +213,7 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // Picks the LFU victim: smallest frequency, then smallest last-use clock.
     private static int lowestFrequency(Integer[] slots, int[] freq, int[] lastUse) {
         int victim = 0;
         for (int i = 1; i < slots.length; i++) {
@@ -235,6 +253,9 @@ public class PageReplacementSimulator {
         return victim;
     }
 
+    // Picks the Optimal victim: the frame whose page is needed farthest in
+    // the remaining reference string (a page that is never needed again
+    // counts as infinitely far away).
     private static int optimalVictim(Integer[] slots, int[] refs, int fromIndex) {
         int victim = 0;
         int farthest = -1;

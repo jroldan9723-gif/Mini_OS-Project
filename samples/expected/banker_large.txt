@@ -1,0 +1,81 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+BANKER'S ALGORITHM (deadlock avoidance)
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+Number of processes: Number of resource types: Allocation matrix - one row per process, 5 number(s) per row (space separated).
+  Allocation for P1 (5 number(s)):   Allocation for P2 (5 number(s)):   Allocation for P3 (5 number(s)):   Allocation for P4 (5 number(s)):   Allocation for P5 (5 number(s)):   Allocation for P6 (5 number(s)):   Allocation for P7 (5 number(s)):   Allocation for P8 (5 number(s)):   Allocation for P9 (5 number(s)):   Allocation for P10 (5 number(s)):   Allocation for P11 (5 number(s)):   Allocation for P12 (5 number(s)):   Allocation for P13 (5 number(s)):   Allocation for P14 (5 number(s)):   Allocation for P15 (5 number(s)): Maximum-need matrix - same format.
+  Max for P1 (5 number(s)):   Max for P2 (5 number(s)):   Max for P3 (5 number(s)):   Max for P4 (5 number(s)):   Max for P5 (5 number(s)):   Max for P6 (5 number(s)):   Max for P7 (5 number(s)):   Max for P8 (5 number(s)):   Max for P9 (5 number(s)):   Max for P10 (5 number(s)):   Max for P11 (5 number(s)):   Max for P12 (5 number(s)):   Max for P13 (5 number(s)):   Max for P14 (5 number(s)):   Max for P15 (5 number(s)): Available resources (5 number(s)): Need matrix (Max - Allocation):
+           R1    R2    R3    R4    R5
+   P1       1     2     3     1     2
+   P2       1     2     3     1     2
+   P3       1     2     3     1     2
+   P4       1     2     3     1     2
+   P5       1     2     3     1     2
+   P6       1     2     3     1     2
+   P7       1     2     3     1     2
+   P8       1     2     3     1     2
+   P9       1     2     3     1     2
+   P10       1     2     3     1     2
+   P11       1     2     3     1     2
+   P12       1     2     3     1     2
+   P13       1     2     3     1     2
+   P14       1     2     3     1     2
+   P15       1     2     3     1     2
+
+Safety check:
+  Work (available) starts at [5,5,5,5,5]
+  P1: need [1,2,3,1,2] <= work [5,5,5,5,5]  -> runs, returns [0,1,2,3,0], work = [5,6,7,8,5]
+  P2: need [1,2,3,1,2] <= work [5,6,7,8,5]  -> runs, returns [1,2,3,0,1], work = [6,8,10,8,6]
+  P3: need [1,2,3,1,2] <= work [6,8,10,8,6]  -> runs, returns [2,3,0,1,2], work = [8,11,10,9,8]
+  P4: need [1,2,3,1,2] <= work [8,11,10,9,8]  -> runs, returns [3,0,1,2,3], work = [11,11,11,11,11]
+  P5: need [1,2,3,1,2] <= work [11,11,11,11,11]  -> runs, returns [0,1,2,3,0], work = [11,12,13,14,11]
+  P6: need [1,2,3,1,2] <= work [11,12,13,14,11]  -> runs, returns [1,2,3,0,1], work = [12,14,16,14,12]
+  P7: need [1,2,3,1,2] <= work [12,14,16,14,12]  -> runs, returns [2,3,0,1,2], work = [14,17,16,15,14]
+  P8: need [1,2,3,1,2] <= work [14,17,16,15,14]  -> runs, returns [3,0,1,2,3], work = [17,17,17,17,17]
+  P9: need [1,2,3,1,2] <= work [17,17,17,17,17]  -> runs, returns [0,1,2,3,0], work = [17,18,19,20,17]
+  P10: need [1,2,3,1,2] <= work [17,18,19,20,17]  -> runs, returns [1,2,3,0,1], work = [18,20,22,20,18]
+  P11: need [1,2,3,1,2] <= work [18,20,22,20,18]  -> runs, returns [2,3,0,1,2], work = [20,23,22,21,20]
+  P12: need [1,2,3,1,2] <= work [20,23,22,21,20]  -> runs, returns [3,0,1,2,3], work = [23,23,23,23,23]
+  P13: need [1,2,3,1,2] <= work [23,23,23,23,23]  -> runs, returns [0,1,2,3,0], work = [23,24,25,26,23]
+  P14: need [1,2,3,1,2] <= work [23,24,25,26,23]  -> runs, returns [1,2,3,0,1], work = [24,26,28,26,24]
+  P15: need [1,2,3,1,2] <= work [24,26,28,26,24]  -> runs, returns [2,3,0,1,2], work = [26,29,28,27,26]
+
+RESULT: SAFE STATE - the OS can satisfy every process in some order.
+Safe sequence: P1 -> P2 -> P3 -> P4 -> P5 -> P6 -> P7 -> P8 -> P9 -> P10 -> P11 -> P12 -> P13 -> P14 -> P15
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

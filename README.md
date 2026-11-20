@@ -406,6 +406,14 @@ result: **36 of 36 passed**.
 | Disk scheduling | disk | boundary_disk_ends: request under the head (0 movement) and the far end of the disk | disk_large: 70 requests, all six algorithms |
 | Multiprogramming | multiprogramming | boundary_multi_single: a single job, minimum memory and quantum | multiprogramming_large: 12 jobs with staggered arrivals |
 
+Exceptional cases are tested as well, not only the happy path:
+`cpu_invalid_input` (letters where numbers belong, then a valid answer),
+`boundary_cpu_zero_burst` (a burst of 0 is rejected and re-asked),
+`banker_unsafe` (no safe sequence exists) and `banker_request` (a request
+that is granted and one that is denied), `segmentation_overlap` (two
+segments that overlap), and the addresses in `paging` that fall outside
+the address space.
+
 ### GUI input test
 
 ```
@@ -562,6 +570,6 @@ Likely technical questions and short answers:
 | Dependencies and setup instructions | none beyond a JDK; see "Running the program" |
 | Documentation of modules and algorithms | this README, section "Modules and algorithms" |
 | Sample inputs and outputs | `samples/` and `samples/expected/` (36 pairs) |
-| Test evidence, small and large inputs | testing table above; `SampleTestRunner` output |
+| Test evidence, small and large inputs | testing table above (small, boundary/exceptional and large for all 8 modules); `SampleTestRunner` output |
 | GUI with flexible, user-defined input | list fields with no fixed item limit on every tab |
 | Input validation without crashes | section "Input checking"; `cpu_invalid_input.txt`; GUI dialogs |

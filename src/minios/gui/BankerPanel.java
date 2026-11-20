@@ -34,7 +34,7 @@ public class BankerPanel extends ModulePanel {
 
     public BankerPanel() {
         super("Banker's Algorithm",
-                "One row per process. Allocation and Max need the same number of columns; Available is one row.",
+                "Rows = processes, columns = resource types. Allocation and Max must match; Available is one row.",
                 BankersAlgorithm::run);
         addRow("Mode:", mode);
         addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"));

@@ -34,7 +34,7 @@ public final class Ui {
     public static JTextArea outputArea() {
         JTextArea out = new JTextArea(18, 90);
         out.setEditable(false);
-        out.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        out.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         return out;
     }
 

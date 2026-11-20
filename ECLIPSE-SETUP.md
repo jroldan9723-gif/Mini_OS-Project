@@ -95,39 +95,236 @@ next step, and the wrong level produces the message
 Package Explorer should now show `src` with the two packages `minios` and
 `minios.gui`, plus `samples` and `MiniOS-Simulator.jar`.
 
-## Step 5: Point the project at one JDK
+## Step 5: Point the project at one JDK (detailed)
 
-This is the step that prevents the `UnsupportedClassVersionError` you saw
-before. That error appears when the code is compiled by a newer JDK than
-the JRE that runs it. The repository's `.classpath` uses the Eclipse
-workspace default JRE, so the fix is to make the compiler and the JRE the
-same version.
+This is the step that prevents the `UnsupportedClassVersionError` you hit
+before. Read the next paragraph once; it explains why the step has the
+shape it has.
 
-1. **Window > Preferences > Java > Installed JREs**: exactly one JDK should
-   be ticked, for example Adoptium **jdk-17**.
-   If it is missing, press **Add... > Standard VM > Next**, press
-   **Directory...**, and select `C:\Program Files\Eclipse Adoptium\jdk-17`
-   (or wherever you installed it), then **Finish** and tick it.
-2. Right-click the project, choose **Properties > Java Build Path >
-   Libraries**. The entry **JRE System Library** should read
-   `JavaSE-17` (or your version). If it does not, select it, press
-   **Edit...**, choose the matching **Alternate JRE** or execution
-   environment, then **Finish**.
-3. In the same Properties window open **Java Compiler**. Tick
-   **Enable project specific settings** and set **Compiler compliance
-   level** to the same number, for example **17**. If the checkbox
-   *"Use compliance from execution environment on the Java Build Path"* is
-   ticked and greyed, untick it first.
-4. Press **Apply and Close**.
+### 5.0 Why this step exists
 
-The rule is simple: the compliance level and the JRE must carry the same
-number. A mismatch is what produces lines such as
+Three different Java versions can be in play at the same time:
+
+| Place | What it decides |
+|-------|-----------------|
+| The JDK that runs Eclipse itself | which language the code editor and compiler support |
+| The JRE System Library on the project's build path | which class library your code is written against |
+| The Compiler compliance level | the version stamped into the `.class` files |
+
+The version stamp is a number inside every compiled file. A runtime
+refuses to load a class stamped newer than itself, which is exactly the
+message you saw:
 
 ```
 java.lang.UnsupportedClassVersionError: minios/Main
 has been compiled by a more recent version of the Java Runtime
-(class file version 65.0), this version ... recognises 61.0
+(class file version 65.0), this version of the Java Runtime
+only recognises class file versions up to 61.0
 ```
+
+Read it as *"the class was built by Java 21 (65) but is being run by
+Java 17 (61)"*. Here is the number table so you can decode any such
+message:
+
+| Java version | Class file version |
+|--------------|--------------------|
+| 8 | 52 |
+| 11 | 55 |
+| 17 | 61 |
+| 21 | 65 |
+| 25 | 69 |
+
+This project uses no API newer than Java 8, so any of these works. Pick
+one version and use it in all three places.
+
+### 5.1 Find out what you have installed
+
+1. Open a terminal (Windows: press Start, type `cmd`, press Enter).
+2. Type:
+
+```
+java -version
+```
+
+3. Write down the number in the first line, for example
+   `openjdk version "17.0.11"`. That is the Java your terminal will use
+   to run `java -jar`, so the project must not be compiled to anything
+   higher than that.
+4. Now type:
+
+```
+where java
+```
+
+   (macOS or Linux: `which java`). This prints the full path of the
+   runtime, for example
+   `C:\Program Files\Eclipse Adoptium\jdk-17\bin\java.exe`.
+   The folder two levels up from `bin` is the JDK home you will need in
+   step 5.3.
+
+If `java -version` says *command not found*, install a JDK first
+(Adoptium Temurin 17 is a safe choice), then reopen the terminal so the
+new `PATH` is picked up.
+
+### 5.2 Check which Java Eclipse itself is running on
+
+1. In Eclipse: **Help > About Eclipse IDE**.
+2. Press the **Installation Details** button.
+3. Open the **Configuration** tab.
+4. In the long property list, find `java.version` and `java.home`.
+   That is the JVM Eclipse is running on.
+
+If this number is older than the JDK you found in 5.1, that is fine as
+long as Eclipse's JVM is at least as new as the compliance level you
+choose. A 2022 or newer Eclipse needs Java 11 or 17; it will not start
+on Java 8. In practice: pick the JDK from 5.1, and pick a compliance
+level that is no higher than either one.
+
+### 5.3 Register the JDK in Eclipse
+
+1. **Window > Preferences** (macOS: **Eclipse > Settings**).
+2. Open **Java > Installed JREs**.
+3. Look for an entry matching the JDK home from 5.1.
+   * If it is there, tick its checkbox. Exactly one entry should be
+     ticked, because the ticked one becomes the workspace default.
+   * If it is missing, continue with the next step.
+4. Press **Add...**, choose **Standard VM**, press **Next**.
+5. Press **Directory...** and select the JDK home folder, for example
+   `C:\Program Files\Eclipse Adoptium\jdk-17`. Select the folder that
+   directly contains `bin` and `lib`, **not** the `bin` folder itself.
+6. The **JRE name** box fills in by itself. Press **Finish**.
+7. Tick the new entry, press **Apply and Close**.
+
+Common mistake: pointing at `jdk-17\bin` instead of `jdk-17`. Eclipse
+then reports *"The JRE home entry is not a valid JRE home"*, because it
+cannot find `lib` in that folder.
+
+### 5.4 Point the project's build path at that JDK
+
+The repository's `.classpath` contains a bare
+`org.eclipse.jdt.launching.JRE_CONTAINER` entry, which means *"use
+whatever JRE this workspace considers current"*. You are about to make
+that explicit for the project.
+
+1. Right-click the project in Package Explorer, choose **Properties**.
+2. Open **Java Build Path**, then the **Libraries** tab.
+3. Find the entry named **JRE System Library**. The text after it tells
+   you what it uses, for example `[jdk-17]`, `[JavaSE-17]`, or
+   `[JRE] (unbound)`.
+4. Select it and press **Edit...**.
+5. Choose **Alternate JRE** and pick the JDK from step 5.3.
+   If you prefer a version-independent setting that survives moving the
+   project to another PC, choose **Execution environment** and pick the
+   matching entry, for example `JavaSE-17`.
+6. Press **Finish**. A red cross or the word *unbound* should disappear
+   from the entry.
+7. Tick the box **"Use compliance from execution environment on the Java
+   Build Path"** if it is visible and not already ticked. With this box
+   ticked, Eclipse takes the compiler level from the entry you just
+   fixed, so the two can no longer disagree.
+
+Leave this dialog open; the next step is in the same window.
+
+### 5.5 Set the compiler compliance level
+
+1. Still in **Properties**, open **Java Compiler** in the left-hand list.
+2. Look at **Compiler compliance level**. Two cases:
+
+   **Case A, the checkbox is ticked and greyed out.** The box
+   *"Use compliance from execution environment on the Java Build Path"*
+   is in charge, and it already follows step 5.4. Check that the level
+   shown matches your JDK (17 for a jdk-17) and skip to 5.7.
+
+   **Case B, the checkbox is clear or editable.** Then:
+   1. Tick **Enable project specific settings**. Eclipse creates a
+      `.settings/org.eclipse.jdt.core.prefs` file in the project so the
+      choice travels with it.
+   2. Untick **"Use compliance from execution environment on the Java
+      Build Path"** if it is ticked and blocking the fields.
+   3. Set **Compiler compliance level** to your JDK's number, for
+      example **17**.
+   4. Let Eclipse adjust **Source compatibility** and
+      **Target compatibility** automatically; they follow the compliance
+      level. If they do not, set both to the same number.
+
+3. Ignore the *"Configure Project Specific Settings"* yellow warning
+   about deprecated options unless it names a version you chose
+   deliberately (Java 8 shows this warning on newer Eclipse builds; if
+   you see it, use 11 or 17 instead).
+4. Press **Apply and Close**.
+
+### 5.6 If the fields will not accept your number
+
+Some Eclipse builds cap the compliance level at the JDK that is running
+Eclipse, not at the JDK you added.
+
+* Choosing a level higher than Eclipse's own JVM is not supported. Lower
+  it, or start Eclipse with a newer JDK: edit `eclipse.ini` in the
+  Eclipse folder and put
+
+  ```
+  -vm
+  C:\Program Files\Eclipse Adoptium\jdk-17\bin\javaw.exe
+  ```
+
+  on two separate lines, **above** the `-vmargs` line. Restart Eclipse.
+* Choosing 1.4 or 1.5 on a modern Eclipse also fails, because those
+  releases are no longer supported. Use 1.8 as the floor.
+
+### 5.7 Force a rebuild
+
+Settings only affect code compiled afterwards, and `bin/` still holds the
+old classes.
+
+1. **Project > Clean...**
+2. Tick `Mini_OS-Project`, press **Clean**.
+3. Wait for the progress bar to finish, then look at the **Problems**
+   view: it should be empty.
+
+If it still shows *"The project was not built since its build path is
+incomplete"*, the JRE entry is still unbound; go back to 5.4.
+
+### 5.8 Verify the setting really took effect
+
+Do not assume; check the stamp Eclipse wrote.
+
+1. Open the **Console** view and start a terminal there, or use the
+   Windows terminal in the project folder.
+2. Run (this tool ships with every JDK, in its `bin` folder):
+
+```
+javap -verbose -cp bin minios.Main | findstr "major version"
+```
+
+On macOS or Linux:
+
+```
+javap -verbose -cp bin minios.Main | grep "major version"
+```
+
+3. The answer must match your chosen level from the table in 5.0:
+   `major version: 52` for Java 8, `55` for 11, `61` for 17, `65` for 21.
+4. Now confirm the runtime that will launch the app is not older than
+   that: `java -version` from 5.1.
+
+If the stamp is higher than the runtime, Eclipse compiled with a newer
+JDK than the one on your `PATH`. Fix it by pointing 5.4 at the *older*
+JDK, or by putting the newer JDK first on `PATH`.
+
+### 5.9 What "correct" looks like when you are done
+
+| Check | Expected |
+|-------|----------|
+| Preferences > Java > Installed JREs | exactly one entry ticked, matching your JDK home |
+| Java Build Path > Libraries | `JRE System Library [jdk-17]` or `[JavaSE-17]`, no *unbound* |
+| Java Compiler | compliance 17 (or your number), ticked project settings |
+| Problems view after Clean | no red crosses and no yellow warnings from `src` |
+| `javap` stamp | matches the table in 5.0 |
+| `java -version` in the terminal | same number or newer |
+
+From that point, running `GuiMain` inside Eclipse and running
+`java -jar MiniOS-Simulator.jar` from a terminal use compatible
+bytecode, and the class version error cannot come back after a Clean.
 
 ## Step 6: Clean build
 
@@ -250,9 +447,9 @@ running copy of the application first.
 |---------|-------|-----|
 | `No projects are found to import` | wrong folder chosen in step 4 | go one level deeper, pick the folder that contains `.project` |
 | Project greyed out, *already exists in workspace* | old copy not deleted | do step 1, then import again |
-| `UnsupportedClassVersionError`, *class file version 65.0* | compiled with a newer JDK than the JRE running it | step 5, then **Project > Clean** |
-| Red crosses right after import | JRE library unbound | **Build Path > Configure Build Path**, step 5 |
-| `Selection does not contain a main type` | file not on the build path, or `bin/` out of date | **Project > Clean**, then run again |
+| `UnsupportedClassVersionError`, *class file version 65.0* | compiled with a newer JDK than the JRE running it | step 5.0 to decode the numbers, 5.4 to repoint, 5.8 to confirm |
+| Red crosses right after import | JRE library unbound | step 5.3 then 5.4, then **Project > Clean** |
+| `Selection does not contain a main type` | file not on the build path, or `bin/` out of date | **Project > Clean**, then run again; if it persists, redo step 5.4 |
 | GUI opens but a tab looks empty | old JAR or stale classes | rerun from `GuiMain.java`, and Clean the project |
 | Console does not accept typing | Console view has no focus | click inside the Console view, then type |
 | `Run this from the project folder` | wrong working directory | step 9, **Arguments** tab |

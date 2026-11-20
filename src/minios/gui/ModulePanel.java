@@ -96,9 +96,7 @@ abstract class ModulePanel extends JPanel {
     // Adds the last input box so it takes whatever height is left in the form;
     // without this the form would leave a gap under its fields.
     final void addLastWideRow(JTextArea area) {
-        JScrollPane pane = new JScrollPane(area);
-        pane.setPreferredSize(area.getPreferredSize());
-        addWideRow(pane, GridBagConstraints.BOTH);
+        addWideRow(Ui.scrolled(area), GridBagConstraints.BOTH);
     }
 
     // The form may grow, but only up to half of the tab, so the output pane

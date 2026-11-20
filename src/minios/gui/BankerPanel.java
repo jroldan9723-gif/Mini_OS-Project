@@ -55,7 +55,7 @@ public class BankerPanel extends ModulePanel {
             return script.toString();
         }
 
-        int n = lines(allocation.getText()).length;
+        int n = Ui.lines(allocation.getText()).length;
         int proc = Ui.parseInt("Process making the request", process.getText(), 1, n);
         int[] req = Ui.parseIntList("Request vector", request.getText());
         int m = Ui.parseIntList("Available resources", available.getText()).length;
@@ -89,8 +89,8 @@ public class BankerPanel extends ModulePanel {
     // Validates the matrices and returns the data portion of the script:
     // n, m, allocation rows, max rows, available line.
     private String systemDataScript() {
-        String[] allocRows = lines(allocation.getText());
-        String[] maxRows = lines(maximum.getText());
+        String[] allocRows = Ui.lines(allocation.getText());
+        String[] maxRows = Ui.lines(maximum.getText());
         if (allocRows.length == 0) {
             throw new Ui.InputError("The allocation matrix is empty - enter at least one row.");
         }
@@ -146,10 +146,6 @@ public class BankerPanel extends ModulePanel {
             matrix[i] = row;
         }
         return matrix;
-    }
-
-    private static String[] lines(String text) {
-        return Ui.lines(text);
     }
 
     private static void appendList(StringBuilder script, int[] values) {

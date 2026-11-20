@@ -42,9 +42,10 @@ java -jar MiniOS-Simulator.jar
 
 In Eclipse: import the project (File > Import > General > Existing
 Projects into Workspace), open `src/minios/gui/GuiMain.java` and choose
-Run As > Java Application. `ECLIPSE-SETUP.md` walks through it in four
-short parts: first import, updating an existing copy, fixing red crosses
-or a class version error, and running each of the four programs.
+Run As > Java Application. Already have it imported and just need the
+newer code? `ECLIPSE-SETUP.md` has the six steps for that (find the
+folder, download, paste and replace, F5, Clean, run), plus the one-time
+import if you do not have the project in Eclipse yet.
 
 ### Console menu (same engine, text mode)
 
@@ -446,7 +447,7 @@ several cases were checked by hand against known results:
 ```
 Mini_OS-Project/
 |-- README.md                      this file
-|-- ECLIPSE-SETUP.md               step-by-step Eclipse import guide
+|-- ECLIPSE-SETUP.md               how to update the code inside Eclipse
 |-- MiniOS-Simulator.jar           runnable GUI application
 |-- AGENTS.md                      notes for automated contributors
 |-- .project, .classpath           Eclipse project files

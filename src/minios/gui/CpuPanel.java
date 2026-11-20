@@ -4,17 +4,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.CPUScheduler;
 
-// Tab 1: CPU scheduling. The number of processes follows from the burst
-// times the user types, so any list length works.
+// Tab 1. The lists are read from the text boxes, so the number of processes is
+// whatever the user typed, and the quantum and priority rows only light up for
+// the algorithms that use them.
 public class CpuPanel extends ModulePanel {
 
-    // Combo box order matches the console menu numbers.
+    private static final long serialVersionUID = 1L;
+
     private static final int[] CHOICES = {1, 2, 3, 4, 5, 6};
 
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
@@ -31,25 +34,35 @@ public class CpuPanel extends ModulePanel {
     private final JTextArea bursts = Ui.area(3, 34);
     private final JTextArea priorities = Ui.area(3, 34);
 
+    private JComponent quantumRow;
+    private JComponent priorityRow;
+
     public CpuPanel() {
-        super("CPU scheduling",
-                "Enter one line (or one number) per process. Names are optional: leave the box "
-                + "empty to use P1, P2, ... Arrivals are times, bursts are CPU times, and "
-                + "priorities are needed for Priority and the comparison (smaller = higher).",
+        super("CPU Scheduling",
+                "One line per process: name (optional), arrival time, burst time. "
+                + "The greyed-out boxes are not used by the chosen algorithm.",
                 CPUScheduler::run);
         addRow("Algorithm:", algorithm);
-        addRow("Time quantum (Round Robin / comparison):", quantum);
+        quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
         addWideRow(new JLabel("<html><b>Process names</b> - optional, one per line</html>"));
         addWideRow(Ui.scrolled(names));
         addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
         addWideRow(Ui.scrolled(arrivals));
         addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
         addWideRow(Ui.scrolled(bursts));
-        addRow("Priorities (Priority / comparison):", priorities);
+        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
+
+        algorithm.addActionListener(e -> updateOptionalRows());
+        updateOptionalRows();
     }
 
-    // Validates the form and writes the console script: the menu choice, the
-    // process count, then name / arrival / burst for every process.
+    // 3 is Round Robin, 4 is the comparison, 6 is Priority.
+    private void updateOptionalRows() {
+        int choice = CHOICES[algorithm.getSelectedIndex()];
+        setRowEnabled(quantumRow, choice == 3 || choice == 4);
+        setRowEnabled(priorityRow, choice == 4 || choice == 6);
+    }
+
     @Override
     public String buildScript() {
         int choice = CHOICES[algorithm.getSelectedIndex()];
@@ -66,7 +79,7 @@ public class CpuPanel extends ModulePanel {
         String[] processNames = new String[n];
         if (nameRows.length == 0) {
             for (int i = 0; i < n; i++) {
-                processNames[i] = "";           // blank line = default name P1, P2, ...
+                processNames[i] = "";
             }
         } else {
             if (nameRows.length != n) {
@@ -109,7 +122,6 @@ public class CpuPanel extends ModulePanel {
             }
         }
 
-        // Final 0 = "back to main menu", so the module returns cleanly.
         script.append("0\n");
         return script.toString();
     }

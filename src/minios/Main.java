@@ -2,9 +2,8 @@ package minios;
 
 import java.util.Scanner;
 
-// Entry point of the console version. Shows the main menu and hands the
-// chosen module to its own class. The GUI version (minios.gui.GuiMain)
-// runs the very same module classes, only the input method differs.
+// Console version. The menu just forwards to one of the module classes, so
+// this file stays small.
 public class Main {
 
     public static void main(String[] args) {
@@ -16,8 +15,6 @@ public class Main {
         System.out.println("   (This is NOT a real operating system.)");
         System.out.println("=====================================================");
 
-        // Keep asking for a module until the user types 0.
-        // If the input stream ends early, stop cleanly instead of crashing.
         boolean running = true;
         try {
             while (running) {
@@ -40,7 +37,6 @@ public class Main {
                 System.out.println();
             }
         } catch (InputHelper.InputEndedException e) {
-            // The input stream ended in the middle of the program; stop cleanly.
         }
 
         System.out.println("Goodbye!");

@@ -2,17 +2,27 @@ package minios;
 
 import java.util.Scanner;
 
-// Reads and checks whatever the user types. Every read line is a prompt
-// plus one value; invalid values are re-asked instead of crashing, which
-// keeps both the console menu and the GUI scripts on the same rules.
+// Reads what the user types and checks it. Every prompt goes through here,
+// so bad input always gets the same treatment: explain, then ask again.
 public class InputHelper {
 
-    // Thrown when the input stream ends while the program still needs data.
-    // The console app catches it and exits cleanly; the GUI catches it too.
     public static class InputEndedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public InputEndedException(String message) {
             super(message);
         }
+    }
+
+    // The GUI switches this on so prompts and menus stay out of its output box.
+    private static boolean quiet;
+
+    public static void setQuiet(boolean value) {
+        quiet = value;
+    }
+
+    public static boolean isQuiet() {
+        return quiet;
     }
 
     private final Scanner scanner;
@@ -22,16 +32,18 @@ public class InputHelper {
     }
 
     public String readLine(String prompt) {
-        System.out.print(prompt);
+        if (!quiet) {
+            System.out.print(prompt);
+        }
         if (!scanner.hasNextLine()) {
-            System.out.println();
-            System.out.println("No more input received. Goodbye!");
+            if (!quiet) {
+                System.out.println();
+            }
             throw new InputEndedException("end of input reached");
         }
         return scanner.nextLine();
     }
 
-    // Reads a whole number and tries again until it parses.
     public int readInt(String prompt) {
         while (true) {
             String line = readLine(prompt).trim();
@@ -43,8 +55,8 @@ public class InputHelper {
         }
     }
 
-    // For counts of items: only a lower bound is enforced, so the user can
-    // enter as many entries as they want (no arbitrary upper limit).
+    // For counts of items. Only a minimum, because the number of processes or
+    // requests should not be limited by us.
     public int readIntAtLeast(String prompt, int min) {
         while (true) {
             int value = readInt(prompt);
@@ -55,8 +67,6 @@ public class InputHelper {
         }
     }
 
-    // Reads a whole number that must fall inside a fixed range
-    // (used for menu choices and for bounded values like a burst time).
     public int readIntInRange(String prompt, int min, int max) {
         while (true) {
             int value = readInt(prompt);
@@ -67,8 +77,7 @@ public class InputHelper {
         }
     }
 
-    // Reads exactly count whole numbers from one line, e.g. "10 4 7".
-    // Re-asks if the count or any of the numbers is wrong.
+    // Reads a whole line and splits it, for things like a reference string.
     public int[] readIntArray(String prompt, int count) {
         while (true) {
             String line = readLine(prompt).trim();

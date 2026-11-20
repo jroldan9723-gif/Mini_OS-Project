@@ -42,7 +42,8 @@ java -jar MiniOS-Simulator.jar
 
 In Eclipse: import the project (File > Import > General > Existing
 Projects into Workspace), open `src/minios/gui/GuiMain.java` and choose
-Run As > Java Application.
+Run As > Java Application. The full import walkthrough, including the
+JRE version setting, is in `ECLIPSE-SETUP.md`.
 
 ### Console menu (same engine, text mode)
 
@@ -81,22 +82,28 @@ One window, one tab per module, numbered like the console menu:
 
 ```
 +------------------------------------------------------------------+
-| Mini OS Simulator: pick a module, fill in the input, press Run.  |
+| Mini OS Simulator                                          [x]   |
 +------------------------------------------------------------------+
-| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragmentation  |
-| 6 Page Repl. | 7 Disk | 8 Multiprogramming                      |
-|                                                                  |
-|  [form: fields, lists, dropdowns]                                |
+| Choose a module, enter your data, then click Run.                |
+| This program simulates the algorithms for our OS class; it does  |
+| not control real hardware.                                       |
+| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragment... >   |
 |                                                                  |
 | +--------------------------------------------------------------+ |
-| | Output (the same engine as the console version)              | |
-| |  CPU SCHEDULING                                               | |
-| |  ... tables, Gantt charts, reports ...                        | |
+| | CPU Scheduling                                               | |
+| |  [form: fields, lists, dropdowns]                            | |
 | +--------------------------------------------------------------+ |
-|                                                                  |
+| +--------------------------------------------------------------+ |
+| | Results                                                      | |
+| |  Algorithm: SRTF ... Gantt chart ... averages ...            | |
+| +--------------------------------------------------------------+ |
 | [ Run ]  [ Load example ]                                        |
 +------------------------------------------------------------------+
 ```
+
+The window opens at 1180 x 740 but shrinks down to 900 x 600 on a small
+laptop screen, and the tab strip scrolls sideways instead of wrapping
+onto a second line.
 
 Every tab has the same two buttons:
 
@@ -105,6 +112,15 @@ Every tab has the same two buttons:
 * **Load example** - fills the form with a small working dataset, handy
   for a quick test or a live demonstration.
 
+`screenshots/` holds one picture of every tab, taken after pressing
+Load example and then Run:
+
+`1-cpu-scheduling.png`, `2-banker.png`, `3-paging.png`,
+`4-segmentation.png`, `5-fragmentation.png`, `6-page-replacement.png`,
+`7-disk-scheduling.png`, `8-multiprogramming.png`.
+
+![CPU scheduling tab](screenshots/1-cpu-scheduling.png)
+
 Lists (burst times, reference strings, request queues, ...) accept any
 length: numbers separated by spaces, tabs or newlines. The number of
 entries is never limited by the program; only the values themselves are
@@ -112,13 +128,25 @@ checked (a burst time must be positive, a request must lie on the disk,
 and so on). When something is wrong, a dialog explains exactly what to
 fix and nothing runs until the form is valid.
 
-The output pane shows the report of the console module itself, so the GUI
-and the text version always print identical results for identical data.
-The design is simple on purpose: the GUI collects and validates input,
-writes the same lines a person would type at the console, runs the module
-on those lines, and displays what the module printed. `minios/gui/Runner.java`
-is the small adapter that does this, and `minios.gui.GuiInputSelfTest`
-checks all eight of them headlessly.
+Rows that the chosen option does not use are greyed out, not deleted:
+the quantum box on the CPU tab, the priorities box unless Priority or the
+comparison is picked, the request boxes on the Banker tab unless a
+resource request is picked, the direction on the disk tab for FCFS and
+SSTF, and whichever half of the fragmentation tab the chosen demo does
+not read. Filling a greyed-out box does nothing, because it is never
+sent to the module.
+
+The output pane shows only the results: no menus and no input prompts.
+The GUI collects and validates the input, then asks the same calculation
+code the console uses to do the work with prompts switched off
+(`InputHelper.setQuiet`), so both versions compute identical numbers while
+the GUI stays clean for a demonstration.
+
+How the source is commented: every class starts with a short note saying
+what it does, and the parts that are easy to get wrong (the quiet
+switch, the Round Robin quantum, the Banker safety loop, the page
+replacement rules) are explained where they happen. The comments are
+short and stay out of the way of the code.
 
 ---
 
@@ -354,7 +382,7 @@ the GUI version shows it as a warning dialog.
 
 ## Testing
 
-### Sample regression test (small and large inputs for every module)
+### Sample regression test (small, boundary and large inputs for every module)
 
 ```
 java -cp bin minios.SampleTestRunner
@@ -363,18 +391,18 @@ java -cp bin minios.SampleTestRunner
 The runner executes every file in `samples/` through the console app in
 a fresh JVM and compares the output with `samples/expected/` (line
 endings are normalized, so it works on Windows and on Linux). Current
-result: **32 of 32 passed**.
+result: **36 of 36 passed**.
 
 | Module | Small inputs | Boundary inputs | Substantially larger input |
 |--------|--------------|-----------------|-----------------------------|
 | CPU scheduling | cpu_fcfs, cpu_sjf, cpu_rr, cpu_srtf, cpu_priority, cpu_compare, cpu_invalid_input | boundary_cpu_single (one process, burst 1), boundary_cpu_zero_burst (burst 0 rejected, then accepted) | cpu_large: 30-process four-way comparison plus 30-process SRTF, all with arrival times |
-| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | - | banker_large: 15 processes x 5 resource types |
+| Banker's algorithm | banker_safe, banker_unsafe, banker_request (granted and denied cases) | boundary_banker_tiny: one process, one resource type | banker_large: 15 processes x 5 resource types |
 | Paging | paging | boundary_paging_last_page: last valid address 2047 and the first invalid 2048 | paging_large: 60-page table, 25 addresses |
 | Segmentation | segmentation, segmentation_overlap | boundary_seg_last_byte: segment ending on the last RAM byte, then offset 1024 rejected | segmentation_large: 18 segments, 14 addresses |
-| Fragmentation | fragment_internal, fragment_external, fragment_compare | - | fragment_large: 14 jobs, 5 frees, three strategies compared |
+| Fragmentation | fragment_internal, fragment_external, fragment_compare | boundary_fragment_exact: process exactly filling its partition (0 KB waste) | fragment_large: 14 jobs, 5 frees, three strategies compared |
 | Page replacement | page_replacement | boundary_page_one_frame: a single frame, so every miss evicts the only page | page_replacement_large: 220 references, 5 frames, four algorithms |
-| Disk scheduling | disk | - | disk_large: 70 requests, all six algorithms |
-| Multiprogramming | multiprogramming | - | multiprogramming_large: 12 jobs with staggered arrivals |
+| Disk scheduling | disk | boundary_disk_ends: request under the head (0 movement) and the far end of the disk | disk_large: 70 requests, all six algorithms |
+| Multiprogramming | multiprogramming | boundary_multi_single: a single job, minimum memory and quantum | multiprogramming_large: 12 jobs with staggered arrivals |
 
 ### GUI input test
 
@@ -417,6 +445,7 @@ several cases were checked by hand against known results:
 ```
 Mini_OS-Project/
 |-- README.md                      this file
+|-- ECLIPSE-SETUP.md               step-by-step Eclipse import guide
 |-- MiniOS-Simulator.jar           runnable GUI application
 |-- AGENTS.md                      notes for automated contributors
 |-- .project, .classpath           Eclipse project files
@@ -449,8 +478,8 @@ Mini_OS-Project/
 |   |       `-- GuiInputSelfTest.java    headless GUI checks
 |   `-- (bin/ appears after Eclipse or javac builds the project)
 `-- samples/
-    |-- *.txt                     32 test inputs (small, boundary and large)
-    `-- expected/                 32 reference outputs
+    |-- *.txt                     36 test inputs (small, boundary and large)
+    `-- expected/                 36 reference outputs
 ```
 
 ---
@@ -526,11 +555,11 @@ Likely technical questions and short answers:
 
 | Rubric checklist item | Where it is |
 |-----------------------|-------------|
-| Source code (Java) | `src/minios/` (11 console classes + 13 GUI classes, commented) |
+| Source code (Java) | `src/minios/` (11 console classes + 13 GUI classes) |
 | Runnable application | `MiniOS-Simulator.jar` (`java -jar MiniOS-Simulator.jar`) |
 | Dependencies and setup instructions | none beyond a JDK; see "Running the program" |
 | Documentation of modules and algorithms | this README, section "Modules and algorithms" |
-| Sample inputs and outputs | `samples/` and `samples/expected/` (32 pairs) |
+| Sample inputs and outputs | `samples/` and `samples/expected/` (36 pairs) |
 | Test evidence, small and large inputs | testing table above; `SampleTestRunner` output |
 | GUI with flexible, user-defined input | list fields with no fixed item limit on every tab |
 | Input validation without crashes | section "Input checking"; `cpu_invalid_input.txt`; GUI dialogs |

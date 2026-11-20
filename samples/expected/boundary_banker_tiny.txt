@@ -1,0 +1,53 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+BANKER'S ALGORITHM (deadlock avoidance)
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+Number of processes: Number of resource types: Allocation matrix - one row per process, 1 number(s) per row (space separated).
+  Allocation for P1 (1 number(s)): Maximum-need matrix - same format.
+  Max for P1 (1 number(s)): Available resources (1 number(s)): Need matrix (Max - Allocation):
+           R1
+   P1       2
+
+Safety check:
+  Work (available) starts at [2]
+  P1: need [2] <= work [2]  -> runs, returns [1], work = [3]
+
+RESULT: SAFE STATE - the OS can satisfy every process in some order.
+Safe sequence: P1
+
+  1) Enter data and check for a safe state
+  2) Resource request (give a process more resources)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

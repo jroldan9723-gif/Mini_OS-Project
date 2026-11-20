@@ -1,17 +1,19 @@
 package minios;
 
-// Paging: splits the logical address space into fixed-size pages that map
-// onto frames of the same size. A logical address becomes page number
-// (address / pageSize) plus offset (address % pageSize), and the page
-// table translates the page number into a frame number.
+// Paging: the logical address is split into a page number and an offset,
+// and the page table says which frame that page sits in.
 public class PagingSimulator {
 
     public static void run(InputHelper in) {
-        System.out.println("PAGING - logical to physical address translation");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("PAGING - logical to physical address translation");
+        }
         while (true) {
-            System.out.println();
-            System.out.println("  1) Build a page table and translate addresses");
-            System.out.println("  0) Back to main menu");
+            if (!InputHelper.isQuiet()) {
+                System.out.println();
+                System.out.println("  1) Build a page table and translate addresses");
+                System.out.println("  0) Back to main menu");
+            }
             int choice = in.readIntInRange("  Choose an option: ", 0, 1);
             if (choice == 0) {
                 return;
@@ -21,9 +23,6 @@ public class PagingSimulator {
         }
     }
 
-    // One session: page size and page table are entered first (long
-    // arithmetic keeps large address spaces from overflowing), then every
-    // typed address is translated until the user enters -1.
     private static void runOnce(InputHelper in) {
         int pageSize = in.readIntInRange("Page size (bytes, e.g. 1024): ", 1, 1_000_000);
         int numPages = in.readIntAtLeast("Number of pages in the logical address space: ", 1);
@@ -33,8 +32,10 @@ public class PagingSimulator {
         System.out.println("Logical address space = " + numPages + " pages x "
                 + pageSize + " bytes = " + logicalSize + " bytes (addresses 0.."
                 + (logicalSize - 1) + ")");
-        System.out.println("Enter the frame number for each page.");
-        System.out.println("Use -1 for a page that is NOT in memory (it is on disk).");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("Enter the frame number for each page.");
+            System.out.println("Use -1 for a page that is NOT in memory (it is on disk).");
+        }
 
         int[] frameOfPage = new int[numPages];
         for (int p = 0; p < numPages; p++) {

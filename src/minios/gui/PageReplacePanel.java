@@ -6,26 +6,24 @@ import javax.swing.JTextField;
 
 import minios.PageReplacementSimulator;
 
-// Tab 6: page replacement. All four algorithms run on the same reference
-// string and frame count, so only those two things are asked for.
+// Tab 6. One reference string and one frame count. All four
+// algorithms run on the same data.
 public class PageReplacePanel extends ModulePanel {
+
+    private static final long serialVersionUID = 1L;
 
     private final JTextArea references = Ui.area(4, 40);
     private final JTextField frames = Ui.field(6);
 
     public PageReplacePanel() {
-        super("Page replacement (FIFO, LRU, Optimal, LFU)",
-                "Reference string: any number of page numbers (spaces or one per line), "
-                + "each >= 0. Frame count: how many frames the RAM has. Every algorithm "
-                + "runs on the same data and the results are compared at the end.",
+        super("Page Replacement",
+                "Reference string and number of frames. All four algorithms run on the same data.",
                 PageReplacementSimulator::run);
         addRow("Number of frames in RAM:", frames);
         addWideRow(new JLabel("<html><b>Reference string</b> - page numbers, any length</html>"));
         addLastWideRow(references);
     }
 
-    // The console expects the reference string on a single line with the
-    // count in front; everything else is one value per line.
     @Override
     public String buildScript() {
         int[] refs = Ui.parseIntList("Reference string", references.getText(), 0,
@@ -36,7 +34,6 @@ public class PageReplacePanel extends ModulePanel {
         StringBuilder script = new StringBuilder();
         script.append("1\n");
         script.append(refs.length).append('\n');
-        // The console reads the whole reference string from one line.
         StringBuilder line = new StringBuilder();
         for (int i = 0; i < refs.length; i++) {
             if (i > 0) {

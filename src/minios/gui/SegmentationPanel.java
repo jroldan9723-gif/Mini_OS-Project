@@ -6,19 +6,19 @@ import javax.swing.JTextField;
 
 import minios.SegmentationSimulator;
 
-// Tab 4: segmentation. Segments are entered as "base limit" pairs, one per
-// line, so the segment count follows from the list itself.
+// Tab 4. Segments are checked here too, because an overlap would only
+// be reported after the module had already started.
 public class SegmentationPanel extends ModulePanel {
+
+    private static final long serialVersionUID = 1L;
 
     private final JTextField ramSize = Ui.field(12);
     private final JTextArea segments = Ui.area(4, 30);
     private final JTextArea addresses = Ui.area(4, 30);
 
     public SegmentationPanel() {
-        super("Segmentation (logical to physical)",
-                "Segments: one \"base limit\" pair per line, in segment order. Segments may not "
-                + "overlap and must end inside RAM. Addresses: one \"segment offset\" pair per "
-                + "line; an offset past the segment limit is reported as a segmentation fault.",
+        super("Segmentation",
+                "One segment per line as base and limit. Addresses are entered as segment and offset.",
                 SegmentationSimulator::run);
         addRow("Physical memory (RAM) size in bytes:", ramSize);
         addWideRow(new JLabel("<html><b>Segment table</b> - \"base limit\" per line</html>"));
@@ -27,9 +27,6 @@ public class SegmentationPanel extends ModulePanel {
         addLastWideRow(addresses);
     }
 
-    // Checks the segment table the same way the console would (positive
-    // limits, inside RAM, no overlaps) and writes the script in the order
-    // the console reads it: n, RAM, base and limit per segment, addresses.
     @Override
     public String buildScript() {
         long ram = Ui.parseInt("RAM size", ramSize.getText(), 1, 1_000_000_000);
@@ -55,8 +52,6 @@ public class SegmentationPanel extends ModulePanel {
                 throw new Ui.InputError("Segment " + i + " ends at " + end
                         + ", which is outside RAM (" + ram + " bytes).");
             }
-            // The console refuses overlapping segments by re-asking, so the
-            // same rule is checked here before the module starts.
             for (int j = 0; j < i; j++) {
                 if (base[i] < base[j] + limit[j] && base[j] < base[i] + limit[i]) {
                     throw new Ui.InputError("Segment " + i + " [" + base[i] + ".." + end
@@ -75,7 +70,6 @@ public class SegmentationPanel extends ModulePanel {
             script.append(limit[i]).append('\n');
         }
 
-        // The address list is optional: an empty box just prints the table.
         String[] addrRows = Ui.lines(addresses.getText());
         for (String row : addrRows) {
             int[] pair = Ui.parseIntList("Address", row);
@@ -88,7 +82,6 @@ public class SegmentationPanel extends ModulePanel {
             script.append(pair[0]).append('\n');
             script.append(pair[1]).append('\n');
         }
-        // Stop marker for the address loop, then back to the module menu.
         script.append("-1\n0\n");
         return script.toString();
     }

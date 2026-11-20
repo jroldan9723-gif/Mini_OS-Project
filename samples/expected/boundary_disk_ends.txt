@@ -1,0 +1,83 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+DISK SCHEDULING
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
+  0) Back to main menu
+  Choose an option: 
+Highest cylinder number (disk = 0..max): Initial head position (0..199): Number of pending requests: Request queue (2 cylinder number(s), space separated): Initial direction for SCAN / C-SCAN / LOOK / C-LOOK (1 = toward higher cylinders, 2 = toward lower): FCFS (First-Come, First-Served)
+  Order of service : 0 -> 0 -> 199
+  Total head movement: 199 cylinders
+
+SSTF (Shortest Seek Time First)
+  Order of service : 0 -> 0 -> 199
+  Total head movement: 199 cylinders
+
+SCAN (elevator)
+  Order of service : 0 -> 0 (at head) -> 199
+  Total head movement: 199 cylinders
+
+C-SCAN (circular elevator)
+  Order of service : 0 -> 0 (at head) -> 199
+  Total head movement: 199 cylinders
+
+LOOK
+  Order of service : 0 -> 0 (at head) -> 199
+  Total head movement: 199 cylinders
+
+C-LOOK
+  Order of service : 0 -> 0 (at head) -> 199
+  Total head movement: 199 cylinders
+
+SUMMARY (total head movement)
+  FCFS  : 199 cylinders
+  SSTF  : 199 cylinders
+  SCAN  : 199 cylinders
+  C-SCAN: 199 cylinders  (includes the return jump - some books exclude it)
+  LOOK  : 199 cylinders
+  C-LOOK: 199 cylinders  (includes the jump - some books exclude it)
+  Smallest movement in this run: 199 cylinders (FCFS (First-Come, First-Served)).
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

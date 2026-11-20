@@ -4,15 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Disk scheduling: decides in which order the read/write head serves the
-// pending cylinder requests. FCFS and SSTF follow the queue or the
-// distances; SCAN, C-SCAN, LOOK and C-LOOK sweep the disk in one direction
-// first (according to the chosen initial direction). The total head
-// movement of every algorithm is reported so they can be compared.
+// Disk scheduling. The head jumps between the requested cylinders and we
+// add up the distance, which is what the movement total means.
 public class DiskScheduler {
 
-    // One algorithm's result: the service steps (annotated) and the number
-    // of cylinders the head travelled in total.
     private static class Result {
         String algorithm;
         List<String> steps = new ArrayList<>();
@@ -41,19 +36,22 @@ public class DiskScheduler {
         boolean towardHigh;
     }
 
-    // Menu: one algorithm, or all six on the same queue plus a summary.
     public static void run(InputHelper in) {
-        System.out.println("DISK SCHEDULING");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("DISK SCHEDULING");
+        }
         while (true) {
-            System.out.println();
-            System.out.println("  1) FCFS");
-            System.out.println("  2) SSTF   (Shortest Seek Time First)");
-            System.out.println("  3) SCAN   (elevator)");
-            System.out.println("  4) C-SCAN (circular elevator)");
-            System.out.println("  5) LOOK   (SCAN without the trip to the boundary)");
-            System.out.println("  6) C-LOOK (circular LOOK)");
-            System.out.println("  7) Compare all six on the same requests");
-            System.out.println("  0) Back to main menu");
+            if (!InputHelper.isQuiet()) {
+                System.out.println();
+                System.out.println("  1) FCFS");
+                System.out.println("  2) SSTF   (Shortest Seek Time First)");
+                System.out.println("  3) SCAN   (elevator)");
+                System.out.println("  4) C-SCAN (circular elevator)");
+                System.out.println("  5) LOOK   (SCAN without the trip to the boundary)");
+                System.out.println("  6) C-LOOK (circular LOOK)");
+                System.out.println("  7) Compare all six on the same requests");
+                System.out.println("  0) Back to main menu");
+            }
             int choice = in.readIntInRange("  Choose an option: ", 0, 7);
             if (choice == 0) {
                 return;
@@ -108,10 +106,6 @@ public class DiskScheduler {
         }
     }
 
-    // Reads the disk limits, the head position and the queue. A request
-    // outside the disk makes the whole problem be entered again, so only a
-    // consistent queue reaches the algorithms. The direction question only
-    // matters for SCAN / C-SCAN / LOOK / C-LOOK.
     private static Problem readProblem(InputHelper in) {
         Problem p = new Problem();
         while (true) {
@@ -139,7 +133,6 @@ public class DiskScheduler {
         return p;
     }
 
-    // FCFS: serve the requests exactly in the order they arrived.
     private static Result fcfs(Problem p) {
         Result r = new Result("FCFS (First-Come, First-Served)");
         r.steps.add(String.valueOf(p.head));
@@ -152,8 +145,7 @@ public class DiskScheduler {
         return r;
     }
 
-    // SSTF: always serve the unserved request closest to the current head
-    // position (ties: the lower cylinder number).
+    // Nearest request first. Fast average, but far requests can wait forever.
     private static Result sstf(Problem p) {
         Result r = new Result("SSTF (Shortest Seek Time First)");
         r.steps.add(String.valueOf(p.head));
@@ -181,46 +173,35 @@ public class DiskScheduler {
         return r;
     }
 
-    // SCAN: sweep toward the chosen direction, all the way to the disk
-    // boundary, then turn around and serve the other side.
+    // SCAN sweeps to the end of the disk and then turns around, like an
+    // elevator that goes to the top floor before coming down.
     private static Result scan(Problem p) {
         Result r = new Result("SCAN (elevator)");
         buildRoute(r, p, true, false);
         return r;
     }
 
-    // C-SCAN: sweep one way to the boundary, jump back to the other end in
-    // one big step, and continue in the same direction.
+    // C-SCAN only serves while moving one way, then jumps back to the start.
     private static Result cscan(Problem p) {
         Result r = new Result("C-SCAN (circular elevator)");
         buildRoute(r, p, true, true);
         return r;
     }
 
-    // LOOK: like SCAN, but the head turns around at the last request
-    // instead of travelling to the disk boundary.
+    // LOOK is SCAN without going all the way to the edge; it turns at the last
+    // request instead.
     private static Result look(Problem p) {
         Result r = new Result("LOOK");
         buildRoute(r, p, false, false);
         return r;
     }
 
-    // C-LOOK: like C-SCAN without the boundary trips; the jump goes from
-    // the last served request straight to the farthest one on the other side.
     private static Result clook(Problem p) {
         Result r = new Result("C-LOOK");
         buildRoute(r, p, false, true);
         return r;
     }
 
-    // Shared route builder for SCAN, C-SCAN, LOOK and C-LOOK:
-    // 1. split the queue into requests above and below the head,
-    // 2. serve the first leg in the chosen direction,
-    // 3. optionally touch the boundary (SCAN / C-SCAN) or jump (circular
-    //    variants), 4. serve the second leg.
-    // Steps are annotated: "(at head)" costs nothing, "(end of disk)" is a
-    // boundary trip, "(wrap)" and "(jump)" are the long jumps of the
-    // circular algorithms - and every travelled cylinder is counted.
     private static void buildRoute(Result r, Problem p, boolean useBoundary, boolean circular) {
         r.steps.add(String.valueOf(p.head));
         int cur = p.head;

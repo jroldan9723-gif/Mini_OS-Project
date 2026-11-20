@@ -1,17 +1,23 @@
 package minios.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.BankersAlgorithm;
 
-// Tab 2: Banker's algorithm. The matrix rows define the system, so the
-// process count and resource count are worked out from the text itself.
+// Tab 2. The banker module keeps the data it was given last, so this panel
+// remembers what it sent and only resends the matrices when they change. The
+// two request boxes are greyed out in a plain safety check.
 public class BankerPanel extends ModulePanel {
 
-    // Package-visible so the self test can drive the form without a window.
+    private static final long serialVersionUID = 1L;
+
     final JComboBox<String> mode = new JComboBox<>(new String[]{
         "Safety check (enter the system data)",
         "Resource request (give a process more resources)"
@@ -22,15 +28,13 @@ public class BankerPanel extends ModulePanel {
     private final JTextField process = Ui.field(6);
     private final JTextField request = Ui.field(24);
 
-    // What the running console module already holds. The console keeps the
-    // last data set in memory, and the script has to match that state.
     private String loadedData = null;
 
+    private final List<JComponent> requestRows = new ArrayList<>();
+
     public BankerPanel() {
-        super("Banker's algorithm",
-                "One row per process, space separated numbers per row. Allocation and Max must "
-                + "have the same shape, and Max must be at least Allocation. Available and the "
-                + "request are single rows (space separated).",
+        super("Banker's Algorithm",
+                "One row per process. Allocation and Max need the same number of columns; Available is one row.",
                 BankersAlgorithm::run);
         addRow("Mode:", mode);
         addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"));
@@ -38,13 +42,22 @@ public class BankerPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"));
         addLastWideRow(maximum);
         addRow("Available resources:", available);
-        addRow("Process making the request (1..n):", process);
-        addRow("Request vector:", request);
+        requestRows.add(addRow("Process making the request (1..n):", process));
+        requestRows.add(addRow("Request vector:", request));
+
+        mode.addActionListener(e -> updateRequestRows());
+        updateRequestRows();
+    }
+
+    private void updateRequestRows() {
+        boolean asking = mode.getSelectedIndex() == 1;
+        for (JComponent row : requestRows) {
+            setRowEnabled(row, asking);
+        }
     }
 
     @Override
     public String buildScript() {
-        // Parse the data first: the request mode needs n for validation too.
         String data = systemDataScript();
         String snapshot = data;
 
@@ -55,7 +68,7 @@ public class BankerPanel extends ModulePanel {
             return script.toString();
         }
 
-        int n = lines(allocation.getText()).length;
+        int n = Ui.lines(allocation.getText()).length;
         int proc = Ui.parseInt("Process making the request", process.getText(), 1, n);
         int[] req = Ui.parseIntList("Request vector", request.getText());
         int m = Ui.parseIntList("Available resources", available.getText()).length;
@@ -65,18 +78,15 @@ public class BankerPanel extends ModulePanel {
         }
 
         if (snapshot.equals(loadedData)) {
-            // The module already holds this exact data: straight to the request.
             script.append("2\n").append(proc).append('\n');
             appendList(script, req);
             script.append("0\n");
         } else if (loadedData == null) {
-            // First run in this session: the module asks for the data itself.
             script.append("2\n").append(data).append(proc).append('\n');
             appendList(script, req);
             script.append("0\n");
             loadedData = snapshot;
         } else {
-            // The data on screen changed: reload it with a safety check, then ask.
             script.append("1\n").append(data);
             script.append("2\n").append(proc).append('\n');
             appendList(script, req);
@@ -86,11 +96,9 @@ public class BankerPanel extends ModulePanel {
         return script.toString();
     }
 
-    // Validates the matrices and returns the data portion of the script:
-    // n, m, allocation rows, max rows, available line.
     private String systemDataScript() {
-        String[] allocRows = lines(allocation.getText());
-        String[] maxRows = lines(maximum.getText());
+        String[] allocRows = Ui.lines(allocation.getText());
+        String[] maxRows = Ui.lines(maximum.getText());
         if (allocRows.length == 0) {
             throw new Ui.InputError("The allocation matrix is empty - enter at least one row.");
         }
@@ -121,8 +129,6 @@ public class BankerPanel extends ModulePanel {
                 }
             }
         }
-        // The console reads the whole allocation matrix, then the whole max
-        // matrix, then Available - in that order.
         for (int i = 0; i < n; i++) {
             appendList(data, alloc[i]);
         }
@@ -146,10 +152,6 @@ public class BankerPanel extends ModulePanel {
             matrix[i] = row;
         }
         return matrix;
-    }
-
-    private static String[] lines(String text) {
-        return Ui.lines(text);
     }
 
     private static void appendList(StringBuilder script, int[] values) {

@@ -9,9 +9,9 @@ import minios.PageReplacementSimulator;
 import minios.PagingSimulator;
 import minios.SegmentationSimulator;
 
-// Headless check of the GUI input builders: load each example, build the
-// script, run the real console module, and confirm the expected section of
-// the output appears. Run it with:  java -cp bin minios.gui.GuiInputSelfTest
+// Fills every tab with its example data, builds the input, runs the real
+// module and looks for an expected line. No window is opened, so it is quick
+// to check before a demo.
 public final class GuiInputSelfTest {
 
     public static void main(String[] args) {
@@ -56,26 +56,20 @@ public final class GuiInputSelfTest {
         }
     }
 
-    // The banker tab has three script shapes depending on what the console
-    // module already holds, so all three are exercised in one session.
     private static int bankerChecks() {
         int failures = 0;
         BankerPanel panel = new BankerPanel();
 
-        // 1) Request on a fresh session: the script embeds the data.
         panel.loadExample();
         panel.mode.setSelectedIndex(1);
         failures += bankerStep(panel, "Banker request (first run)", "Request from P2");
 
-        // 2) Safety check on the same data.
         panel.mode.setSelectedIndex(0);
         failures += bankerStep(panel, "Banker safety check", "RESULT: SAFE STATE");
 
-        // 3) Request with the data unchanged: the script is short.
         panel.mode.setSelectedIndex(1);
         failures += bankerStep(panel, "Banker request (data loaded)", "the request is GRANTED");
 
-        // 4) Request after editing Available: reload, then request.
         panel.available.setText("2 2 1");
         failures += bankerStep(panel, "Banker request (data changed)", "Request from P2");
 

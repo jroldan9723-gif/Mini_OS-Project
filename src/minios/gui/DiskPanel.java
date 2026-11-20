@@ -1,15 +1,19 @@
 package minios.gui;
 
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.DiskScheduler;
 
-// Tab 7: disk scheduling. The request queue is a free-form list, so any
-// number of pending requests can be simulated.
+// Tab 7. The queue is checked against the disk size here, otherwise the module
+// would ask for the whole problem again. The direction only matters for the
+// SCAN family, so it is greyed out for FCFS and SSTF.
 public class DiskPanel extends ModulePanel {
+
+    private static final long serialVersionUID = 1L;
 
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
         "FCFS (First-Come, First-Served)",
@@ -28,21 +32,29 @@ public class DiskPanel extends ModulePanel {
         "Toward lower cylinders"
     });
 
+    private JComponent directionRow;
+
     public DiskPanel() {
-        super("Disk scheduling",
-                "Disk is 0..max. The request queue is a list of cylinder numbers inside the "
-                + "disk; the initial direction only matters for SCAN, C-SCAN, LOOK and C-LOOK.",
+        super("Disk Scheduling",
+                "Cylinder range, head position, and the list of requests.",
                 DiskScheduler::run);
         addRow("Algorithm:", algorithm);
         addRow("Highest cylinder number (disk = 0..max):", maxCylinder);
         addRow("Initial head position:", head);
-        addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
+        directionRow = addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
         addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"));
         addLastWideRow(requests);
+
+        algorithm.addActionListener(e -> updateDirectionRow());
+        updateDirectionRow();
     }
 
-    // Queue values are checked against the disk limits up front, because
-    // the console would otherwise ask for the whole problem again.
+    // Column 1 is FCFS and 2 is SSTF; neither scans in a direction.
+    private void updateDirectionRow() {
+        int choice = algorithm.getSelectedIndex() + 1;
+        setRowEnabled(directionRow, choice >= 3);
+    }
+
     @Override
     public String buildScript() {
         int choice = algorithm.getSelectedIndex() + 1;

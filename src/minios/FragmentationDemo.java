@@ -3,15 +3,8 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
-// Fragmentation, in two demos:
-// - internal: fixed partitions, waste is the space left inside a partition
-//   that the process cannot use;
-// - external: variable memory, free space exists but is split into holes.
-// First-Fit, Best-Fit and Worst-Fit can run separately or be compared on
-// exactly the same data.
 public class FragmentationDemo {
 
-    // One allocation: a named block living at [start .. start + size).
     private static class Alloc {
         String name;
         int start;
@@ -28,14 +21,17 @@ public class FragmentationDemo {
         }
     }
 
-    // Menu: internal demo, external demo, or back.
     public static void run(InputHelper in) {
-        System.out.println("FRAGMENTATION - internal vs external");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("FRAGMENTATION - internal vs external");
+        }
         while (true) {
-            System.out.println();
-            System.out.println("  1) Internal fragmentation (fixed partitions)");
-            System.out.println("  2) External fragmentation (holes in variable memory)");
-            System.out.println("  0) Back to main menu");
+            if (!InputHelper.isQuiet()) {
+                System.out.println();
+                System.out.println("  1) Internal fragmentation (fixed partitions)");
+                System.out.println("  2) External fragmentation (holes in variable memory)");
+                System.out.println("  0) Back to main menu");
+            }
             int choice = in.readIntInRange("  Choose an option: ", 0, 2);
             if (choice == 0) {
                 return;
@@ -50,11 +46,13 @@ public class FragmentationDemo {
     }
 
     private static int askStrategy(InputHelper in) {
-        System.out.println("Allocation strategy:");
-        System.out.println("  1) First-Fit  (first partition/hole that fits)");
-        System.out.println("  2) Best-Fit   (smallest one that fits)");
-        System.out.println("  3) Worst-Fit  (largest one that fits)");
-        System.out.println("  4) Compare all three on the same data");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("Allocation strategy:");
+            System.out.println("  1) First-Fit  (first partition/hole that fits)");
+            System.out.println("  2) Best-Fit   (smallest one that fits)");
+            System.out.println("  3) Worst-Fit  (largest one that fits)");
+            System.out.println("  4) Compare all three on the same data");
+        }
         return in.readIntInRange("  Choose a strategy: ", 1, 4);
     }
 
@@ -107,10 +105,6 @@ public class FragmentationDemo {
         }
     }
 
-    // Places every process into a free partition that fits, following the
-    // chosen strategy: 1 = first that fits, 2 = smallest that fits,
-    // 3 = largest that fits. A process with no free partition stays -1
-    // (it has to wait).
     private static int[] assignInternal(int[] partitionSize, int[] procSize, int strategy) {
         int[] assigned = new int[procSize.length];
         boolean[] used = new boolean[partitionSize.length];
@@ -265,9 +259,6 @@ public class FragmentationDemo {
         return memory;
     }
 
-    // Variable allocation: collect the current holes (gaps between blocks
-    // plus the tail), pick one that fits according to the strategy, and
-    // insert the new block at that address. Returns false if nothing fits.
     private static boolean allocate(List<Alloc> memory, String name, int size, int memSize,
                                     int strategy) {
 
@@ -307,9 +298,6 @@ public class FragmentationDemo {
         return true;
     }
 
-    // Walks the memory map and returns {total free KB, largest hole KB}.
-    // totalFree >= request while largestHole < request is exactly the
-    // situation called external fragmentation.
     private static int[] freeStats(List<Alloc> memory, int memSize) {
         int totalFree = 0;
         int largestHole = 0;

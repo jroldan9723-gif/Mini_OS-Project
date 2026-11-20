@@ -8,29 +8,29 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.Font;
 
-// Entry point of the GUI application: one window, one tab per module.
 public final class GuiMain {
 
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
-            // The default look and feel is fine if this fails.
         }
 
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame(
-                    "Mini OS Simulator - educational demonstration (not a real OS)");
+            JFrame frame = new JFrame("Mini OS Simulator");
 
-            JLabel header = new JLabel(
-                    "  Mini OS Simulator: pick a module, fill in the input, press Run. "
-                    + "This is NOT a real operating system.  ");
+            JLabel header = new JLabel("  Choose a module, enter your data, then click Run.");
             header.setFont(header.getFont().deriveFont(Font.BOLD));
+            JLabel note = new JLabel(
+                    "  This program simulates the algorithms for our OS class; it does not "
+                    + "control real hardware.");
 
-            JPanel top = new JPanel(new BorderLayout());
-            top.add(header, BorderLayout.CENTER);
+            JPanel top = new JPanel(new GridLayout(2, 1));
+            top.add(header);
+            top.add(note);
 
             JTabbedPane tabs = new JTabbedPane();
             tabs.addTab("1 CPU Scheduling", new CpuPanel());

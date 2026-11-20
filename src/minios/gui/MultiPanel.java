@@ -9,12 +9,8 @@ import javax.swing.JTextField;
 
 import minios.MultiprogrammingSimulator;
 
-// Tab 8: multiprogramming. Jobs are typed one per line as
-// "name memory burst arrival", so the job count comes from the list.
 public class MultiPanel extends ModulePanel {
 
-    // Swing components are serializable by inheritance, but these panels are
-    // never written to a stream; the field only silences the compiler warning.
     private static final long serialVersionUID = 1L;
 
     private final JTextField memorySize = Ui.field(10);
@@ -22,10 +18,8 @@ public class MultiPanel extends ModulePanel {
     private final JTextField quantum = Ui.field(6);
 
     public MultiPanel() {
-        super("Multiprogramming (jobs sharing memory, CPU and one I/O device)",
-                "One job per line as: name memory-in-KB CPU-burst arrival-time. Names must be "
-                + "unique and non-empty. The simulator uses first-fit loading, Round Robin on "
-                + "the CPU, and one shared I/O device.",
+        super("Multiprogramming",
+                "One job per line: name, memory in KB, CPU burst, arrival time.",
                 MultiprogrammingSimulator::run);
         addRow("Main memory size (KB):", memorySize);
         addRow("Time quantum for the CPU (ticks):", quantum);
@@ -33,8 +27,6 @@ public class MultiPanel extends ModulePanel {
         addLastWideRow(jobs);
     }
 
-    // One job per line in the form, four lines per job in the script -
-    // exactly the order in which the console asks for them.
     @Override
     public String buildScript() {
         int mem = Ui.parseInt("Main memory size", memorySize.getText(), 1, 1_000_000);
@@ -44,7 +36,6 @@ public class MultiPanel extends ModulePanel {
             throw new Ui.InputError("Enter at least one job as \"name mem burst arrival\".");
         }
 
-        // The console re-asks for empty or duplicate names, so check first.
         Set<String> seen = new HashSet<>();
         int[][] numbers = new int[rows.length][];
         for (int i = 0; i < rows.length; i++) {

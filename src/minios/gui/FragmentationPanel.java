@@ -7,12 +7,8 @@ import javax.swing.JTextField;
 
 import minios.FragmentationDemo;
 
-// Tab 5: fragmentation. Two demos share this tab: fixed partitions (internal
-// fragmentation) and holes in variable memory (external fragmentation).
 public class FragmentationPanel extends ModulePanel {
 
-    // Swing components are serializable by inheritance, but these panels are
-    // never written to a stream; the field only silences the compiler warning.
     private static final long serialVersionUID = 1L;
 
     private final JComboBox<String> kind = new JComboBox<>(new String[]{
@@ -33,10 +29,8 @@ public class FragmentationPanel extends ModulePanel {
     private final JTextField request = Ui.field(10);
 
     public FragmentationPanel() {
-        super("Fragmentation (internal and external)",
-                "Internal: partition sizes and process sizes as lists. External: one "
-                + "\"name size\" job per line, optional job names to free (one per line), and "
-                + "a new request. Counts are never fixed - use as many entries as you like.",
+        super("Fragmentation",
+                "Pick a demo, then fill only the boxes that demo uses.",
                 FragmentationDemo::run);
         addRow("Demo:", kind);
         addRow("Allocation strategy:", strategy);
@@ -52,8 +46,6 @@ public class FragmentationPanel extends ModulePanel {
         addRow("New request in KB (external demo):", request);
     }
 
-    // Builds one script for either demo. The counts are derived from the
-    // lists themselves, so both demos accept any number of entries.
     @Override
     public String buildScript() {
         int strat = strategy.getSelectedIndex() + 1;

@@ -10,15 +10,10 @@ import javax.swing.JTextField;
 
 import minios.CPUScheduler;
 
-// Tab 1: CPU scheduling. The number of processes follows from the burst
-// times the user types, so any list length works.
 public class CpuPanel extends ModulePanel {
 
-    // Swing components are serializable by inheritance, but these panels are
-    // never written to a stream; the field only silences the compiler warning.
     private static final long serialVersionUID = 1L;
 
-    // Combo box order matches the console menu numbers.
     private static final int[] CHOICES = {1, 2, 3, 4, 5, 6};
 
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
@@ -36,10 +31,8 @@ public class CpuPanel extends ModulePanel {
     private final JTextArea priorities = Ui.area(3, 34);
 
     public CpuPanel() {
-        super("CPU scheduling",
-                "Enter one line (or one number) per process. Names are optional: leave the box "
-                + "empty to use P1, P2, ... Arrivals are times, bursts are CPU times, and "
-                + "priorities are needed for Priority and the comparison (smaller = higher).",
+        super("CPU Scheduling",
+                "One line per process: name (optional), arrival time, burst time. Priorities for options 4 and 6.",
                 CPUScheduler::run);
         addRow("Algorithm:", algorithm);
         addRow("Time quantum (Round Robin / comparison):", quantum);
@@ -52,8 +45,6 @@ public class CpuPanel extends ModulePanel {
         addRow("Priorities (Priority / comparison):", priorities);
     }
 
-    // Validates the form and writes the console script: the menu choice, the
-    // process count, then name / arrival / burst for every process.
     @Override
     public String buildScript() {
         int choice = CHOICES[algorithm.getSelectedIndex()];
@@ -70,7 +61,7 @@ public class CpuPanel extends ModulePanel {
         String[] processNames = new String[n];
         if (nameRows.length == 0) {
             for (int i = 0; i < n; i++) {
-                processNames[i] = "";           // blank line = default name P1, P2, ...
+                processNames[i] = "";
             }
         } else {
             if (nameRows.length != n) {
@@ -113,7 +104,6 @@ public class CpuPanel extends ModulePanel {
             }
         }
 
-        // Final 0 = "back to main menu", so the module returns cleanly.
         script.append("0\n");
         return script.toString();
     }

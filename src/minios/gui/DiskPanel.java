@@ -7,12 +7,8 @@ import javax.swing.JTextField;
 
 import minios.DiskScheduler;
 
-// Tab 7: disk scheduling. The request queue is a free-form list, so any
-// number of pending requests can be simulated.
 public class DiskPanel extends ModulePanel {
 
-    // Swing components are serializable by inheritance, but these panels are
-    // never written to a stream; the field only silences the compiler warning.
     private static final long serialVersionUID = 1L;
 
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
@@ -33,9 +29,8 @@ public class DiskPanel extends ModulePanel {
     });
 
     public DiskPanel() {
-        super("Disk scheduling",
-                "Disk is 0..max. The request queue is a list of cylinder numbers inside the "
-                + "disk; the initial direction only matters for SCAN, C-SCAN, LOOK and C-LOOK.",
+        super("Disk Scheduling",
+                "Cylinder range, head position, and the list of requests.",
                 DiskScheduler::run);
         addRow("Algorithm:", algorithm);
         addRow("Highest cylinder number (disk = 0..max):", maxCylinder);
@@ -45,8 +40,6 @@ public class DiskPanel extends ModulePanel {
         addLastWideRow(requests);
     }
 
-    // Queue values are checked against the disk limits up front, because
-    // the console would otherwise ask for the whole problem again.
     @Override
     public String buildScript() {
         int choice = algorithm.getSelectedIndex() + 1;

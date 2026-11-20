@@ -6,13 +6,8 @@ import java.util.Scanner;
 
 import minios.InputHelper;
 
-// Runs one console module on a scripted input and returns everything the
-// module printed. This is how the GUI and the console menu share the exact
-// same algorithm code: the GUI builds the same lines a user would type,
-// the module answers on a captured stream, and the GUI shows that text.
 public final class Runner {
 
-    // A module is any of the console classes with a run(InputHelper) method.
     public interface Module {
         void run(InputHelper in);
     }
@@ -25,20 +20,22 @@ public final class Runner {
 
         try {
             System.setOut(capture);
+            InputHelper.setQuiet(true);
             module.run(new InputHelper(new Scanner(script)));
         } catch (InputHelper.InputEndedException e) {
-            failure = "The script ended before the module finished. Please report this input.";
+            failure = "The input ended before the calculation finished.";
         } catch (RuntimeException e) {
             failure = "Unexpected error: " + e;
         } finally {
+            InputHelper.setQuiet(false);
             System.setOut(original);
             capture.flush();
             capture.close();
         }
 
-        String output = buffer.toString();
+        String output = buffer.toString().trim();
         if (failure != null) {
-            output = output + "\n[!] " + failure;
+            output = output + "\n\n[!] " + failure;
         }
         return output;
     }

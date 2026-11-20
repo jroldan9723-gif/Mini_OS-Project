@@ -9,13 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Runs every input in samples/ through the console application in a fresh
-// JVM and compares the output byte for byte with samples/expected/.
-// A fresh JVM per sample keeps saved state (for example the banker's last
-// data set) from leaking from one test into the next, and line endings are
-// normalized so the same test passes on Windows and on Linux.
-//
-// Run it from the project folder:   java -cp bin minios.SampleTestRunner
 public class SampleTestRunner {
 
     public static void main(String[] args) throws Exception {

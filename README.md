@@ -113,13 +113,11 @@ checked (a burst time must be positive, a request must lie on the disk,
 and so on). When something is wrong, a dialog explains exactly what to
 fix and nothing runs until the form is valid.
 
-The output pane shows the report of the console module itself, so the GUI
-and the text version always print identical results for identical data.
-The design is simple on purpose: the GUI collects and validates input,
-writes the same lines a person would type at the console, runs the module
-on those lines, and displays what the module printed. `minios/gui/Runner.java`
-is the small adapter that does this, and `minios.gui.GuiInputSelfTest`
-checks all eight of them headlessly.
+The output pane shows only the results: no menus and no input prompts.
+The GUI collects and validates the input, then asks the same calculation
+code the console uses to do the work with prompts switched off
+(`InputHelper.setQuiet`), so both versions compute identical numbers while
+the GUI stays clean for a demonstration.
 
 ---
 
@@ -528,7 +526,7 @@ Likely technical questions and short answers:
 
 | Rubric checklist item | Where it is |
 |-----------------------|-------------|
-| Source code (Java) | `src/minios/` (11 console classes + 13 GUI classes, commented) |
+| Source code (Java) | `src/minios/` (11 console classes + 13 GUI classes) |
 | Runnable application | `MiniOS-Simulator.jar` (`java -jar MiniOS-Simulator.jar`) |
 | Dependencies and setup instructions | none beyond a JDK; see "Running the program" |
 | Documentation of modules and algorithms | this README, section "Modules and algorithms" |

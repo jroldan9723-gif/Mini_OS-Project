@@ -3,22 +3,11 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
-// Multiprogramming: several jobs share memory, the CPU and one I/O device.
-// Jobs arrive at their own arrival time, are loaded first-fit into memory,
-// take turns on the CPU with Round Robin, each performs one I/O of
-// IO_DURATION ticks at the halfway point of its burst (one job at a time on
-// the device), and the tick-by-tick table shows who is running, waiting,
-// queued or not arrived, plus the memory map and any external fragmentation.
-// A final report gives turnaround, waiting times and CPU utilization.
 public class MultiprogrammingSimulator {
 
     private static final int IO_DURATION = 3;
-    // Safety valve: a normal run always finishes far below this limit.
     private static final int MAX_TICKS = 10000;
 
-    // One job and its state machine: NOT ARRIVED -> JOB QUEUE -> READY ->
-    // RUNNING, possibly WAITING (I/O) along the way, then TERMINATED.
-    // waiting time counts every tick spent outside RUNNING and the device.
     private static class Job {
         String name;
         int mem;
@@ -66,14 +55,16 @@ public class MultiprogrammingSimulator {
         }
     }
 
-    // Menu: start a new simulation (one is enough; re-entering gives a new
-    // run with different data).
     public static void run(InputHelper in) {
-        System.out.println("MULTIPROGRAMMING - jobs sharing memory and the CPU");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("MULTIPROGRAMMING - jobs sharing memory and the CPU");
+        }
         while (true) {
-            System.out.println();
-            System.out.println("  1) Start a new multiprogramming simulation");
-            System.out.println("  0) Back to main menu");
+            if (!InputHelper.isQuiet()) {
+                System.out.println();
+                System.out.println("  1) Start a new multiprogramming simulation");
+                System.out.println("  0) Back to main menu");
+            }
             int choice = in.readIntInRange("  Choose an option: ", 0, 1);
             if (choice == 0) {
                 return;
@@ -83,17 +74,6 @@ public class MultiprogrammingSimulator {
         }
     }
 
-    // The whole simulation, one tick at a time. Every tick runs the same
-    // phases in this order:
-    //   1. arrivals enter the job queue,
-    //   2. queued jobs are loaded first-fit into free memory,
-    //   3. the CPU picks the next ready job,
-    //   4. the I/O device finishes / starts work (the queue feeds it),
-    //   5. the running job gets one tick of CPU (finish / I/O point /
-    //      quantum expiry decide what happens next),
-    //   6. every job that used neither CPU nor device this tick waits.
-    // The header row is printed before the loop so the columns line up
-    // with every snapshot below it.
     private static void runOnce(InputHelper in) {
         int memSize = in.readIntInRange("Main memory size (KB): ", 1, 1_000_000);
         int n = in.readIntAtLeast("How many jobs? ", 1);
@@ -120,13 +100,15 @@ public class MultiprogrammingSimulator {
         int quantum = in.readIntInRange("Time quantum for the CPU (ticks): ", 1, 100);
 
         System.out.println();
-        System.out.println("Simulation rules:");
-        System.out.println("  - first-fit contiguous loading, memory = " + memSize + " KB");
-        System.out.println("  - Round Robin on the CPU, quantum = " + quantum + " tick(s)");
-        System.out.println("  - each job does ONE I/O of " + IO_DURATION
-                + " ticks at the halfway point of its burst, one job at a time on the device");
-        System.out.println("  - a job only exists for the OS once its arrival time is reached");
-        System.out.println();
+        if (!InputHelper.isQuiet()) {
+            System.out.println("Simulation rules:");
+            System.out.println("  - first-fit contiguous loading, memory = " + memSize + " KB");
+            System.out.println("  - Round Robin on the CPU, quantum = " + quantum + " tick(s)");
+            System.out.println("  - each job does ONE I/O of " + IO_DURATION
+                    + " ticks at the halfway point of its burst, one job at a time on the device");
+            System.out.println("  - a job only exists for the OS once its arrival time is reached");
+            System.out.println();
+        }
         System.out.println("Tick | CPU | READY (queue order) | WAITING | I/O device | JOB QUEUE | not arrived | memory");
         System.out.println("-----+-----+---------------------+---------+------------+-----------+-------------+-------");
 
@@ -287,9 +269,6 @@ public class MultiprogrammingSimulator {
         System.out.println("time running and time actually on the I/O device are not waiting.");
     }
 
-    // Formats one row of the tick table: CPU, ready queue, waiting jobs,
-    // I/O device, job queue, jobs that have not arrived, and who sits in
-    // memory right now.
     private static String snapshot(Job runningThisTick, List<Job> ready, List<Job> jobs,
                                    List<Alloc> memory, Job ioJob) {
 
@@ -347,10 +326,6 @@ public class MultiprogrammingSimulator {
         sb.append(value);
     }
 
-    // Prints the memory map after every change: allocated blocks, free
-    // ranges, total free vs largest hole - and a warning when a waiting job
-    // would fit in total free memory but not in any single hole, which is
-    // external fragmentation.
     private static void printMemoryLayout(List<Alloc> memory, int memSize, List<Job> jobs) {
         StringBuilder sb = new StringBuilder("    memory: ");
         int cursor = 0;
@@ -406,8 +381,6 @@ public class MultiprogrammingSimulator {
         return sb.toString();
     }
 
-    // First-fit: returns the start address of the first hole big enough for
-    // size, or -1 when nothing fits.
     private static int firstFit(List<Alloc> memory, int size, int memSize) {
         int cursor = 0;
         for (Alloc a : memory) {

@@ -8,11 +8,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-// Small shared helpers for building forms and checking what the user typed.
 public final class Ui {
 
-    // Thrown when a form field does not hold valid data. Each Run button
-    // catches it and shows the message as a dialog instead of crashing.
     public static class InputError extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -32,7 +29,6 @@ public final class Ui {
         return a;
     }
 
-    // The output pane looks like the console: fixed-width font, read only.
     public static JTextArea outputArea() {
         JTextArea out = new JTextArea(18, 90);
         out.setEditable(false);
@@ -40,14 +36,12 @@ public final class Ui {
         return out;
     }
 
-    // Wraps a form text area in a scroll bar with a sensible default size.
     public static JScrollPane scrolled(JTextArea area) {
         JScrollPane pane = new JScrollPane(area);
         pane.setPreferredSize(area.getPreferredSize());
         return pane;
     }
 
-    // One whole number, optionally limited to a range.
     public static int parseInt(String what, String text, int min, int max) {
         String t = text == null ? "" : text.trim();
         try {
@@ -64,8 +58,6 @@ public final class Ui {
         }
     }
 
-    // A list of whole numbers separated by spaces or newlines, no fixed limit
-    // on how many entries the list may contain.
     public static int[] parseIntList(String what, String text) {
         return parseIntList(what, text, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
@@ -91,8 +83,6 @@ public final class Ui {
         return values;
     }
 
-    // The non-empty lines of a text area, trimmed. Blank lines are ignored so
-    // the user can format long lists however they like.
     public static String[] lines(String text) {
         if (text == null || text.trim().isEmpty()) {
             return new String[0];

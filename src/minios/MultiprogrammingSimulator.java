@@ -267,10 +267,14 @@ public class MultiprogrammingSimulator {
         System.out.printf("CPU utilization        : %.2f%% (%d busy ticks out of %d)%n",
                 100.0 * busyTicks / time, busyTicks, time);
         System.out.println("Completed jobs         : " + terminated + " / " + jobs.size());
-        System.out.println();
-        System.out.println("Note: turnaround = finished at - arrival time. Waiting time counts");
-        System.out.println("the ticks spent in the job queue, the ready queue or the I/O queue;");
-        System.out.println("time running and time actually on the I/O device are not waiting.");
+        // The GUI output stays results-only, so the GUI tab shows this rule in
+        // its hint line instead.
+        if (!InputHelper.isQuiet()) {
+            System.out.println();
+            System.out.println("Note: turnaround = finished at - arrival time. Waiting time counts");
+            System.out.println("the ticks spent in the job queue, the ready queue or the I/O queue;");
+            System.out.println("time running and time actually on the I/O device are not waiting.");
+        }
     }
 
     private static String snapshot(Job runningThisTick, List<Job> ready, List<Job> jobs,

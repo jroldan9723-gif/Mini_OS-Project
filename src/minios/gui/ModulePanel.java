@@ -1,6 +1,7 @@
 package minios.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -52,26 +53,28 @@ abstract class ModulePanel extends JPanel {
         add(buttons, BorderLayout.SOUTH);
     }
 
-    final void addRow(String labelText, JComponent field) {
+    final JLabel addRow(String labelText, JComponent field) {
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = formRows;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(2, 4, 2, 4);
-        form.add(new JLabel(labelText), c);
+        JLabel label = new JLabel(labelText);
+        form.add(label, c);
 
         c.gridx = 1;
         c.weightx = 1.0;
         c.fill = GridBagConstraints.HORIZONTAL;
         form.add(field, c);
         formRows++;
+        return label;
     }
 
-    final void addWideRow(JComponent component) {
-        addWideRow(component, GridBagConstraints.HORIZONTAL);
+    final JComponent addWideRow(JComponent component) {
+        return addWideRow(component, GridBagConstraints.HORIZONTAL);
     }
 
-    final void addWideRow(JComponent component, int fill) {
+    final JComponent addWideRow(JComponent component, int fill) {
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = formRows;
@@ -82,10 +85,22 @@ abstract class ModulePanel extends JPanel {
         c.insets = new Insets(2, 4, 2, 4);
         form.add(component, c);
         formRows++;
+        return component;
     }
 
-    final void addLastWideRow(JTextArea area) {
-        addWideRow(Ui.scrolled(area), GridBagConstraints.BOTH);
+    // Greys out a whole row, including the label and the text inside a scroll
+    // pane. Used by the fragmentation tab, where only one demo is active.
+    static void setRowEnabled(Component row, boolean on) {
+        row.setEnabled(on);
+        if (row instanceof Container) {
+            for (Component child : ((Container) row).getComponents()) {
+                setRowEnabled(child, on);
+            }
+        }
+    }
+
+    final JComponent addLastWideRow(JTextArea area) {
+        return addWideRow(Ui.scrolled(area), GridBagConstraints.BOTH);
     }
 
     @Override

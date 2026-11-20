@@ -32,8 +32,10 @@ public class PagingSimulator {
         System.out.println("Logical address space = " + numPages + " pages x "
                 + pageSize + " bytes = " + logicalSize + " bytes (addresses 0.."
                 + (logicalSize - 1) + ")");
-        System.out.println("Enter the frame number for each page.");
-        System.out.println("Use -1 for a page that is NOT in memory (it is on disk).");
+        if (!InputHelper.isQuiet()) {
+            System.out.println("Enter the frame number for each page.");
+            System.out.println("Use -1 for a page that is NOT in memory (it is on disk).");
+        }
 
         int[] frameOfPage = new int[numPages];
         for (int p = 0; p < numPages; p++) {

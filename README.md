@@ -82,22 +82,28 @@ One window, one tab per module, numbered like the console menu:
 
 ```
 +------------------------------------------------------------------+
-| Mini OS Simulator: pick a module, fill in the input, press Run.  |
+| Mini OS Simulator                                          [x]   |
 +------------------------------------------------------------------+
-| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragmentation  |
-| 6 Page Repl. | 7 Disk | 8 Multiprogramming                      |
-|                                                                  |
-|  [form: fields, lists, dropdowns]                                |
+| Choose a module, enter your data, then click Run.                |
+| This program simulates the algorithms for our OS class; it does  |
+| not control real hardware.                                       |
+| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragment... >   |
 |                                                                  |
 | +--------------------------------------------------------------+ |
-| | Output (the same engine as the console version)              | |
-| |  CPU SCHEDULING                                               | |
-| |  ... tables, Gantt charts, reports ...                        | |
+| | CPU Scheduling                                               | |
+| |  [form: fields, lists, dropdowns]                            | |
 | +--------------------------------------------------------------+ |
-|                                                                  |
+| +--------------------------------------------------------------+ |
+| | Results                                                      | |
+| |  Algorithm: SRTF ... Gantt chart ... averages ...            | |
+| +--------------------------------------------------------------+ |
 | [ Run ]  [ Load example ]                                        |
 +------------------------------------------------------------------+
 ```
+
+The window opens at 1180 x 740 but shrinks down to 900 x 600 on a small
+laptop screen, and the tab strip scrolls sideways instead of wrapping
+onto a second line.
 
 Every tab has the same two buttons:
 
@@ -106,12 +112,29 @@ Every tab has the same two buttons:
 * **Load example** - fills the form with a small working dataset, handy
   for a quick test or a live demonstration.
 
+`screenshots/` holds one picture of every tab, taken after pressing
+Load example and then Run:
+
+`1-cpu-scheduling.png`, `2-banker.png`, `3-paging.png`,
+`4-segmentation.png`, `5-fragmentation.png`, `6-page-replacement.png`,
+`7-disk-scheduling.png`, `8-multiprogramming.png`.
+
+![CPU scheduling tab](screenshots/1-cpu-scheduling.png)
+
 Lists (burst times, reference strings, request queues, ...) accept any
 length: numbers separated by spaces, tabs or newlines. The number of
 entries is never limited by the program; only the values themselves are
 checked (a burst time must be positive, a request must lie on the disk,
 and so on). When something is wrong, a dialog explains exactly what to
 fix and nothing runs until the form is valid.
+
+Rows that the chosen option does not use are greyed out, not deleted:
+the quantum box on the CPU tab, the priorities box unless Priority or the
+comparison is picked, the request boxes on the Banker tab unless a
+resource request is picked, the direction on the disk tab for FCFS and
+SSTF, and whichever half of the fragmentation tab the chosen demo does
+not read. Filling a greyed-out box does nothing, because it is never
+sent to the module.
 
 The output pane shows only the results: no menus and no input prompts.
 The GUI collects and validates the input, then asks the same calculation
@@ -359,7 +382,7 @@ the GUI version shows it as a warning dialog.
 
 ## Testing
 
-### Sample regression test (small and large inputs for every module)
+### Sample regression test (small, boundary and large inputs for every module)
 
 ```
 java -cp bin minios.SampleTestRunner

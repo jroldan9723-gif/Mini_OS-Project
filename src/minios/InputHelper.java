@@ -36,8 +36,9 @@ public class InputHelper {
             System.out.print(prompt);
         }
         if (!scanner.hasNextLine()) {
-            System.out.println();
-            System.out.println("No more input received. Goodbye!");
+            if (!quiet) {
+                System.out.println();
+            }
             throw new InputEndedException("end of input reached");
         }
         return scanner.nextLine();

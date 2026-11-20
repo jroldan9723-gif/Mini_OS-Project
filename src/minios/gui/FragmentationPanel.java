@@ -1,14 +1,18 @@
 package minios.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.FragmentationDemo;
 
-// Tab 5. Both demos share the tab and only the boxes of the chosen
-// demo are used when the input is built.
+// Tab 5. Both demos share the tab, so the rows the chosen demo does not use
+// are greyed out instead of being filled with numbers that would be ignored.
 public class FragmentationPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -30,22 +34,45 @@ public class FragmentationPanel extends ModulePanel {
     private final JTextArea frees = Ui.area(3, 30);
     private final JTextField request = Ui.field(10);
 
+    private final List<JComponent> internalRows = new ArrayList<>();
+    private final List<JComponent> externalRows = new ArrayList<>();
+
     public FragmentationPanel() {
         super("Fragmentation",
-                "Pick a demo, then fill only the boxes that demo uses.",
+                "Pick a demo. The boxes the other demo uses are greyed out and are not read.",
                 FragmentationDemo::run);
         addRow("Demo:", kind);
         addRow("Allocation strategy:", strategy);
-        addRow("Total memory in KB (external demo):", memorySize);
-        addWideRow(new JLabel("<html><b>Partition sizes in KB</b> - internal demo (one list)</html>"));
-        addWideRow(Ui.scrolled(partitions));
-        addWideRow(new JLabel("<html><b>Process sizes in KB</b> - internal demo (one list)</html>"));
-        addWideRow(Ui.scrolled(processes));
-        addWideRow(new JLabel("<html><b>Jobs</b> - external demo: \"name size\" per line</html>"));
-        addWideRow(Ui.scrolled(jobs));
-        addWideRow(new JLabel("<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>"));
-        addLastWideRow(frees);
-        addRow("New request in KB (external demo):", request);
+
+        externalRows.add(addRow("Total memory in KB (external demo):", memorySize));
+
+        internalRows.add(addWideRow(new JLabel(
+                "<html><b>Partition sizes in KB</b> - internal demo (one list)</html>")));
+        internalRows.add(addWideRow(Ui.scrolled(partitions)));
+        internalRows.add(addWideRow(new JLabel(
+                "<html><b>Process sizes in KB</b> - internal demo (one list)</html>")));
+        internalRows.add(addWideRow(Ui.scrolled(processes)));
+
+        externalRows.add(addWideRow(new JLabel(
+                "<html><b>Jobs</b> - external demo: \"name size\" per line</html>")));
+        externalRows.add(addWideRow(Ui.scrolled(jobs)));
+        externalRows.add(addWideRow(new JLabel(
+                "<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>")));
+        externalRows.add(addLastWideRow(frees));
+        externalRows.add(addRow("New request in KB (external demo):", request));
+
+        kind.addActionListener(e -> updateEnabledRows());
+        updateEnabledRows();
+    }
+
+    private void updateEnabledRows() {
+        boolean internal = kind.getSelectedIndex() == 0;
+        for (JComponent row : internalRows) {
+            setRowEnabled(row, internal);
+        }
+        for (JComponent row : externalRows) {
+            setRowEnabled(row, !internal);
+        }
     }
 
     @Override

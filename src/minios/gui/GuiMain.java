@@ -8,8 +8,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Font;
+import java.awt.Toolkit;
 
 // The window that opens when the program starts. One tab per module, in the
 // same order as the console menu.
@@ -49,7 +51,19 @@ public final class GuiMain {
             frame.setLayout(new BorderLayout());
             frame.add(top, BorderLayout.NORTH);
             frame.add(tabs, BorderLayout.CENTER);
-            frame.setSize(1180, 740);
+            // 1180 x 740 is enough for the widest table. On a smaller screen the
+            // window is cut down so the buttons are not off the bottom edge.
+            int width = 1180;
+            int height = 740;
+            try {
+                Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+                width = Math.min(width, screen.width - 40);
+                height = Math.min(height, screen.height - 80);
+            } catch (RuntimeException e) {
+                // no screen size to ask for, so keep the normal size
+            }
+            frame.setSize(width, height);
+            frame.setMinimumSize(new Dimension(820, 540));
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);

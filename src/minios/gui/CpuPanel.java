@@ -4,14 +4,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.CPUScheduler;
 
-// Tab 1. The lists are read from the text boxes, so the number of
-// processes is whatever the user typed.
+// Tab 1. The lists are read from the text boxes, so the number of processes is
+// whatever the user typed, and the quantum and priority rows only light up for
+// the algorithms that use them.
 public class CpuPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -32,19 +34,33 @@ public class CpuPanel extends ModulePanel {
     private final JTextArea bursts = Ui.area(3, 34);
     private final JTextArea priorities = Ui.area(3, 34);
 
+    private JComponent quantumRow;
+    private JComponent priorityRow;
+
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: name (optional), arrival time, burst time. Priorities for options 4 and 6.",
+                "One line per process: name (optional), arrival time, burst time. "
+                + "The greyed-out boxes are not used by the chosen algorithm.",
                 CPUScheduler::run);
         addRow("Algorithm:", algorithm);
-        addRow("Time quantum (Round Robin / comparison):", quantum);
+        quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
         addWideRow(new JLabel("<html><b>Process names</b> - optional, one per line</html>"));
         addWideRow(Ui.scrolled(names));
         addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
         addWideRow(Ui.scrolled(arrivals));
         addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
         addWideRow(Ui.scrolled(bursts));
-        addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
+        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
+
+        algorithm.addActionListener(e -> updateOptionalRows());
+        updateOptionalRows();
+    }
+
+    // 3 is Round Robin, 4 is the comparison, 6 is Priority.
+    private void updateOptionalRows() {
+        int choice = CHOICES[algorithm.getSelectedIndex()];
+        setRowEnabled(quantumRow, choice == 3 || choice == 4);
+        setRowEnabled(priorityRow, choice == 4 || choice == 6);
     }
 
     @Override

@@ -1,15 +1,19 @@
 package minios.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.BankersAlgorithm;
 
-// Tab 2. The banker module keeps the data it was given last, so this
-// panel remembers what it sent and only resends the matrices when
-// they change.
+// Tab 2. The banker module keeps the data it was given last, so this panel
+// remembers what it sent and only resends the matrices when they change. The
+// two request boxes are greyed out in a plain safety check.
 public class BankerPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -26,6 +30,8 @@ public class BankerPanel extends ModulePanel {
 
     private String loadedData = null;
 
+    private final List<JComponent> requestRows = new ArrayList<>();
+
     public BankerPanel() {
         super("Banker's Algorithm",
                 "One row per process. Allocation and Max need the same number of columns; Available is one row.",
@@ -36,8 +42,18 @@ public class BankerPanel extends ModulePanel {
         addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"));
         addLastWideRow(maximum);
         addRow("Available resources:", available);
-        addRow("Process making the request (1..n):", process);
-        addRow("Request vector:", request);
+        requestRows.add(addRow("Process making the request (1..n):", process));
+        requestRows.add(addRow("Request vector:", request));
+
+        mode.addActionListener(e -> updateRequestRows());
+        updateRequestRows();
+    }
+
+    private void updateRequestRows() {
+        boolean asking = mode.getSelectedIndex() == 1;
+        for (JComponent row : requestRows) {
+            setRowEnabled(row, asking);
+        }
     }
 
     @Override

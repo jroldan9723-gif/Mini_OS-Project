@@ -124,8 +124,10 @@ public class CPUScheduler {
             } else if (choice == 3) {
                 int quantum = in.readIntInRange("Time quantum (whole time units): ", 1, 100);
                 printResult(procs, roundRobin(procs, quantum), true);
-                System.out.println("Note: in Round Robin the execution list shows one entry");
-                System.out.println("      per time slice, so a process can appear several times.");
+                if (!InputHelper.isQuiet()) {
+                    System.out.println("Note: in Round Robin the execution list shows one entry");
+                    System.out.println("      per time slice, so a process can appear several times.");
+                }
             } else if (choice == 6) {
                 readPriorities(in, procs);
                 printResult(procs, prioritySchedule(procs), false);

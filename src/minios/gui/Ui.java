@@ -54,9 +54,9 @@ public final class Ui {
             return value;
         } catch (NumberFormatException e) {
             if (t.isEmpty()) {
-                throw new InputError(what + " is empty. " + rangeHint(min, max) + ".");
+                throw new InputError(what + ": nothing was entered. " + rangeHint(min, max));
             }
-            throw new InputError(what + ": \"" + t + "\" is not valid. " + rangeHint(min, max) + ".");
+            throw new InputError(what + ": \"" + t + "\" is not valid. " + rangeHint(min, max));
         }
     }
 
@@ -67,7 +67,7 @@ public final class Ui {
     public static int[] parseIntList(String what, String text, int min, int max) {
         String t = text == null ? "" : text.trim();
         if (t.isEmpty()) {
-            throw new InputError(what + " is empty. Enter at least one whole number.");
+            throw new InputError(what + ": nothing was entered. Type at least one whole number.");
         }
         String[] parts = t.split("\\s+");
         int[] values = new int[parts.length];

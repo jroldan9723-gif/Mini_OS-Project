@@ -21,7 +21,7 @@ public class MultiPanel extends ModulePanel {
 
     public MultiPanel() {
         super("Multiprogramming",
-                "One job per line: name, memory in KB, CPU burst, arrival time.",
+                "One job per line: name, memory in KB, CPU burst, arrival time. Waiting time counts the ticks in the job, ready and I/O queues, not the time running or on the device.",
                 MultiprogrammingSimulator::run);
         addRow("Main memory size (KB):", memorySize);
         addRow("Time quantum for the CPU (ticks):", quantum);

@@ -2,6 +2,8 @@ package minios;
 
 import java.util.Scanner;
 
+// Console version. The menu just forwards to one of the module classes, so
+// this file stays small.
 public class Main {
 
     public static void main(String[] args) {

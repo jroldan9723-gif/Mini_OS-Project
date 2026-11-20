@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Disk scheduling. The head jumps between the requested cylinders and we
+// add up the distance, which is what the movement total means.
 public class DiskScheduler {
 
     private static class Result {
@@ -143,6 +145,7 @@ public class DiskScheduler {
         return r;
     }
 
+    // Nearest request first. Fast average, but far requests can wait forever.
     private static Result sstf(Problem p) {
         Result r = new Result("SSTF (Shortest Seek Time First)");
         r.steps.add(String.valueOf(p.head));
@@ -170,18 +173,23 @@ public class DiskScheduler {
         return r;
     }
 
+    // SCAN sweeps to the end of the disk and then turns around, like an
+    // elevator that goes to the top floor before coming down.
     private static Result scan(Problem p) {
         Result r = new Result("SCAN (elevator)");
         buildRoute(r, p, true, false);
         return r;
     }
 
+    // C-SCAN only serves while moving one way, then jumps back to the start.
     private static Result cscan(Problem p) {
         Result r = new Result("C-SCAN (circular elevator)");
         buildRoute(r, p, true, true);
         return r;
     }
 
+    // LOOK is SCAN without going all the way to the edge; it turns at the last
+    // request instead.
     private static Result look(Problem p) {
         Result r = new Result("LOOK");
         buildRoute(r, p, false, false);

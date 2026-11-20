@@ -10,6 +10,8 @@ import javax.swing.JTextField;
 
 import minios.CPUScheduler;
 
+// Tab 1. The lists are read from the text boxes, so the number of
+// processes is whatever the user typed.
 public class CpuPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -42,7 +44,7 @@ public class CpuPanel extends ModulePanel {
         addWideRow(Ui.scrolled(arrivals));
         addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
         addWideRow(Ui.scrolled(bursts));
-        addRow("Priorities (Priority / comparison):", priorities);
+        addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
     }
 
     @Override

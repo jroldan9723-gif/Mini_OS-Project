@@ -3,9 +3,13 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
+// Jobs share memory, the CPU and one I/O device. Everything happens in
+// ticks so one table row can be printed per tick.
 public class MultiprogrammingSimulator {
 
+    // How long one I/O takes, in ticks.
     private static final int IO_DURATION = 3;
+    // Safety limit, so a mistake cannot make the simulation run forever.
     private static final int MAX_TICKS = 10000;
 
     private static class Job {
@@ -381,6 +385,7 @@ public class MultiprogrammingSimulator {
         return sb.toString();
     }
 
+    // Start address of the first hole that is big enough, or -1 if none fits.
     private static int firstFit(List<Alloc> memory, int size, int memSize) {
         int cursor = 0;
         for (Alloc a : memory) {

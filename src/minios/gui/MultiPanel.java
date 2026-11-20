@@ -9,6 +9,8 @@ import javax.swing.JTextField;
 
 import minios.MultiprogrammingSimulator;
 
+// Tab 8. One line per job in the form, four lines per job in the
+// input that is built.
 public class MultiPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

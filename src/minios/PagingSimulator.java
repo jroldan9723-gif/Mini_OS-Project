@@ -1,5 +1,7 @@
 package minios;
 
+// Paging: the logical address is split into a page number and an offset,
+// and the page table says which frame that page sits in.
 public class PagingSimulator {
 
     public static void run(InputHelper in) {

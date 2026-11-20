@@ -8,6 +8,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+// Helpers for the form fields and the input checks, so every tab validates
+// numbers the same way.
 public final class Ui {
 
     public static class InputError extends RuntimeException {

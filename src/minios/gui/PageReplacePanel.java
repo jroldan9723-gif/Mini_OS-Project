@@ -6,6 +6,8 @@ import javax.swing.JTextField;
 
 import minios.PageReplacementSimulator;
 
+// Tab 6. One reference string and one frame count. All four
+// algorithms run on the same data.
 public class PageReplacePanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

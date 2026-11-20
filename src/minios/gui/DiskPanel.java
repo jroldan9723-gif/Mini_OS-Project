@@ -7,6 +7,8 @@ import javax.swing.JTextField;
 
 import minios.DiskScheduler;
 
+// Tab 7. The queue is checked against the disk size here, otherwise
+// the module would ask for the whole problem again.
 public class DiskPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

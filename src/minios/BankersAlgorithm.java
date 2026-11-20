@@ -3,8 +3,12 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
+// Banker's algorithm. Need = max - allocation, then we look for an order in
+// which every process can still finish. If we find one the state is safe.
 public class BankersAlgorithm {
 
+    // The data from the last entry is kept, otherwise every resource request
+    // would have to retype the whole matrix.
     private static boolean loaded = false;
     private static int curN;
     private static int curM;
@@ -112,6 +116,9 @@ public class BankersAlgorithm {
         }
     }
 
+    // Three checks first (negative, bigger than need, bigger than available),
+    // then pretend to grant it and run the safety test again. If it fails, the
+    // old allocation and available are put back.
     private static void requestMode(InputHelper in) {
         if (!loaded) {
             System.out.println("(No data yet - please enter the system data first.)");
@@ -201,6 +208,9 @@ public class BankersAlgorithm {
         return need;
     }
 
+    // The safety algorithm itself: keep looking for a process whose whole need
+    // fits in the work vector. If one is found it runs to the end and gives its
+    // allocation back, so work grows and we try again.
     private static boolean checkSafe(int[][] need, int[][] allocation, int[] available,
                                      List<Integer> safeOrder, StringBuilder log) {
         int n = allocation.length;
@@ -256,6 +266,8 @@ public class BankersAlgorithm {
         return matrix;
     }
 
+    // Catches impossible data (negative resources, max below what is already
+    // held) before anything is calculated.
     private static String validate(int[][] allocation, int[][] max, int[] available) {
         for (int i = 0; i < allocation.length; i++) {
             for (int j = 0; j < allocation[0].length; j++) {

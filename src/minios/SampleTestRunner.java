@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Runs every file in samples/ through the console program and compares the
+// output with samples/expected/. One JVM per sample so saved state cannot
+// leak from one test into the next.
 public class SampleTestRunner {
 
     public static void main(String[] args) throws Exception {

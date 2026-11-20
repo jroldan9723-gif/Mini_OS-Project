@@ -17,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+// Layout every tab shares: the form on top, the results in the middle, the
+// buttons at the bottom. The subclasses only add fields and build the input.
 abstract class ModulePanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
@@ -91,12 +93,15 @@ abstract class ModulePanel extends JPanel {
         Dimension mine = super.getPreferredSize();
         Container parent = getParent();
         if (parent != null) {
-            int cap = Math.max(320, parent.getHeight() / 2);
+            // Leave room for the results below, but never cut off the last field.
+            int cap = Math.max(320, parent.getHeight() - 250);
             mine.height = Math.min(mine.height, cap);
         }
         return mine;
     }
 
+    // Turns the form into input for the module, then shows what came back. If a
+    // field is wrong nothing runs and a message box explains why.
     private void runModule(Runner.Module module) {
         try {
             String script = buildScript();

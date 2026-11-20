@@ -7,6 +7,9 @@ import javax.swing.JTextField;
 
 import minios.BankersAlgorithm;
 
+// Tab 2. The banker module keeps the data it was given last, so this
+// panel remembers what it sent and only resends the matrices when
+// they change.
 public class BankerPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

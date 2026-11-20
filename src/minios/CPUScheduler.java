@@ -8,8 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+// CPU scheduling. Every process has a name, an arrival time and a burst
+// time, and time only moves forward when the CPU works on something.
 public class CPUScheduler {
 
+    // One process. id keeps the order the user typed them in, which is used
+    // whenever two processes are otherwise equal.
     static class Process {
         int id;
         String name;
@@ -52,6 +56,7 @@ public class CPUScheduler {
             }
         }
 
+        // Joins touching segments so the Gantt chart does not repeat the same name.
         void addSegment(int who, int from, int to) {
             if (to <= from) {
                 return;
@@ -225,6 +230,8 @@ public class CPUScheduler {
                 });
     }
 
+    // Shared loop for FCFS, SJF and Priority. They only differ in which
+    // arrived process they pick next, so the rule is passed in as a comparator.
     private static Result schedule(List<Process> procs, String algorithm, Comparator<Integer> rule) {
         int n = procs.size();
         Result r = new Result(algorithm, n);
@@ -269,6 +276,8 @@ public class CPUScheduler {
         return r;
     }
 
+    // Round Robin: take the process at the front, run it for one quantum, then
+    // put it back at the end if it still has work left.
     static Result roundRobin(List<Process> procs, int quantum) {
         int n = procs.size();
         Result r = new Result("Round Robin (quantum = " + quantum + ")", n);
@@ -330,6 +339,8 @@ public class CPUScheduler {
         return r;
     }
 
+    // Moves processes from the arrival list into the ready queue once their
+    // arrival time has been reached.
     private static int admitArrivals(List<Process> procs, List<Integer> byArrival,
                                      ArrayDeque<Integer> queue, int from, int time) {
         int k = from;
@@ -340,6 +351,8 @@ public class CPUScheduler {
         return k;
     }
 
+    // SRTF looks one tick at a time, so it can switch to a shorter process in
+    // the middle of another one.
     static Result srtf(List<Process> procs) {
         int n = procs.size();
         Result r = new Result("SRTF (Shortest Remaining Time First, preemptive)", n);
@@ -390,6 +403,9 @@ public class CPUScheduler {
         return r;
     }
 
+    // The three numbers the rubric asks for: turnaround is finish minus
+    // arrival, waiting is turnaround minus burst, response is first start minus
+    // arrival.
     private static void fillTimes(Result r, List<Process> procs) {
         for (int i = 0; i < procs.size(); i++) {
             Process p = procs.get(i);
@@ -474,6 +490,7 @@ public class CPUScheduler {
                 + bestOf(new Result[] {fcfsR, sjfR, rrR, priR}, false));
     }
 
+    // Only used by the comparison table, to name the cheapest algorithm.
     private static String bestOf(Result[] results, boolean waiting) {
         Result best = results[0];
         for (Result r : results) {

@@ -2,6 +2,8 @@ package minios;
 
 import java.util.Scanner;
 
+// Reads what the user types and checks it. Every prompt goes through here,
+// so bad input always gets the same treatment: explain, then ask again.
 public class InputHelper {
 
     public static class InputEndedException extends RuntimeException {
@@ -12,6 +14,7 @@ public class InputHelper {
         }
     }
 
+    // The GUI switches this on so prompts and menus stay out of its output box.
     private static boolean quiet;
 
     public static void setQuiet(boolean value) {
@@ -51,6 +54,8 @@ public class InputHelper {
         }
     }
 
+    // For counts of items. Only a minimum, because the number of processes or
+    // requests should not be limited by us.
     public int readIntAtLeast(String prompt, int min) {
         while (true) {
             int value = readInt(prompt);
@@ -71,6 +76,7 @@ public class InputHelper {
         }
     }
 
+    // Reads a whole line and splits it, for things like a reference string.
     public int[] readIntArray(String prompt, int count) {
         while (true) {
             String line = readLine(prompt).trim();

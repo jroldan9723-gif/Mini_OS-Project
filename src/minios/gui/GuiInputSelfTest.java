@@ -9,6 +9,9 @@ import minios.PageReplacementSimulator;
 import minios.PagingSimulator;
 import minios.SegmentationSimulator;
 
+// Fills every tab with its example data, builds the input, runs the real
+// module and looks for an expected line. No window is opened, so it is quick
+// to check before a demo.
 public final class GuiInputSelfTest {
 
     public static void main(String[] args) {

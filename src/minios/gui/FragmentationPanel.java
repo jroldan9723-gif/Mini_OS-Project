@@ -7,6 +7,8 @@ import javax.swing.JTextField;
 
 import minios.FragmentationDemo;
 
+// Tab 5. Both demos share the tab and only the boxes of the chosen
+// demo are used when the input is built.
 public class FragmentationPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

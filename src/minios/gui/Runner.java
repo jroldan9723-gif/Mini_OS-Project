@@ -6,6 +6,9 @@ import java.util.Scanner;
 
 import minios.InputHelper;
 
+// Runs a module with the console prompts switched off, so the output box
+// only gets the tables and the answers. This is also why the GUI and the
+// console always agree: it is the same code doing the calculation.
 public final class Runner {
 
     public interface Module {

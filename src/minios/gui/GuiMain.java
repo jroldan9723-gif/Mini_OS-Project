@@ -11,6 +11,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Font;
 
+// The window that opens when the program starts. One tab per module, in the
+// same order as the console menu.
 public final class GuiMain {
 
     public static void main(String[] args) {
@@ -33,6 +35,8 @@ public final class GuiMain {
             top.add(note);
 
             JTabbedPane tabs = new JTabbedPane();
+            // Scroll the tab strip instead of wrapping it onto a second row.
+            tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
             tabs.addTab("1 CPU Scheduling", new CpuPanel());
             tabs.addTab("2 Banker's Algorithm", new BankerPanel());
             tabs.addTab("3 Paging", new PagingPanel());
@@ -45,7 +49,7 @@ public final class GuiMain {
             frame.setLayout(new BorderLayout());
             frame.add(top, BorderLayout.NORTH);
             frame.add(tabs, BorderLayout.CENTER);
-            frame.setSize(1040, 740);
+            frame.setSize(1180, 740);
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);

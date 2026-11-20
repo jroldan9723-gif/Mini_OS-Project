@@ -3,6 +3,8 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
+// Page replacement. The same reference string goes through all four
+// algorithms so the fault counts can be compared fairly.
 public class PageReplacementSimulator {
 
     private static class Result {
@@ -104,6 +106,7 @@ public class PageReplacementSimulator {
                 label, r.faults, r.hits(total), r.faultRate(total), r.hitRate(total));
     }
 
+    // FIFO replaces whichever page has been in memory the longest.
     private static Result runFifo(int[] refs, int frames) {
         Result r = new Result("FIFO");
         Integer[] slots = new Integer[frames];
@@ -123,6 +126,8 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // LRU needs to know when each page was last used, so we keep a counter
+    // that only ever grows and replace the smallest one.
     private static Result runLru(int[] refs, int frames) {
         Result r = new Result("LRU");
         Integer[] slots = new Integer[frames];
@@ -148,6 +153,8 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // Optimal looks ahead in the reference string. It cannot be done for real,
+    // it is only here to show the best possible number of faults.
     private static Result runOptimal(int[] refs, int frames) {
         Result r = new Result("Optimal");
         Integer[] slots = new Integer[frames];
@@ -170,6 +177,8 @@ public class PageReplacementSimulator {
         return r;
     }
 
+    // LFU counts how many times each page was used and drops the least used
+    // one, breaking ties like LRU.
     private static Result runLfu(int[] refs, int frames) {
         Result r = new Result("LFU");
         r.showFreqs = true;

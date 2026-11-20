@@ -119,6 +119,12 @@ code the console uses to do the work with prompts switched off
 (`InputHelper.setQuiet`), so both versions compute identical numbers while
 the GUI stays clean for a demonstration.
 
+How the source is commented: every class starts with a short note saying
+what it does, and the parts that are easy to get wrong (the quiet
+switch, the Round Robin quantum, the Banker safety loop, the page
+replacement rules) are explained where they happen. The comments are
+short and stay out of the way of the code.
+
 ---
 
 ## Modules and algorithms

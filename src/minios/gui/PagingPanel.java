@@ -6,6 +6,7 @@ import javax.swing.JTextField;
 
 import minios.PagingSimulator;
 
+// Tab 3. One frame number per page, -1 meaning the page is on disk.
 public class PagingPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

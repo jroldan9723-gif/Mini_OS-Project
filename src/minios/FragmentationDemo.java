@@ -3,6 +3,8 @@ package minios;
 import java.util.ArrayList;
 import java.util.List;
 
+// Internal fragmentation is wasted space inside a fixed partition.
+// External fragmentation is free memory that exists but is split into holes.
 public class FragmentationDemo {
 
     private static class Alloc {
@@ -105,6 +107,8 @@ public class FragmentationDemo {
         }
     }
 
+    // Places each process in a partition that fits. 1 is first fit, 2 best fit,
+    // 3 worst fit, the same three the teacher gave as examples.
     private static int[] assignInternal(int[] partitionSize, int[] procSize, int strategy) {
         int[] assigned = new int[procSize.length];
         boolean[] used = new boolean[partitionSize.length];
@@ -298,6 +302,8 @@ public class FragmentationDemo {
         return true;
     }
 
+    // Returns total free memory and the biggest single hole. If the total is
+    // enough but the biggest hole is not, that is external fragmentation.
     private static int[] freeStats(List<Alloc> memory, int memSize) {
         int totalFree = 0;
         int largestHole = 0;

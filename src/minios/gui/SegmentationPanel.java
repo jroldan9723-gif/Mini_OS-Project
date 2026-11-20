@@ -6,6 +6,8 @@ import javax.swing.JTextField;
 
 import minios.SegmentationSimulator;
 
+// Tab 4. Segments are checked here too, because an overlap would only
+// be reported after the module had already started.
 public class SegmentationPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;

@@ -1,5 +1,7 @@
 package minios;
 
+// Segmentation: every segment has a base and a limit, and an offset that
+// reaches past the limit is a segmentation fault.
 public class SegmentationSimulator {
 
     public static void run(InputHelper in) {
@@ -100,6 +102,7 @@ public class SegmentationSimulator {
         }
     }
 
+    // Two segments clash when neither one ends before the other begins.
     private static int overlapWith(int[] base, int[] limit, int count, int candBase, int candLimit) {
         long candEnd = (long) candBase + candLimit;
         for (int i = 0; i < count; i++) {

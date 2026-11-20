@@ -1,496 +1,247 @@
-# Putting the project into Eclipse, step by step
+# Opening the project in Eclipse
 
-This guide starts from a fresh download and ends with the GUI running, the
-tests passing, and a JAR you can double-click-free run from a terminal. It
-assumes Windows; the only difference on macOS or Linux is the folder paths
-in steps 2 and 5.
+Everything you need fits on this page. Pick the part that matches what you
+are doing now:
 
-What you are importing:
+| Your situation | Go to |
+|----------------|-------|
+| This is the first time you put the project in Eclipse | **Part 1** |
+| It is already in Eclipse and you only want the newer files | **Part 2** |
+| Eclipse shows red crosses, or Java complains about the class version | **Part 3** |
+| It is imported and you want to run or present it | **Part 4** |
+
+What the project contains:
 
 | Item | Count | Where |
 |------|-------|-------|
-| Console classes | 11 | `src/minios/` |
-| GUI classes | 13 | `src/minios/gui/` |
+| Java source files | 24 (11 console + 13 GUI) | `src/minios/` |
 | Sample tests | 36 inputs + 36 expected outputs | `samples/`, `samples/expected/` |
-| Runnable JAR | 1 | `MiniOS-Simulator.jar` |
-| External libraries | none | only the JDK is needed |
-
-There are four things you can run, and it helps to know which is which
-before you start:
-
-| Class | What it is |
-|-------|------------|
-| `minios.gui.GuiMain` | the GUI application (the one you demonstrate) |
-| `minios.Main` | the console menu version, same engine |
-| `minios.SampleTestRunner` | runs all 36 samples and reports pass or fail |
-| `minios.gui.GuiInputSelfTest` | checks the GUI input of all 8 tabs |
+| Ready-made program | 1 | `MiniOS-Simulator.jar` |
+| Extra libraries | none | only a JDK is needed |
 
 ---
 
-## Step 1: Delete the old copy first (only for a fresh import)
+## Part 1: First time in Eclipse
 
-The project name inside `.project` is `Mini_OS-Project`. Eclipse refuses to
-import a second project with the same name, so a second copy has to be
-cleared out first.
+You need two things: the project folder on your disk, and a JDK (Java
+17 or newer is the safe choice; 8 and 11 also work).
 
-**Already have the project in Eclipse and just want the newer code? Skip
-this step.** Copy the new files over the same folder on disk, then in
-Eclipse press **F5** (or right-click the project > **Refresh**) and run
-**Project > Clean...**. Nothing in the project setup changes between
-versions, so re-importing only loses the JDK settings from step 5.
+### 1.1 Get the folder on your disk
 
-Use the rest of this step when you are importing for the first time, or
-when you downloaded the new ZIP into a different folder and now have two
-copies with the same name.
-
-1. In Eclipse, right-click `Mini_OS-Project` in Package Explorer.
-2. Choose **Delete**.
-3. Tick **Delete project contents on disk (cannot be undone)** so the old
-   `bin/` folder disappears too. Leaving it behind is what causes stale
-   classes later.
-4. Also delete any old project folder lying around in Downloads, the
-   Desktop, or your Eclipse workspace folder.
-
-## Step 2: Get the new code
-
-**Option A, download a ZIP (no tools needed)**
+Easiest is the ZIP:
 
 1. Open <https://github.com/jroldan9723-gif/Mini_OS-Project>
-2. Press the green **Code** button, then **Download ZIP**.
-3. Right-click the downloaded `Mini_OS-Project-main.zip` and choose
-   **Extract All**.
-4. Extract it somewhere without spaces in the path, for example
-   `C:\Users\<your name>\Documents\Mini_OS-Project`.
+2. Green **Code** button, then **Download ZIP**.
+3. Right-click the download, **Extract All**.
+4. Put it somewhere without spaces in the path, for example
+   `C:\Users\you\Documents\Mini_OS-Project`.
 
-**Option B, git clone (only if git is installed)**
+If you have git, this does the same thing:
 
 ```
 git clone https://github.com/jroldan9723-gif/Mini_OS-Project.git
 ```
 
-Either way, step 3 is the one people skip and then wonder why the import
-finds nothing.
+### 1.2 Find the right folder
 
-## Step 3: Check the folder you are about to import
-
-Open the extracted folder and look inside. The project root is the folder
-that directly contains all of these:
+Open the extracted folder. It must directly contain these:
 
 ```
 .project
 .classpath
 src
 samples
-README.md
 MiniOS-Simulator.jar
 ```
 
-A ZIP download usually creates one extra wrapper folder
-(`Mini_OS-Project-main`). If the folder you open contains only a single
-folder, go one level deeper; that inner folder is the project root.
+A ZIP download usually wraps everything in an extra folder
+(`Mini_OS-Project-main`). If the folder you opened contains only one
+folder, go one level deeper. **This is the step people skip**, and it is
+why Eclipse answers *"No projects are found to import"*.
 
-This is exactly the folder Eclipse wants as the "root directory" in the
-next step, and the wrong level produces the message
-**"No projects are found to import"**.
-
-## Step 4: Import into Eclipse
+### 1.3 Import it
 
 1. **File > Import...**
 2. **General > Existing Projects into Workspace**, then **Next**.
-3. **Select root directory**, press **Browse**, and choose the project root
-   from step 3.
-4. `Mini_OS-Project` appears ticked in the Projects box. Press **Finish**.
-5. If the project is listed but greyed out with *"already exists in
-   workspace"*, you skipped step 1.
+3. **Select root directory > Browse**, pick the folder from 1.2.
+4. `Mini_OS-Project` appears in the list with a tick. Press **Finish**.
 
-Package Explorer should now show `src` with the two packages `minios` and
-`minios.gui`, plus `samples` and `MiniOS-Simulator.jar`.
+You should now see `src` in Package Explorer, with the packages `minios`
+and `minios.gui` inside it.
 
-## Step 5: Point the project at one JDK (detailed)
+### 1.4 Set the Java version
 
-This is the step that prevents the `UnsupportedClassVersionError` you hit
-before. Read the next paragraph once; it explains why the step has the
-shape it has.
+Do this only if you see a red cross, or if you plan to hand the project
+to someone else. If it already compiles, skip to Part 4.
 
-### 5.0 Why this step exists
+1. **Window > Preferences > Java > Installed JREs**. Make sure exactly one
+   JDK is ticked (Add... > Standard VM > Directory, and pick the JDK
+   folder itself, the one that contains `bin` and `lib`).
+2. Right-click the project > **Properties > Java Build Path >
+   Libraries**. Select **JRE System Library** > **Edit...** >
+   **Alternate JRE** > your JDK > **Finish**.
+3. Still in Properties, open **Java Compiler** and set **Compiler
+   compliance level** to the same number as that JDK (17 for a JDK 17).
+4. **Apply and Close**, then **Project > Clean...**, tick the project,
+   **Clean**.
 
-Three different Java versions can be in play at the same time:
+The Problems view should end up empty.
 
-| Place | What it decides |
-|-------|-----------------|
-| The JDK that runs Eclipse itself | which language the code editor and compiler support |
-| The JRE System Library on the project's build path | which class library your code is written against |
-| The Compiler compliance level | the version stamped into the `.class` files |
+### 1.5 Check it works
 
-The version stamp is a number inside every compiled file. A runtime
-refuses to load a class stamped newer than itself, which is exactly the
-message you saw:
+Open `src/minios/gui/GuiMain.java`, right-click, **Run As > Java
+Application**. The window should look like this (tab 1, after **Load
+example** then **Run**):
 
-```
-java.lang.UnsupportedClassVersionError: minios/Main
-has been compiled by a more recent version of the Java Runtime
-(class file version 65.0), this version of the Java Runtime
-only recognises class file versions up to 61.0
-```
+![CPU scheduling tab](screenshots/1-cpu-scheduling.png)
 
-Read it as *"the class was built by Java 21 (65) but is being run by
-Java 17 (61)"*. Here is the number table so you can decode any such
-message:
+If you got this far, everything is set up.
 
-| Java version | Class file version |
-|--------------|--------------------|
-| 8 | 52 |
-| 11 | 55 |
-| 17 | 61 |
-| 21 | 65 |
-| 25 | 69 |
+---
 
-This project uses no API newer than Java 8, so any of these works. Pick
-one version and use it in all three places.
+## Part 2: Just updating an existing copy
 
-### 5.1 Find out what you have installed
+Do **not** delete the project and import it again. Re-importing throws
+away the Java settings from 1.4, and you would have to redo them.
 
-1. Open a terminal (Windows: press Start, type `cmd`, press Enter).
-2. Type:
+1. Put the new files into the **same folder** on disk:
+   * with git: `git pull` inside that folder;
+   * with a ZIP: extract it over the folder and choose **Replace files**.
+2. In Eclipse, click the project and press **F5** (that is Refresh). The
+   new files, including `.settings/`, appear.
+3. **Project > Clean...**, tick the project, **Clean**.
 
-```
-java -version
-```
+Done. The old `bin/` is rebuilt from the new sources.
 
-3. Write down the number in the first line, for example
-   `openjdk version "17.0.11"`. That is the Java your terminal will use
-   to run `java -jar`, so the project must not be compiled to anything
-   higher than that.
-4. Now type:
+You only need Part 1 again if you extracted the new ZIP into a
+*different* folder, so that two folders called `Mini_OS-Project` now
+exist and Eclipse refuses the duplicate name.
 
-```
-where java
-```
+---
 
-   (macOS or Linux: `which java`). This prints the full path of the
-   runtime, for example
-   `C:\Program Files\Eclipse Adoptium\jdk-17\bin\java.exe`.
-   The folder two levels up from `bin` is the JDK home you will need in
-   step 5.3.
+## Part 3: When something is wrong
 
-If `java -version` says *command not found*, install a JDK first
-(Adoptium Temurin 17 is a safe choice), then reopen the terminal so the
-new `PATH` is picked up.
+| What you see | Why | Fix |
+|--------------|-----|-----|
+| *No projects are found to import* | wrong folder picked | go one level deeper, pick the folder with `.project` inside (1.2) |
+| Project greyed out, *already exists in workspace* | two copies with the same name | delete the copy you do not want (tick *delete contents on disk*), then import the other one |
+| Red crosses right after import | the JRE library is not set | 1.4, then Clean |
+| *UnsupportedClassVersionError ... class file version 65.0* | compiled by a newer Java than the one running it | see the table below |
+| *Selection does not contain a main type* | stale `bin/` folder | **Project > Clean...**, then run again |
+| Console does not react to typing | the Console view is not focused | click inside the Console view first, then type |
+| *Run this from the project folder* | the test runner cannot find `samples/` | 4.3 below |
+| A test says `failed` | an algorithm or a message really changed | compare with `samples/expected/`, and regenerate that file only if the change was intended |
 
-### 5.2 Check which Java Eclipse itself is running on
+### The class version error, explained once
 
-1. In Eclipse: **Help > About Eclipse IDE**.
-2. Press the **Installation Details** button.
-3. Open the **Configuration** tab.
-4. In the long property list, find `java.version` and `java.home`.
-   That is the JVM Eclipse is running on.
+Every compiled file carries a version number. A Java runtime refuses to
+load a file that was compiled for a newer Java than itself. The number in
+the error message tells you which Java built it:
 
-If this number is older than the JDK you found in 5.1, that is fine as
-long as Eclipse's JVM is at least as new as the compliance level you
-choose. A 2022 or newer Eclipse needs Java 11 or 17; it will not start
-on Java 8. In practice: pick the JDK from 5.1, and pick a compliance
-level that is no higher than either one.
+| Java | 8 | 11 | 17 | 21 | 25 |
+|------|---|----|----|----|----|
+| class file version | 52 | 55 | 61 | 65 | 69 |
 
-### 5.3 Register the JDK in Eclipse
+So *"class file version 65.0, this runtime recognises up to 61.0"* means:
+built with Java 21, being run by Java 17. Fix it by pointing the project
+at the **older** Java (1.4, choosing that JDK), then Clean. The project
+uses nothing newer than Java 8, so any of these versions is fine as long
+as the compiler and the runtime agree.
 
-1. **Window > Preferences** (macOS: **Eclipse > Settings**).
-2. Open **Java > Installed JREs**.
-3. Look for an entry matching the JDK home from 5.1.
-   * If it is there, tick its checkbox. Exactly one entry should be
-     ticked, because the ticked one becomes the workspace default.
-   * If it is missing, continue with the next step.
-4. Press **Add...**, choose **Standard VM**, press **Next**.
-5. Press **Directory...** and select the JDK home folder, for example
-   `C:\Program Files\Eclipse Adoptium\jdk-17`. Select the folder that
-   directly contains `bin` and `lib`, **not** the `bin` folder itself.
-6. The **JRE name** box fills in by itself. Press **Finish**.
-7. Tick the new entry, press **Apply and Close**.
-
-Common mistake: pointing at `jdk-17\bin` instead of `jdk-17`. Eclipse
-then reports *"The JRE home entry is not a valid JRE home"*, because it
-cannot find `lib` in that folder.
-
-### 5.4 Point the project's build path at that JDK
-
-The repository's `.classpath` contains a bare
-`org.eclipse.jdt.launching.JRE_CONTAINER` entry, which means *"use
-whatever JRE this workspace considers current"*. You are about to make
-that explicit for the project.
-
-1. Right-click the project in Package Explorer, choose **Properties**.
-2. Open **Java Build Path**, then the **Libraries** tab.
-3. Find the entry named **JRE System Library**. The text after it tells
-   you what it uses, for example `[jdk-17]`, `[JavaSE-17]`, or
-   `[JRE] (unbound)`.
-4. Select it and press **Edit...**.
-5. Choose **Alternate JRE** and pick the JDK from step 5.3.
-   If you prefer a version-independent setting that survives moving the
-   project to another PC, choose **Execution environment** and pick the
-   matching entry, for example `JavaSE-17`.
-6. Press **Finish**. A red cross or the word *unbound* should disappear
-   from the entry.
-7. Tick the box **"Use compliance from execution environment on the Java
-   Build Path"** if it is visible and not already ticked. With this box
-   ticked, Eclipse takes the compiler level from the entry you just
-   fixed, so the two can no longer disagree.
-
-Leave this dialog open; the next step is in the same window.
-
-### 5.5 Set the compiler compliance level
-
-1. Still in **Properties**, open **Java Compiler** in the left-hand list.
-2. Look at **Compiler compliance level**. Two cases:
-
-   **Case A, the checkbox is ticked and greyed out.** The box
-   *"Use compliance from execution environment on the Java Build Path"*
-   is in charge, and it already follows step 5.4. Check that the level
-   shown matches your JDK (17 for a jdk-17) and skip to 5.7.
-
-   **Case B, the checkbox is clear or editable.** Then:
-   1. Tick **Enable project specific settings**. Eclipse creates a
-      `.settings/org.eclipse.jdt.core.prefs` file in the project so the
-      choice travels with it.
-   2. Untick **"Use compliance from execution environment on the Java
-      Build Path"** if it is ticked and blocking the fields.
-   3. Set **Compiler compliance level** to your JDK's number, for
-      example **17**.
-   4. Let Eclipse adjust **Source compatibility** and
-      **Target compatibility** automatically; they follow the compliance
-      level. If they do not, set both to the same number.
-
-3. Ignore the *"Configure Project Specific Settings"* yellow warning
-   about deprecated options unless it names a version you chose
-   deliberately (Java 8 shows this warning on newer Eclipse builds; if
-   you see it, use 11 or 17 instead).
-4. Press **Apply and Close**.
-
-### 5.6 If the fields will not accept your number
-
-Some Eclipse builds cap the compliance level at the JDK that is running
-Eclipse, not at the JDK you added.
-
-* Choosing a level higher than Eclipse's own JVM is not supported. Lower
-  it, or start Eclipse with a newer JDK: edit `eclipse.ini` in the
-  Eclipse folder and put
-
-  ```
-  -vm
-  C:\Program Files\Eclipse Adoptium\jdk-17\bin\javaw.exe
-  ```
-
-  on two separate lines, **above** the `-vmargs` line. Restart Eclipse.
-* Choosing 1.4 or 1.5 on a modern Eclipse also fails, because those
-  releases are no longer supported. Use 1.8 as the floor.
-
-### 5.7 Force a rebuild
-
-Settings only affect code compiled afterwards, and `bin/` still holds the
-old classes.
-
-1. **Project > Clean...**
-2. Tick `Mini_OS-Project`, press **Clean**.
-3. Wait for the progress bar to finish, then look at the **Problems**
-   view: it should be empty.
-
-If it still shows *"The project was not built since its build path is
-incomplete"*, the JRE entry is still unbound; go back to 5.4.
-
-### 5.8 Verify the setting really took effect
-
-Do not assume; check the stamp Eclipse wrote.
-
-1. Open the **Console** view and start a terminal there, or use the
-   Windows terminal in the project folder.
-2. Run (this tool ships with every JDK, in its `bin` folder):
+One extra case: if the compliance level box will not accept your number
+at all, Eclipse itself is running on an older Java. Either pick the lower
+number, or start Eclipse on the newer JDK by putting these two lines in
+`eclipse.ini`, above `-vmargs`:
 
 ```
-javap -verbose -cp bin minios.Main | findstr "major version"
+-vm
+C:\Program Files\Eclipse Adoptium\jdk-17\bin\javaw.exe
 ```
 
-On macOS or Linux:
+---
+
+## Part 4: Running things
+
+There are four programs, and it helps to know which is which:
+
+| Class | What it is |
+|-------|------------|
+| `minios.gui.GuiMain` | the GUI (the one you demonstrate) |
+| `minios.Main` | the console menu, same engine |
+| `minios.SampleTestRunner` | runs all 36 samples and reports pass or fail |
+| `minios.gui.GuiInputSelfTest` | checks the input of all 8 tabs, no window |
+
+### 4.1 The GUI
+
+Right-click `src/minios/gui/GuiMain.java` > **Run As > Java Application**.
+On any tab press **Load example**, then **Run**.
+
+The first launch may ask which main class to use; pick `GuiMain`.
+
+### 4.2 The console version
+
+Right-click `src/minios/Main.java` > **Run As > Java Application**, click
+inside the Console view, type `1`, press Enter.
+
+To replay a sample file instead of typing:
+
+1. **Run > Run Configurations... > Java Application > Main**
+2. **Common** tab > **Standard Input and Output** > tick **Input File**
+3. pick e.g. `samples/cpu_srtf.txt`, **Apply**, **Run**
+
+Untick **Input File** afterwards, or every run will replay that same file.
+
+No Input File box in your Eclipse? Use a terminal in the project folder:
 
 ```
-javap -verbose -cp bin minios.Main | grep "major version"
+java -cp bin minios.Main < samples/cpu_srtf.txt
 ```
 
-3. The answer must match your chosen level from the table in 5.0:
-   `major version: 52` for Java 8, `55` for 11, `61` for 17, `65` for 21.
-4. Now confirm the runtime that will launch the app is not older than
-   that: `java -version` from 5.1.
+### 4.3 The regression test
 
-If the stamp is higher than the runtime, Eclipse compiled with a newer
-JDK than the one on your `PATH`. Fix it by pointing 5.4 at the *older*
-JDK, or by putting the newer JDK first on `PATH`.
-
-### 5.9 What "correct" looks like when you are done
-
-| Check | Expected |
-|-------|----------|
-| Preferences > Java > Installed JREs | exactly one entry ticked, matching your JDK home |
-| Java Build Path > Libraries | `JRE System Library [jdk-17]` or `[JavaSE-17]`, no *unbound* |
-| Java Compiler | compliance 17 (or your number), ticked project settings |
-| Problems view after Clean | no red crosses and no yellow warnings from `src` |
-| `javap` stamp | matches the table in 5.0 |
-| `java -version` in the terminal | same number or newer |
-
-From that point, running `GuiMain` inside Eclipse and running
-`java -jar MiniOS-Simulator.jar` from a terminal use compatible
-bytecode, and the class version error cannot come back after a Clean.
-
-## Step 6: Clean build
-
-1. **Project > Clean...**, tick `Mini_OS-Project`, press **Clean**.
-2. Wait for the progress bar in the bottom right to finish.
-3. Look at the **Problems** view. There should be no red crosses.
-
-If the project has red crosses, the build path is still wrong: right-click
-the project, **Build Path > Configure Build Path...**, and repeat step 5.
-
-The sources are plain ASCII and the repository already carries
-`.settings/org.eclipse.core.resources.prefs`, which tells Eclipse to use
-UTF-8. If you ever see odd characters in comments, set
-**Properties > Resource > Text file encoding > UTF-8** by hand.
-
-## Step 7: Run the GUI
-
-1. Expand `src > minios > gui`.
-2. Right-click `GuiMain.java` and choose **Run As > Java Application**.
-3. A window titled *Mini OS Simulator* opens with eight tabs and the note
-   that it does not control real hardware.
-4. On any tab press **Load example**, then **Run**. The report appears in
-   the lower pane.
-
-The first launch may show a list of main classes; pick `GuiMain` and press
-**OK**. Eclipse remembers the choice afterwards.
-
-## Step 8: Run the console version
-
-1. Right-click `src/minios/Main.java`, choose **Run As > Java
-   Application**.
-2. The Console view shows the main menu. **Click inside the Console view
-   first**, then type `1` and press **Enter**. Typing only reaches the
-   program while the Console view has focus.
-
-To play back a whole sample file instead of typing:
-
-1. **Run > Run Configurations...**
-2. Select **Java Application > Main**.
-3. Open the **Common** tab on the right.
-4. Under **Standard Input and Output** tick **Input File**, choose
-   **File System**, and browse to for example
-   `samples\cpu_srtf.txt`.
-5. **Apply**, then **Run**.
-
-The full session runs by itself and the transcript scrolls past. Untick
-**Input File** again for normal interactive use, otherwise every launch
-will replay the same file.
-
-If your Eclipse version has no **Input File** box, use a terminal from the
-project folder instead:
-
-```
-java -cp bin minios.Main < samples\cpu_srtf.txt
-```
-
-## Step 9: Run the 36-sample regression test
-
-1. Right-click `src/minios/SampleTestRunner.java`, choose **Run As > Java
-   Application**.
-2. The Console ends with:
+Right-click `src/minios/SampleTestRunner.java` > **Run As > Java
+Application**. It ends with:
 
 ```
 Result: 36 passed, 0 failed, 36 total.
 ```
 
-What it does: for every file in `samples/`, it starts a fresh Java process,
-feeds the file as standard input to `minios.Main`, and compares the output
-with the matching file in `samples/expected/`. A `FAIL` line names the
-sample that changed, which is handy after you edit an algorithm.
+It needs the project folder as working directory, which Eclipse uses by
+default. If you see *"Run this from the project folder"*, go to **Run
+Configurations > SampleTestRunner > Arguments** and set **Working
+directory > Other > Workspace > Mini_OS-Project**.
 
-Two things to know:
+### 4.4 The GUI input test
 
-* It needs the working directory to be the project folder. Eclipse uses
-  that by default. If you see *"Run this from the project folder"*, open
-  **Run Configurations > SampleTestRunner > Arguments** tab and set
-  **Working directory > Other > Workspace...** to `Mini_OS-Project`.
-* Exit code 1 means at least one sample failed; that is a real difference,
-  not a setup problem.
+Right-click `src/minios/gui/GuiInputSelfTest.java` > **Run As > Java
+Application**. Expect 11 `PASS` lines and `ALL GUI CHECKS PASSED`. No
+window should open; if one does, something is wrong.
 
-## Step 10: Run the GUI input self test
+### 4.5 The JAR
 
-1. Right-click `src/minios/gui/GuiInputSelfTest.java`, choose **Run As >
-   Java Application**.
-2. Expect 11 `PASS` lines followed by `ALL GUI CHECKS PASSED`.
-
-It builds each tab's input the same way the Run button does and feeds it
-to the real module, without opening a window. If a window or a warning
-dialog appears during this test, something is wrong.
-
-## Step 11: Run the JAR (the version you hand in)
-
-Open a terminal in the project folder and run:
+In a terminal, inside the project folder:
 
 ```
 java -jar MiniOS-Simulator.jar
 ```
 
-The JAR is a snapshot of the code at export time. Editing a `.java` file
-in Eclipse does **not** change the JAR, so repeat step 12 whenever you
-change something you want in the submitted JAR.
+The JAR is a copy of the code from when it was exported. Editing a
+`.java` file does **not** update it. To make a new one:
 
-## Step 12: Export a fresh JAR after your changes
-
-1. **Project > Clean...** so `bin/` matches the current sources.
-2. **File > Export... > Java > Runnable JAR file > Next**.
-3. **Launch configuration:** `GuiMain - Mini_OS-Project`.
-4. **Export destination:** `MiniOS-Simulator.jar` inside the project folder
-   (overwrite the old one).
-5. **Finish**, and confirm the overwrite warnings.
-6. Test it from a terminal: `java -jar MiniOS-Simulator.jar`.
-
-If the export refuses to overwrite because the JAR is in use, close any
-running copy of the application first.
+1. **Project > Clean...**
+2. **File > Export... > Java > Runnable JAR file > Next**
+3. Launch configuration `GuiMain - Mini_OS-Project`
+4. Export destination: `MiniOS-Simulator.jar` in the project folder
+5. **Finish**, accept the overwrite
 
 ---
 
-## Troubleshooting
+## Before you present
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `No projects are found to import` | wrong folder chosen in step 4 | go one level deeper, pick the folder that contains `.project` |
-| Project greyed out, *already exists in workspace* | old copy not deleted | do step 1, then import again |
-| `UnsupportedClassVersionError`, *class file version 65.0* | compiled with a newer JDK than the JRE running it | step 5.0 to decode the numbers, 5.4 to repoint, 5.8 to confirm |
-| Red crosses right after import | JRE library unbound | step 5.3 then 5.4, then **Project > Clean** |
-| `Selection does not contain a main type` | file not on the build path, or `bin/` out of date | **Project > Clean**, then run again; if it persists, redo step 5.4 |
-| GUI opens but a tab looks empty | old JAR or stale classes | rerun from `GuiMain.java`, and Clean the project |
-| Console does not accept typing | Console view has no focus | click inside the Console view, then type |
-| `Run this from the project folder` | wrong working directory | step 9, **Arguments** tab |
-| `Result: 31 passed, 1 failed` | you changed an algorithm or a message | compare the named sample against `samples/expected/`, then regenerate that expected file if the change is intended |
-| JAR runs old behaviour | JAR not re-exported | step 12 |
-| `Error: Unable to access jarfile` | wrong folder, or a typo in the name | run from the folder that contains the JAR, or use the full path |
-
-## Files that must stay together
-
-`SampleTestRunner` looks for `samples/` relative to the working directory,
-and `GuiInputSelfTest` does not depend on any file at all. Keep this layout
-if you move the project:
-
-```
-Mini_OS-Project/
-  src/                  source code
-  samples/              36 inputs
-  samples/expected/     36 expected outputs
-  MiniOS-Simulator.jar  runnable GUI
-```
-
-Copying only `src/` somewhere else still lets the GUI run, but the
-regression test will report that it cannot find the samples.
-
-## Final checklist before you present
-
-1. Project imported, **Problems** view empty.
-2. `GuiMain` runs and all eight tabs respond to Load example then Run.
-3. `SampleTestRunner` prints `36 passed, 0 failed`.
-4. `GuiInputSelfTest` prints `ALL GUI CHECKS PASSED`.
+1. Problems view empty (no red crosses).
+2. `GuiMain` opens, and all eight tabs answer Load example then Run.
+3. `SampleTestRunner`: `36 passed, 0 failed`.
+4. `GuiInputSelfTest`: `ALL GUI CHECKS PASSED`.
 5. `java -jar MiniOS-Simulator.jar` opens the same GUI.
-6. `samples/` and `samples/expected/` are both still present.
+6. `samples/` and `samples/expected/` are both still there (the test
+   runner needs them; the GUI does not).

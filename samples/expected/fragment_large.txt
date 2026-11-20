@@ -1,0 +1,61 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+FRAGMENTATION - internal vs external
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+EXTERNAL FRAGMENTATION: free space exists, but it is split into holes.
+Allocation strategy:
+  1) First-Fit  (first partition/hole that fits)
+  2) Best-Fit   (smallest one that fits)
+  3) Worst-Fit  (largest one that fits)
+  4) Compare all three on the same data
+  Choose a strategy: Total memory (KB): How many jobs to allocate first?   Name of job 1 (e.g. A):   Size of J01 (KB):   Name of job 2 (e.g. A):   Size of J02 (KB):   Name of job 3 (e.g. A):   Size of J03 (KB):   Name of job 4 (e.g. A):   Size of J04 (KB):   Name of job 5 (e.g. A):   Size of J05 (KB):   Name of job 6 (e.g. A):   Size of J06 (KB):   Name of job 7 (e.g. A):   Size of J07 (KB):   Name of job 8 (e.g. A):   Size of J08 (KB):   Name of job 9 (e.g. A):   Size of J09 (KB):   Name of job 10 (e.g. A):   Size of J10 (KB):   Name of job 11 (e.g. A):   Size of J11 (KB):   Name of job 12 (e.g. A):   Size of J12 (KB):   Name of job 13 (e.g. A):   Size of J13 (KB):   Name of job 14 (e.g. A):   Size of J14 (KB): How many jobs to free?   Name of the job to free:   Name of the job to free:   Name of the job to free:   Name of the job to free:   Name of the job to free: New request size (KB): 
+COMPARISON - same jobs, frees and request for every strategy
+
+--- first-fit ---
+  Memory map: [J01 0-300] [HOLE 300-1000] [J04 1000-1640] [J05 1640-2050] [J06 2050-2300] [HOLE 2300-3000] [J08 3000-3330] [J09 3330-3520] [J10 3520-4080] [HOLE 4080-4550] [J12 4550-4770] [HOLE 4770-5150] [J14 5150-5760] [HOLE 5760-8192]
+  Total free: 4682 KB, largest hole: 2432 KB, request of 400 KB: fits
+
+--- best-fit ---
+  Memory map: [J01 0-300] [HOLE 300-1000] [J04 1000-1640] [J05 1640-2050] [J06 2050-2300] [HOLE 2300-3000] [J08 3000-3330] [J09 3330-3520] [J10 3520-4080] [HOLE 4080-4550] [J12 4550-4770] [HOLE 4770-5150] [J14 5150-5760] [HOLE 5760-8192]
+  Total free: 4682 KB, largest hole: 2432 KB, request of 400 KB: fits
+
+--- worst-fit ---
+  Memory map: [J01 0-300] [HOLE 300-1000] [J04 1000-1640] [J05 1640-2050] [J06 2050-2300] [HOLE 2300-3000] [J08 3000-3330] [J09 3330-3520] [J10 3520-4080] [HOLE 4080-4550] [J12 4550-4770] [HOLE 4770-5150] [J14 5150-5760] [HOLE 5760-8192]
+  Total free: 4682 KB, largest hole: 2432 KB, request of 400 KB: fits
+
+  1) Internal fragmentation (fixed partitions)
+  2) External fragmentation (holes in variable memory)
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

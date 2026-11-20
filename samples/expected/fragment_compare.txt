@@ -3,13 +3,13 @@
    (This is NOT a real operating system.)
 =====================================================
 ---------------- MAIN MENU --------------------
-  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
   2) Banker's algorithm (deadlock avoidance)
   3) Paging           (logical -> physical)
   4) Segmentation     (logical -> physical)
   5) Fragmentation    (internal & external)
-  6) Page replacement  (FIFO, LRU, Optimal)
-  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
   8) Multiprogramming (jobs sharing CPU+memory)
   0) Exit
 ----------------------------------------------
@@ -66,13 +66,13 @@ Summary (total internal fragmentation):
   0) Back to main menu
   Choose an option: 
 ---------------- MAIN MENU --------------------
-  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
   2) Banker's algorithm (deadlock avoidance)
   3) Paging           (logical -> physical)
   4) Segmentation     (logical -> physical)
   5) Fragmentation    (internal & external)
-  6) Page replacement  (FIFO, LRU, Optimal)
-  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
   8) Multiprogramming (jobs sharing CPU+memory)
   0) Exit
 ----------------------------------------------

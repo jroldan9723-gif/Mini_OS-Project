@@ -1,0 +1,83 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+DISK SCHEDULING
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
+  0) Back to main menu
+  Choose an option: 
+Highest cylinder number (disk = 0..max): Initial head position (0..1999): Number of pending requests: Request queue (70 cylinder number(s), space separated): Initial direction for SCAN / C-SCAN / LOOK / C-LOOK (1 = toward higher cylinders, 2 = toward lower): FCFS (First-Come, First-Served)
+  Order of service : 500 -> 53 -> 190 -> 327 -> 464 -> 601 -> 738 -> 875 -> 1012 -> 1149 -> 1286 -> 1423 -> 1560 -> 1697 -> 1834 -> 1971 -> 108 -> 245 -> 382 -> 519 -> 656 -> 793 -> 930 -> 1067 -> 1204 -> 1341 -> 1478 -> 1615 -> 1752 -> 1889 -> 26 -> 163 -> 300 -> 437 -> 574 -> 711 -> 848 -> 985 -> 1122 -> 1259 -> 1396 -> 1533 -> 1670 -> 1807 -> 1944 -> 81 -> 218 -> 355 -> 492 -> 629 -> 766 -> 903 -> 1040 -> 1177 -> 1314 -> 1451 -> 1588 -> 1725 -> 1862 -> 1999 -> 136 -> 273 -> 410 -> 547 -> 684 -> 821 -> 958 -> 1095 -> 1232 -> 1369 -> 1506
+  Total head movement: 16804 cylinders
+
+SSTF (Shortest Seek Time First)
+  Order of service : 500 -> 492 -> 519 -> 547 -> 574 -> 601 -> 629 -> 656 -> 684 -> 711 -> 738 -> 766 -> 793 -> 821 -> 848 -> 875 -> 903 -> 930 -> 958 -> 985 -> 1012 -> 1040 -> 1067 -> 1095 -> 1122 -> 1149 -> 1177 -> 1204 -> 1232 -> 1259 -> 1286 -> 1314 -> 1341 -> 1369 -> 1396 -> 1423 -> 1451 -> 1478 -> 1506 -> 1533 -> 1560 -> 1588 -> 1615 -> 1670 -> 1697 -> 1725 -> 1752 -> 1807 -> 1834 -> 1862 -> 1889 -> 1944 -> 1971 -> 1999 -> 464 -> 437 -> 410 -> 382 -> 355 -> 327 -> 300 -> 273 -> 245 -> 218 -> 190 -> 163 -> 136 -> 108 -> 81 -> 53 -> 26
+  Total head movement: 3488 cylinders
+
+SCAN (elevator)
+  Order of service : 500 -> 519 -> 547 -> 574 -> 601 -> 629 -> 656 -> 684 -> 711 -> 738 -> 766 -> 793 -> 821 -> 848 -> 875 -> 903 -> 930 -> 958 -> 985 -> 1012 -> 1040 -> 1067 -> 1095 -> 1122 -> 1149 -> 1177 -> 1204 -> 1232 -> 1259 -> 1286 -> 1314 -> 1341 -> 1369 -> 1396 -> 1423 -> 1451 -> 1478 -> 1506 -> 1533 -> 1560 -> 1588 -> 1615 -> 1670 -> 1697 -> 1725 -> 1752 -> 1807 -> 1834 -> 1862 -> 1889 -> 1944 -> 1971 -> 1999 -> 492 -> 464 -> 437 -> 410 -> 382 -> 355 -> 327 -> 300 -> 273 -> 245 -> 218 -> 190 -> 163 -> 136 -> 108 -> 81 -> 53 -> 26
+  Total head movement: 3472 cylinders
+
+C-SCAN (circular elevator)
+  Order of service : 500 -> 519 -> 547 -> 574 -> 601 -> 629 -> 656 -> 684 -> 711 -> 738 -> 766 -> 793 -> 821 -> 848 -> 875 -> 903 -> 930 -> 958 -> 985 -> 1012 -> 1040 -> 1067 -> 1095 -> 1122 -> 1149 -> 1177 -> 1204 -> 1232 -> 1259 -> 1286 -> 1314 -> 1341 -> 1369 -> 1396 -> 1423 -> 1451 -> 1478 -> 1506 -> 1533 -> 1560 -> 1588 -> 1615 -> 1670 -> 1697 -> 1725 -> 1752 -> 1807 -> 1834 -> 1862 -> 1889 -> 1944 -> 1971 -> 1999 -> 0 (wrap) -> 26 -> 53 -> 81 -> 108 -> 136 -> 163 -> 190 -> 218 -> 245 -> 273 -> 300 -> 327 -> 355 -> 382 -> 410 -> 437 -> 464 -> 492
+  Total head movement: 3990 cylinders
+
+LOOK
+  Order of service : 500 -> 519 -> 547 -> 574 -> 601 -> 629 -> 656 -> 684 -> 711 -> 738 -> 766 -> 793 -> 821 -> 848 -> 875 -> 903 -> 930 -> 958 -> 985 -> 1012 -> 1040 -> 1067 -> 1095 -> 1122 -> 1149 -> 1177 -> 1204 -> 1232 -> 1259 -> 1286 -> 1314 -> 1341 -> 1369 -> 1396 -> 1423 -> 1451 -> 1478 -> 1506 -> 1533 -> 1560 -> 1588 -> 1615 -> 1670 -> 1697 -> 1725 -> 1752 -> 1807 -> 1834 -> 1862 -> 1889 -> 1944 -> 1971 -> 1999 -> 492 -> 464 -> 437 -> 410 -> 382 -> 355 -> 327 -> 300 -> 273 -> 245 -> 218 -> 190 -> 163 -> 136 -> 108 -> 81 -> 53 -> 26
+  Total head movement: 3472 cylinders
+
+C-LOOK
+  Order of service : 500 -> 519 -> 547 -> 574 -> 601 -> 629 -> 656 -> 684 -> 711 -> 738 -> 766 -> 793 -> 821 -> 848 -> 875 -> 903 -> 930 -> 958 -> 985 -> 1012 -> 1040 -> 1067 -> 1095 -> 1122 -> 1149 -> 1177 -> 1204 -> 1232 -> 1259 -> 1286 -> 1314 -> 1341 -> 1369 -> 1396 -> 1423 -> 1451 -> 1478 -> 1506 -> 1533 -> 1560 -> 1588 -> 1615 -> 1670 -> 1697 -> 1725 -> 1752 -> 1807 -> 1834 -> 1862 -> 1889 -> 1944 -> 1971 -> 1999 -> 26 (jump) -> 53 -> 81 -> 108 -> 136 -> 163 -> 190 -> 218 -> 245 -> 273 -> 300 -> 327 -> 355 -> 382 -> 410 -> 437 -> 464 -> 492
+  Total head movement: 3938 cylinders
+
+SUMMARY (total head movement)
+  FCFS  : 16804 cylinders
+  SSTF  : 3488 cylinders
+  SCAN  : 3472 cylinders
+  C-SCAN: 3990 cylinders  (includes the return jump - some books exclude it)
+  LOOK  : 3472 cylinders
+  C-LOOK: 3938 cylinders  (includes the jump - some books exclude it)
+  Smallest movement in this run: 3472 cylinders (SCAN (elevator)).
+
+  1) FCFS
+  2) SSTF   (Shortest Seek Time First)
+  3) SCAN   (elevator)
+  4) C-SCAN (circular elevator)
+  5) LOOK   (SCAN without the trip to the boundary)
+  6) C-LOOK (circular LOOK)
+  7) Compare all six on the same requests
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

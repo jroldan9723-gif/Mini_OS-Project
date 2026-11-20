@@ -1,0 +1,80 @@
+package minios.gui;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+import minios.DiskScheduler;
+
+// Tab 7: disk scheduling. The request queue is a free-form list, so any
+// number of pending requests can be simulated.
+public class DiskPanel extends ModulePanel {
+
+    private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
+        "FCFS (First-Come, First-Served)",
+        "SSTF (Shortest Seek Time First)",
+        "SCAN (elevator)",
+        "C-SCAN (circular elevator)",
+        "LOOK (SCAN without the boundary trip)",
+        "C-LOOK (circular LOOK)",
+        "Compare all six on the same requests"
+    });
+    private final JTextField maxCylinder = Ui.field(8);
+    private final JTextField head = Ui.field(8);
+    private final JTextArea requests = Ui.area(6, 34);
+    private final JComboBox<String> direction = new JComboBox<>(new String[]{
+        "Toward higher cylinders",
+        "Toward lower cylinders"
+    });
+
+    public DiskPanel() {
+        super("Disk scheduling",
+                "Disk is 0..max. The request queue is a list of cylinder numbers inside the "
+                + "disk; the initial direction only matters for SCAN, C-SCAN, LOOK and C-LOOK.",
+                DiskScheduler::run);
+        addRow("Algorithm:", algorithm);
+        addRow("Highest cylinder number (disk = 0..max):", maxCylinder);
+        addRow("Initial head position:", head);
+        addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
+        addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"));
+        addWideRow(Ui.scrolled(requests));
+    }
+
+    // Queue values are checked against the disk limits up front, because
+    // the console would otherwise ask for the whole problem again.
+    @Override
+    public String buildScript() {
+        int choice = algorithm.getSelectedIndex() + 1;
+        int max = Ui.parseInt("Highest cylinder number", maxCylinder.getText(), 1, 1_000_000);
+        int start = Ui.parseInt("Initial head position", head.getText(), 0, max);
+        int[] queue = Ui.parseIntList("Request queue", requests.getText(), 0, max);
+        int dir = direction.getSelectedIndex() + 1;
+
+        StringBuilder script = new StringBuilder();
+        script.append(choice).append('\n');
+        script.append(max).append('\n');
+        script.append(start).append('\n');
+        script.append(queue.length).append('\n');
+        StringBuilder line = new StringBuilder();
+        for (int i = 0; i < queue.length; i++) {
+            if (i > 0) {
+                line.append(' ');
+            }
+            line.append(queue[i]);
+        }
+        script.append(line).append('\n');
+        script.append(dir).append('\n');
+        script.append("0\n");
+        return script.toString();
+    }
+
+    @Override
+    public void loadExample() {
+        algorithm.setSelectedIndex(6);
+        maxCylinder.setText("199");
+        head.setText("53");
+        requests.setText("98 183 37 122 14 124 65 67");
+        direction.setSelectedIndex(0);
+    }
+}

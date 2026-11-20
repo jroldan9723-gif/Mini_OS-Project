@@ -3,60 +3,63 @@
    (This is NOT a real operating system.)
 =====================================================
 ---------------- MAIN MENU --------------------
-  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
   2) Banker's algorithm (deadlock avoidance)
   3) Paging           (logical -> physical)
   4) Segmentation     (logical -> physical)
   5) Fragmentation    (internal & external)
-  6) Page replacement  (FIFO, LRU, Optimal)
-  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
   8) Multiprogramming (jobs sharing CPU+memory)
   0) Exit
 ----------------------------------------------
 Your choice: 
 CPU SCHEDULING
-Options 1-4 assume every process arrives at time 0.
+Options 1-4 and 6 assume every process arrives at time 0.
 SRTF (option 5) asks for an arrival time per process.
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
   3) Round Robin (preemptive, fixed time quantum)
-  4) Compare all three on the same processes
+  4) Compare FCFS, SJF, RR and Priority on the same processes
   5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
   0) Back to main menu
   Choose an option: 
-How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4: Time quantum for Round Robin (whole time units): 
-COMPARISON OF THE THREE ALGORITHMS
+How many processes?   CPU burst time for P1:   CPU burst time for P2:   CPU burst time for P3:   CPU burst time for P4: Time quantum for Round Robin (whole time units):   Priority of P1 (smaller number = higher priority):   Priority of P2 (smaller number = higher priority):   Priority of P3 (smaller number = higher priority):   Priority of P4 (smaller number = higher priority): 
+COMPARISON OF THE FOUR ALGORITHMS
 (W = waiting time, T = turnaround time)
 
-Process  Burst | FCFS    | SJF     | RR     
-               | W    T  | W    T  | W    T 
--------- ----- | ------- | ------- | -------
-P1           5 |   0   5 |   3   8 |  11  16
-P2           3 |   5   8 |   0   3 |   4   7
-P3           8 |   8  16 |  14  22 |  12  20
-P4           6 |  16  22 |   8  14 |  16  22
--------- ----- | ------- | ------- | -------
+Process  Burst | FCFS     | SJF      | RR       | Priority
+               | W    T   | W    T   | W    T   | W    T  
+-------- ----- | -------- | -------- | -------- | --------
+P1           5 | 0 5      | 3 8      | 11 16    | 9 14    
+P2           3 | 5 8      | 0 3      | 4 7      | 0 3     
+P3           8 | 8 16     | 14 22    | 12 20    | 14 22   
+P4           6 | 16 22    | 8 14     | 16 22    | 3 9     
+-------- ----- | -------- | -------- | -------- | --------
 Averages (waiting / turnaround):
-  FCFS : 7.25 / 12.75
-  SJF  : 6.25 / 11.75
-  RR   : 10.75 / 16.25
+  FCFS     : 7.25 / 12.75
+  SJF      : 6.25 / 11.75
+  RR       : 10.75 / 16.25
+  Priority : 6.50 / 12.00
 
   1) FCFS        (First-Come, First-Served)
   2) SJF         (Shortest Job First, non-preemptive)
   3) Round Robin (preemptive, fixed time quantum)
-  4) Compare all three on the same processes
+  4) Compare FCFS, SJF, RR and Priority on the same processes
   5) SRTF        (Shortest Remaining Time First, preemptive)
+  6) Priority    (non-preemptive, smaller number = higher priority)
   0) Back to main menu
   Choose an option: 
 ---------------- MAIN MENU --------------------
-  1) CPU scheduling   (FCFS, SJF, Round Robin)
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
   2) Banker's algorithm (deadlock avoidance)
   3) Paging           (logical -> physical)
   4) Segmentation     (logical -> physical)
   5) Fragmentation    (internal & external)
-  6) Page replacement  (FIFO, LRU, Optimal)
-  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
   8) Multiprogramming (jobs sharing CPU+memory)
   0) Exit
 ----------------------------------------------

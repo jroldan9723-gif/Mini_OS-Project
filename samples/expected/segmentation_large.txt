@@ -1,0 +1,74 @@
+=====================================================
+   MINI OS SIMULATOR  --  educational demonstration
+   (This is NOT a real operating system.)
+=====================================================
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+SEGMENTATION - logical to physical address translation
+
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+How many segments? Physical memory (RAM) size in bytes:   Base address of segment 0:   Limit (size) of segment 0:   Base address of segment 1:   Limit (size) of segment 1:   Base address of segment 2:   Limit (size) of segment 2:   Base address of segment 3:   Limit (size) of segment 3:   Base address of segment 4:   Limit (size) of segment 4:   Base address of segment 5:   Limit (size) of segment 5:   Base address of segment 6:   Limit (size) of segment 6:   Base address of segment 7:   Limit (size) of segment 7:   Base address of segment 8:   Limit (size) of segment 8:   Base address of segment 9:   Limit (size) of segment 9:   Base address of segment 10:   Limit (size) of segment 10:   Base address of segment 11:   Limit (size) of segment 11:   Base address of segment 12:   Limit (size) of segment 12:   Base address of segment 13:   Limit (size) of segment 13:   Base address of segment 14:   Limit (size) of segment 14:   Base address of segment 15:   Limit (size) of segment 15:   Base address of segment 16:   Limit (size) of segment 16:   Base address of segment 17:   Limit (size) of segment 17: 
+Segment table in use:
+  Segment |   Base | Limit | Ends at
+  --------|--------|-------|--------
+        0 |      0 |    50 |      49
+        1 |     50 |   187 |     236
+        2 |    253 |   324 |     576
+        3 |    609 |   461 |    1069
+        4 |   1070 |    98 |    1167
+        5 |   1184 |   235 |    1418
+        6 |   1451 |   372 |    1822
+        7 |   1823 |   509 |    2331
+        8 |   2348 |   146 |    2493
+        9 |   2526 |   283 |    2808
+       10 |   2809 |   420 |    3228
+       11 |   3245 |    57 |    3301
+       12 |   3334 |   194 |    3527
+       13 |   3528 |   331 |    3858
+       14 |   3875 |   468 |    4342
+       15 |   4375 |   105 |    4479
+       16 |   4480 |   242 |    4721
+       17 |   4738 |   379 |    5116
+
+Segment number (-1 to stop):   Offset inside that segment:   0:10 -> base 0 + offset 10 = physical address 10
+Segment number (-1 to stop):   Offset inside that segment:   1:99999 -> SEGMENTATION FAULT: offset 99999 is past the end of segment 1 (limit = 187).
+Segment number (-1 to stop):   Offset inside that segment:   2:0 -> base 253 + offset 0 = physical address 253
+Segment number (-1 to stop):   Offset inside that segment:   5:400 -> SEGMENTATION FAULT: offset 400 is past the end of segment 5 (limit = 235).
+Segment number (-1 to stop):   Offset inside that segment:   7:-1 -> INVALID ADDRESS: offset is negative.
+Segment number (-1 to stop):   Offset inside that segment:   9:100000 -> SEGMENTATION FAULT: offset 100000 is past the end of segment 9 (limit = 283).
+Segment number (-1 to stop):   Offset inside that segment:   11:5 -> base 3245 + offset 5 = physical address 3250
+Segment number (-1 to stop):   Offset inside that segment:   13:250 -> base 3528 + offset 250 = physical address 3778
+Segment number (-1 to stop):   Offset inside that segment:   17:0 -> base 4738 + offset 0 = physical address 4738
+Segment number (-1 to stop):   Offset inside that segment:   99:3 -> INVALID ADDRESS: segment 99 does not exist (valid segments are 0..17).
+Segment number (-1 to stop):   Offset inside that segment:   4:499 -> SEGMENTATION FAULT: offset 499 is past the end of segment 4 (limit = 98).
+Segment number (-1 to stop):   Offset inside that segment:   16:12345 -> SEGMENTATION FAULT: offset 12345 is past the end of segment 16 (limit = 242).
+Segment number (-1 to stop): 
+  1) Build a segment table and translate addresses
+  0) Back to main menu
+  Choose an option: 
+---------------- MAIN MENU --------------------
+  1) CPU scheduling   (FCFS, SJF, Round Robin, Priority)
+  2) Banker's algorithm (deadlock avoidance)
+  3) Paging           (logical -> physical)
+  4) Segmentation     (logical -> physical)
+  5) Fragmentation    (internal & external)
+  6) Page replacement  (FIFO, LRU, Optimal, LFU)
+  7) Disk scheduling  (FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK)
+  8) Multiprogramming (jobs sharing CPU+memory)
+  0) Exit
+----------------------------------------------
+Your choice: 
+
+Goodbye!

@@ -41,19 +41,57 @@ The extracted folder contains one folder inside it, usually called
 `Mini_OS-Project-main`. **Open that one.** It is the folder with
 `.project` and `src` in it.
 
-## Step 3: Copy everything from it
+## Step 3: Copy everything from it (this is the "replace" part)
 
-1. In the extracted folder, press **Ctrl+A** to select everything.
-2. **Ctrl+C** to copy.
+You are pasting the new files on top of the old ones. Same names, so
+Windows has to overwrite instead of adding.
+
+1. In the extracted folder (the one with `.project` and `src`), press
+   **Ctrl+A**. Everything should turn blue, folders included.
+2. **Ctrl+C**.
 3. Go to the folder from Step 1 and open it.
-4. **Ctrl+V** to paste.
-5. Windows asks what to do with the files that already exist. Choose
-   **Replace the files in the destination**.
-6. If it says a folder cannot be replaced, tick **Do this for all
-   current items** and press **Yes**.
+4. **Ctrl+V**.
 
-That is the whole update. Nothing in Eclipse has changed yet, because
-Eclipse is still showing its old memory of those files.
+Now Windows asks what to do. The wording differs slightly by version:
+
+| Dialog you see | Click |
+|----------------|-------|
+| *"There is already a file with the same name in this location"* | **Replace the file in the destination** |
+| *"Do you want to replace these files?"* with a tick box | tick **Do this for all current items**, then **Yes** |
+| *"The destination has 24 files with the same name"* | **Replace the files in the destination** |
+
+The paste then runs for a couple of seconds. When it finishes, the window
+looks exactly like before, which is normal: the files were replaced, not
+added.
+
+> **You are not deleting anything, and you do not need to.** Choosing
+> *Replace* overwrites each file one by one. If you accidentally chose
+> *"Don't copy"* or *"Skip these files"*, nothing changed; press **Ctrl+V**
+> again and pick Replace this time.
+
+### If Windows refuses to replace something
+
+You get *"The action can't be completed because the file is open in
+another program"*. The file is locked by something else, so Windows
+cannot write over it. In practice it is one of these two:
+
+* you are running the simulator from that folder, so
+  `MiniOS-Simulator.jar` is locked. Close the app window and paste again.
+* `README.md` is open in Word or Notepad. Close it and paste again.
+
+If it is only one file, choosing **Skip** for that one is harmless as
+long as you fix it afterwards: paste the whole thing again with the app
+closed.
+
+### Check the paste landed before going back to Eclipse
+
+1. Go into the pasted folder: `src` > `minios` > `gui`.
+2. Right-click `CpuPanel.java` > **Open with** > **Notepad**.
+3. Press **Ctrl+F** and search for `Greyed-out boxes`.
+
+That text exists only in the new version. If Notepad cannot find it, that
+file was not replaced; paste again (Ctrl+V, then Replace). This check
+needs no Eclipse, so do it now, before Step 4.
 
 > If you edited any of the source files yourself and want to keep your
 > changes, copy those files out first. This paste overwrites them.

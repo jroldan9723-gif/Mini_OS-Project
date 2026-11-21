@@ -268,10 +268,48 @@ This is the only case where you import instead of paste.
    Workspace > Next**.
 3. **Select root directory** > **Browse** > pick that folder.
 4. `Mini_OS-Project` appears ticked > **Finish**.
-5. If there is a red cross on the project, right-click it >
-   **Properties > Java Build Path > Libraries**, select **JRE System
-   Library**, press **Edit...**, choose **Alternate JRE**, pick your JDK,
-   **Finish > Apply and Close**, then **Project > Clean...**.
+5. If there is a red cross on the project, fix the JRE first: see
+   "Where the build path is" below, then **Project > Clean...**.
+
+---
+
+## Where the build path is (red crosses, wrong Java version)
+
+The "build path" is not a file you can open. It is one of the property
+pages of the project, and there are three ways to reach the same place:
+
+| Route | What to do |
+|-------|------------|
+| Right-click menu (easiest) | Right-click **Mini_OS-Project** in Package Explorer > **Build Path** > **Configure Build Path...** |
+| Project menu | Select the project, then **Project** menu > **Properties** |
+| Keyboard | Select the project and press **Alt+Enter** |
+
+All three open a **Properties for Mini_OS-Project** window. Then:
+
+1. Click the **Libraries** tab (it is the third tab: *Source*, *Projects*,
+   *Libraries*, *Order and Export*).
+2. Find the row **JRE System Library**. If it says *unbound* or shows a
+   red cross, that is your problem.
+3. Select that row > **Edit...**.
+4. Choose **Alternate JRE** > pick your installed JDK > **Finish**.
+5. **Apply and Close**.
+6. **Project > Clean...** > tick the project > **Clean**.
+
+To check the Java **language level** instead (the cause of
+`UnsupportedClassVersionError`), the same window has a **Java Compiler**
+page on the left, with **Compiler compliance level** on it. Set it to the
+same number as your JDK, e.g. 17.
+
+Where things live, since the names are easy to mix up:
+
+| What you want | Where it is |
+|---------------|-------------|
+| The JRE this project compiles against | Project > Properties > **Java Build Path** > Libraries |
+| The Java language level | Project > Properties > **Java Compiler** |
+| The JDKs Eclipse knows about | **Window > Preferences > Java > Installed JREs** (not per project) |
+| The output folder (`bin/`) | Project > Properties > **Java Build Path** > **Source** tab, *Default output folder* |
+
+If the project has no red crosses and runs, you do not need any of this.
 
 ---
 
@@ -281,8 +319,8 @@ This is the only case where you import instead of paste.
 |--------------|---------------|-----|
 | The old behaviour is still there after Step 6 | Eclipse never saw the new files | repeat Step 4 (F5) and Step 5 (Clean) |
 | *"already exists in workspace"* while importing | two projects with the same name | you do not need to import; just use Steps 1-6 on the existing one |
-| Red crosses after Clean | the JRE library was never set for this project | the last step in the section above |
-| `UnsupportedClassVersionError`, *class file version 65.0* | the project is compiled for a newer Java than the one running it | set the Java Build Path to your JDK (same section), then Clean |
+| Red crosses after Clean | the JRE library was never set for this project | section "Where the build path is" above |
+| `UnsupportedClassVersionError`, *class file version 65.0* | the project is compiled for a newer Java than the one running it | section "Where the build path is": set the JRE and the compliance level, then Clean |
 | Rows are not greyed out | you are running an old build or the old JAR | **Project > Clean...**, then run `GuiMain` again |
 | `java -jar MiniOS-Simulator.jar` shows the old screen | the JAR is fine; it was rebuilt already | run it from the folder from Step 1, not from an older copy |
 | Console does not accept typing | the Console view is not focused | click inside the Console view first |

@@ -212,6 +212,52 @@ configuration `GuiMain - Mini_OS-Project`, destination
 
 ---
 
+## "Can I just delete the old one and put the new one?"
+
+Yes, that works. It is the slower way, and it costs you two things, so
+know what you are trading before you do it.
+
+### The delete-and-reimport way (works, 5 minutes)
+
+1. In Package Explorer, right-click **Mini_OS-Project** > **Delete**.
+2. Tick **Delete project contents on disk (cannot be undone)** > **OK**.
+   The folder on your disk is gone now.
+3. Extract the new ZIP (Step 2) and open the inner folder that contains
+   `.project`.
+4. **File > Import... > General > Existing Projects into Workspace >
+   Next > Select root directory > Browse**, pick that folder,
+   **Finish**.
+5. If red crosses appear, set the JRE once (the last step of the section
+   below), then **Project > Clean...**.
+6. Run `GuiMain` as in Step 7.1.
+
+### What it costs you
+
+| | Paste over (Steps 1-6) | Delete and re-import |
+|---|---|---|
+| Time | about 2 minutes | about 5 minutes |
+| Run configurations you made (like the `Input File` one for the console) | kept | **lost** |
+| A hand-set JRE / build path | kept | **lost**, red crosses until you redo it |
+| Risk of picking the wrong folder | none, you paste into the open one | real: the wrong level gives *"No projects are found to import"* |
+| Risk of losing the project entirely | none | **real** if you delete the folder and then cannot find the ZIP |
+
+The second row is the one people forget: deleting the project also
+deletes every run configuration, so the `Input File` trick in 7.2 has to
+be set up again.
+
+### When deleting is actually the better choice
+
+* The project in Eclipse is already broken and you would rather start
+  clean than diagnose it.
+* You never changed any settings (no custom JRE, no run configurations),
+  so there is nothing to lose.
+* You want a folder with a different name or in a different place.
+
+If none of those apply, paste over it. Same result, fewer steps, nothing
+to redo.
+
+---
+
 ## If you do not have the project in Eclipse at all
 
 This is the only case where you import instead of paste.

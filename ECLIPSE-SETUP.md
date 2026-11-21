@@ -115,6 +115,10 @@ Eclipse throws away the old compiled classes in `bin` and compiles the
 new sources. The **Problems** view at the bottom should be empty when it
 finishes.
 
+If red errors appear in the Console when you then run `GuiMain`, it is
+the Java version setting, not the code: see "The 'compiled by a more
+recent version' error" below.
+
 ## Step 6: Check the new code is really in there
 
 1. Expand `src > minios > gui` and open `GuiMain.java`.
@@ -295,10 +299,78 @@ All three open a **Properties for Mini_OS-Project** window. Then:
 5. **Apply and Close**.
 6. **Project > Clean...** > tick the project > **Clean**.
 
-To check the Java **language level** instead (the cause of
-`UnsupportedClassVersionError`), the same window has a **Java Compiler**
-page on the left, with **Compiler compliance level** on it. Set it to the
-same number as your JDK, e.g. 17.
+## The "compiled by a more recent version" error
+
+Full message, in red at the top of the Console:
+
+```
+java.lang.UnsupportedClassVersionError: minios/gui/GuiMain has been
+compiled by a more recent version of the Java Runtime (class file
+version 65.0), this version of the Java Runtime only recognises class
+file versions up to 61.0
+```
+
+Two Java versions are in play and they disagree:
+
+| Number in the message | What it is |
+|-----------------------|------------|
+| **65.0** (the first number) | the version the `.class` files in `bin/` were **compiled** to |
+| **61.0** (the second) | the highest version the Java **running** the app understands |
+
+The line above the error tells you which runtime is running it, and it
+looks like this in your case:
+
+```
+C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\javaw.exe
+```
+
+`jdk-17` understands up to **61**. So the classes in `bin/` were built
+with Java 21 (65) or Java 25 (69) by the project's compiler, even though
+the app runs on 17. **Your code is fine; only the compile setting is
+wrong.**
+
+### Fix it in 30 seconds
+
+1. Right-click **Mini_OS-Project** > **Build Path** > **Configure Build
+   Path...**
+2. Click **Java Compiler** in the list on the left.
+3. Tick **Enable project specific settings**.
+4. Set **Compiler compliance level** to the number matching the runtime
+   in the error. For the `jdk-17` path above, choose **17**.
+   (If the box is greyed out, untick **Use compliance from execution
+   environment on the Java Build Path** on the same page first.)
+5. **Apply and Close**.
+6. **Project > Clean...** > tick the project > **Clean**. This deletes the
+   old 65.0 files and compiles fresh ones.
+7. **Run As > Java Application** again.
+
+If you would rather keep the code compatible with 17 and also with the
+JAR that is already in the repository, pick the **lower** of the two
+numbers, never the higher one. Lower is always safe: Java 8 code runs on
+Java 17.
+
+### Why this project cannot hit it any more
+
+The repository now ships `.settings/org.eclipse.jdt.core.prefs`, which
+tells Eclipse to compile at **Java 11** unless you deliberately change
+it. Java 11 bytecode (version 55) runs on Java 11, 17, 21 and 25, so the
+mismatch cannot happen after a Clean. The JAR in the repository is even
+more conservative: its classes are version 52 (Java 8).
+
+If your `bin/` still holds 65.0 files after Clean, the project-specific
+setting is not being applied: check step 3 above, then Clean again.
+
+### The quick sanity check
+
+From a terminal in the project folder:
+
+```
+javap -verbose -cp bin minios.Main | findstr "major version"
+```
+
+On macOS or Linux, replace `findstr` with `grep`. The number must be
+lower than or equal to what the runtime in the error message supports:
+52 for Java 8, 55 for 11, 61 for 17, 65 for 21.
 
 Where things live, since the names are easy to mix up:
 
@@ -320,7 +392,7 @@ If the project has no red crosses and runs, you do not need any of this.
 | The old behaviour is still there after Step 6 | Eclipse never saw the new files | repeat Step 4 (F5) and Step 5 (Clean) |
 | *"already exists in workspace"* while importing | two projects with the same name | you do not need to import; just use Steps 1-6 on the existing one |
 | Red crosses after Clean | the JRE library was never set for this project | section "Where the build path is" above |
-| `UnsupportedClassVersionError`, *class file version 65.0* | the project is compiled for a newer Java than the one running it | section "Where the build path is": set the JRE and the compliance level, then Clean |
+| `UnsupportedClassVersionError`, *class file version 65.0* | the project is compiled for a newer Java than the one running it | section "The 'compiled by a more recent version' error" below has the 30-second fix |
 | Rows are not greyed out | you are running an old build or the old JAR | **Project > Clean...**, then run `GuiMain` again |
 | `java -jar MiniOS-Simulator.jar` shows the old screen | the JAR is fine; it was rebuilt already | run it from the folder from Step 1, not from an older copy |
 | Console does not accept typing | the Console view is not focused | click inside the Console view first |

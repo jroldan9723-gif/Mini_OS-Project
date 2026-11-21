@@ -90,6 +90,75 @@ finishes.
 
 If you see the grey row and the results, the update worked.
 
+## Step 7: The steps to run it every time
+
+Once the project is in Eclipse, you run things from Package Explorer.
+There are four programs worth knowing, and they all start the same way:
+**right-click the `.java` file > Run As > Java Application**.
+
+### 7.1 The GUI (this is the one you demonstrate)
+
+1. Expand `src > minios > gui`.
+2. Right-click **GuiMain.java** > **Run As** > **Java Application**.
+3. Pick a tab along the top.
+4. Press **Load example** to fill the form, or type your own numbers.
+5. Press **Run**. The report appears in the Results pane.
+
+The first launch may ask which main class to use; pick `GuiMain` and
+press **OK**. Eclipse remembers it after that.
+
+### 7.2 The console version (same calculations, text menu)
+
+1. Right-click **src/minios/Main.java** > **Run As** > **Java
+   Application**.
+2. **Click inside the Console view first.** Typing only reaches the
+   program while the Console has focus; without it, nothing happens and
+   it looks frozen.
+3. Type `1`, press Enter, and follow the prompts.
+
+To replay a whole sample file instead of typing it:
+
+1. **Run > Run Configurations... > Java Application > Main**
+2. Open the **Common** tab.
+3. Under **Standard Input and Output**, tick **Input File**.
+4. **File System...** and pick e.g. `samples/cpu_srtf.txt`.
+5. **Apply**, then **Run**.
+
+Untick **Input File** afterwards, or every run replays that same file.
+
+### 7.3 The regression test (all 36 samples)
+
+1. Right-click **src/minios/SampleTestRunner.java** > **Run As** >
+   **Java Application**.
+2. The Console ends with `Result: 36 passed, 0 failed, 36 total.`
+
+It needs the project folder as the working directory, which Eclipse uses
+by default. If you see *"Run this from the project folder"*, go to **Run
+Configurations > SampleTestRunner > Arguments** and set **Working
+directory > Other > Workspace > Mini_OS-Project**.
+
+### 7.4 The GUI input test (all 8 tabs, no window)
+
+1. Right-click **src/minios/gui/GuiInputSelfTest.java** > **Run As** >
+   **Java Application**.
+2. Expect 11 `PASS` lines and `ALL GUI CHECKS PASSED`.
+
+No window should open. If one does, something is wrong.
+
+### 7.5 The JAR, from a terminal
+
+Open a terminal in the project folder (Step 1) and run:
+
+```
+java -jar MiniOS-Simulator.jar
+```
+
+The JAR is a copy of the code from when it was exported; editing a
+`.java` file does not change it. To make a new one: **Project > Clean...**,
+then **File > Export... > Java > Runnable JAR file > Next**, launch
+configuration `GuiMain - Mini_OS-Project`, destination
+`MiniOS-Simulator.jar` in the project folder, **Finish**.
+
 ---
 
 ## What actually changed, if you are curious
@@ -145,7 +214,7 @@ Same six steps every time:
 3. paste and replace (Step 3),
 4. F5,
 5. Clean,
-6. run `GuiMain` and look.
+6. run `GuiMain` and look (Step 7.1).
 
 If you use git, Steps 2 and 3 are replaced by one command inside the
 project folder:

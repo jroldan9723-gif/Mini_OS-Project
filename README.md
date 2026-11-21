@@ -44,7 +44,8 @@ In Eclipse: import the project (File > Import > General > Existing
 Projects into Workspace), open `src/minios/gui/GuiMain.java` and choose
 Run As > Java Application. Already have it imported and just need the
 newer code? `ECLIPSE-SETUP.md` has the six steps for that (find the
-folder, download, paste and replace, F5, Clean, run), plus the one-time
+folder, download, paste and replace, F5, Clean, run), its step 7 lists
+the run steps for all four programs, and it ends with the one-time
 import if you do not have the project in Eclipse yet.
 
 ### Console menu (same engine, text mode)
@@ -70,7 +71,8 @@ On Windows the same two commands work in the Command Prompt.
 
 1. File > Export...
 2. Java > Runnable JAR file > Next
-3. Launch configuration: `GuiMain - minios`
+3. Launch configuration: `GuiMain - Mini_OS-Project` (Eclipse names it
+   after the class and the project)
 4. Export destination: any file name ending in `.jar`
 
 The repository already contains a ready-made `MiniOS-Simulator.jar`, so

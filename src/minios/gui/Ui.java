@@ -35,10 +35,10 @@ public final class Ui {
     public static JTextField field(int columns) {
         JTextField f = new JTextField(columns);
         f.setFont(Theme.BODY);
-        f.setForeground(Theme.TEXT);
+        f.setForeground(Theme.INK);
         f.setBackground(Color.WHITE);
         f.setBorder(fieldBorder());
-        f.setMargin(new Insets(4, 6, 4, 6));
+        f.setMargin(new Insets(5, 8, 5, 8));
         return f;
     }
 
@@ -48,7 +48,7 @@ public final class Ui {
         a.setWrapStyleWord(false);
         a.setTabSize(4);
         a.setFont(Theme.BODY);
-        a.setForeground(Theme.TEXT);
+        a.setForeground(Theme.INK);
         a.setBackground(Color.WHITE);
         a.setMargin(new Insets(4, 6, 4, 6));
         return a;
@@ -58,7 +58,7 @@ public final class Ui {
         JTextArea out = new JTextArea();
         out.setEditable(false);
         out.setFont(Theme.MONO);
-        out.setForeground(Theme.TEXT);
+        out.setForeground(Theme.INK);
         out.setBackground(Theme.CARD);
         out.setTabSize(4);
         return out;
@@ -78,20 +78,41 @@ public final class Ui {
     // A flat, single-pixel border. The default look and feel border is what
     // makes a Swing window look dated.
     static Border fieldBorder() {
-        return BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Theme.LINE),
-                BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        return BorderFactory.createLineBorder(Theme.LINE);
     }
 
     // The stock combo box is short and 3D; give it the same flat frame and
     // height as a text field so a row of controls lines up.
     public static void styleCombo(javax.swing.JComboBox<?> combo) {
         combo.setFont(Theme.BODY);
-        combo.setForeground(Theme.TEXT);
+        combo.setForeground(Theme.INK);
         combo.setBackground(Color.WHITE);
         combo.setBorder(fieldBorder());
-        combo.setPreferredSize(new java.awt.Dimension(200, 26));
+        combo.setPreferredSize(new java.awt.Dimension(200, 28));
         ((javax.swing.JComponent) combo).putClientProperty("JComboBox.isTableCellEditor", Boolean.FALSE);
+    }
+
+    // Puts a rounded tinted chip behind a label, used for the small status
+    // text in the report header.
+    static JComponent pill(final javax.swing.JLabel label) {
+        return new JComponent() {
+            private static final long serialVersionUID = 1L;
+            {
+                setLayout(new java.awt.BorderLayout());
+                setBorder(new javax.swing.border.EmptyBorder(3, 8, 3, 8));
+                add(label, java.awt.BorderLayout.CENTER);
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                java.awt.Color c = label.getForeground();
+                g2.setColor(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue(), 26));
+                g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.dispose();
+            }
+        };
     }
 
     static JButton primary(String text) {

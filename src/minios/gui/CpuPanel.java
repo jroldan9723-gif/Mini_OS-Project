@@ -39,7 +39,7 @@ public class CpuPanel extends ModulePanel {
 
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: ID, arrival, burst. Greyed boxes are unused.",
+                "One line per process: ID, arrival, burst.",
                 CPUScheduler::run);
         Ui.styleCombo(algorithm);
         addRow("Algorithm:", algorithm);

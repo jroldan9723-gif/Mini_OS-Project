@@ -59,7 +59,7 @@ public class FragmentationPanel extends ModulePanel {
                 "<html><b>Jobs</b> - external demo: \"name size\" per line</html>"), 20));
         externalRows.add(addWideRow(Ui.scrolled(jobs), 66));
         externalRows.add(addWideRow(new JLabel(
-                "<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>"), 20));
+                "<html><b>Jobs to free</b> - external demo, optional</html>"), 20));
         externalRows.add(addLastWideRow(frees));
         externalRows.add(addRow("New request in KB (external demo):", request));
 

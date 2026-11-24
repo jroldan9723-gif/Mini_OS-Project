@@ -418,3 +418,15 @@ git pull
 ```
 
 Then do Steps 4-6 as usual.
+
+### The three GUI checks, without opening a window
+
+These are quick to run before a demo. Each one prints PASS lines and a
+final summary:
+
+* Right-click **src/minios/gui/GuiInputSelfTest.java** > Run As > Java Application
+* Right-click **src/minios/gui/GuiTableSelfTest.java** > Run As > Java Application
+* Right-click **src/minios/gui/GuiInputEdgeTest.java** > Run As > Java Application
+
+Expect `ALL GUI CHECKS PASSED`, `ALL EDIT CHECKS PASSED` and
+`ALL EDGE CHECKS PASSED`.

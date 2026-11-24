@@ -2,7 +2,6 @@ package minios.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -96,6 +95,12 @@ public final class GuiMain {
         name.setFont(Theme.APP_TITLE);
         name.setForeground(Color.WHITE);
         bar.add(name, BorderLayout.WEST);
+
+        // a short accent rule under the title, the only decoration up here
+        JPanel rule = new JPanel();
+        rule.setBackground(Theme.ACCENT_LIGHT);
+        rule.setPreferredSize(new Dimension(0, 2));
+        bar.add(rule, BorderLayout.SOUTH);
 
         JLabel note = new JLabel("classroom project  |  Java, no external libraries");
         note.setFont(Theme.HINT);

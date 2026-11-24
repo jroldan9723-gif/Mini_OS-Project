@@ -464,7 +464,18 @@ java -cp bin minios.gui.GuiTableSelfTest
 Types into the entry boxes and presses Add row, Save changes, Remove and
 Clear all the way a user would, then checks what the table holds. It also
 checks that a repeated process name is refused. Current result:
-**ALL EDIT CHECKS PASSED** (15 checks).
+**ALL EDIT CHECKS PASSED** (16 checks).
+
+### Bad input test
+
+```
+java -cp bin minios.gui.GuiInputEdgeTest
+```
+
+Sends junk to all eight screens (empty tables, blank numbers, words where
+numbers belong, values out of range, a job bigger than memory) and checks
+that every one comes back as a readable message rather than a crash.
+Current result: **ALL EDGE CHECKS PASSED** (23 checks).
 
 ### Result verification
 
@@ -528,6 +539,7 @@ Mini_OS-Project/
 |   |       |-- DiskPanel.java           tab 7
 |   |       |-- MultiPanel.java          tab 8
 |   |       |-- GuiTableSelfTest.java    add / edit / remove checks
+|   |       |-- GuiInputEdgeTest.java    bad input checks, all 8 screens
 |   |       |-- RecordEditor.java        table with Add and Edit buttons
 |   |       |-- Group.java               titled frame around a group of fields
 |   |       |-- StripTabs.java           hand drawn tab strip

@@ -1,7 +1,6 @@
 package minios.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +87,13 @@ final class RecordEditor extends JPanel {
     private final JLabel message = new JLabel(" ");
     private final JLabel count = new JLabel("no rows yet");
 
+    private JPanel boxesRow;
+    private final int[] boxWidth = new int[8];
+    private final int numberWidth;
+    private final boolean[] columnEnabled = new boolean[8];
+    private JScrollPane pane;
+    private boolean syncing = false;
+
     private Runnable changed = null;
     private int editingRow = -1;
 
@@ -98,39 +104,107 @@ final class RecordEditor extends JPanel {
     // numberPrefix labels each row on the left (P1, P2, ... or Page 0, ...).
     RecordEditor(String numberPrefix, int numberStart, Column... columns) {
         super(new BorderLayout(0, 4));
+        for (int i = 0; i < columnEnabled.length; i++) {
+            columnEnabled[i] = true;
+        }
         this.columns = columns;
         this.numberPrefix = numberPrefix;
         this.numberStart = numberStart;
+        this.numberWidth = numberPrefix == null ? 0 : Math.max(56, numberPrefix.length() * 9 + 26);
         this.boxes = new JTextField[columns.length];
 
         setOpaque(false);
 
-        table = new JTable(model);
+        table = new JTable(model) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void paintComponent(java.awt.Graphics g) {
+                super.paintComponent(g);
+                if (data.isEmpty()) {
+                    java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                    g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
+                            java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                    g2.setFont(Theme.HINT);
+                    g2.setColor(Theme.MUTED);
+                    g2.drawString("No rows yet.", 14, 26);
+                    g2.dispose();
+                }
+            }
+
+            @Override
+            public java.awt.Component prepareRenderer(
+                    javax.swing.table.TableCellRenderer renderer, int row, int col) {
+                java.awt.Component c = super.prepareRenderer(renderer, row, col);
+                if (isRowSelected(row)) {
+                    c.setBackground(Theme.SELECT);
+                    c.setForeground(Theme.INK);
+                } else {
+                    c.setBackground(row % 2 == 0 ? Theme.SURFACE : Theme.ZEBRA);
+                    c.setForeground(Theme.INK);
+                }
+                return c;
+            }
+        };
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setRowHeight(22);
-        table.setFont(Theme.LABEL);
+        table.setRowHeight(23);
+        table.setFont(Theme.TABLE);
         table.setForeground(Theme.INK);
         table.setBackground(Theme.SURFACE);
         table.setGridColor(Theme.HAIRLINE);
         table.setShowVerticalLines(true);
         table.setShowHorizontalLines(true);
+        table.setIntercellSpacing(new java.awt.Dimension(1, 1));
         table.setFillsViewportHeight(true);
-        table.setTableHeader(null);
         table.setFocusable(false);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        // A header makes it obvious which column is which once the entry boxes
+        // above have been cleared for the next row.
+        javax.swing.table.JTableHeader header = table.getTableHeader();
+        header.setFont(Theme.TABLE_HEAD);
+        header.setReorderingAllowed(false);
+        header.setResizingAllowed(false);
+        header.setPreferredSize(new java.awt.Dimension(10, 24));
+        header.setDefaultRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable t, Object value,
+                    boolean selected, boolean focus, int row, int col) {
+                java.awt.Component c = super.getTableCellRendererComponent(t, value,
+                        false, false, row, col);
+                c.setBackground(Theme.HEADER_BG);
+                c.setForeground(Theme.HEADING);
+                c.setFont(Theme.TABLE_HEAD);
+                setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                        javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER),
+                        javax.swing.BorderFactory.createEmptyBorder(0, 6, 0, 6)));
+                return c;
+            }
+        });
         for (int i = 0; i < columns.length; i++) {
             int width = columns[i].width;
             table.getColumnModel().getColumn(i + (numberPrefix == null ? 0 : 1))
                     .setPreferredWidth(width);
         }
         if (numberPrefix != null) {
-            table.getColumnModel().getColumn(0).setPreferredWidth(52);
-            table.getColumnModel().getColumn(0).setMaxWidth(64);
+            table.getColumnModel().getColumn(0).setPreferredWidth(numberWidth);
+            table.getColumnModel().getColumn(0).setMinWidth(numberWidth);
         }
         table.getSelectionModel().addListSelectionListener(e -> rowPicked());
 
-        JScrollPane pane = new JScrollPane(table);
+        pane = new JScrollPane(table);
         pane.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
+        pane.getViewport().setBackground(Theme.SURFACE);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setColumnHeaderView(table.getTableHeader());
+        pane.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                syncWidths();
+            }
+        });
 
         add(pane, BorderLayout.CENTER);
         add(buildEntryRow(), BorderLayout.NORTH);
@@ -138,57 +212,54 @@ final class RecordEditor extends JPanel {
     }
 
     private JPanel buildEntryRow() {
-        JPanel outer = new JPanel(new BorderLayout(0, 4));
+        JPanel outer = new JPanel(new BorderLayout(0, 3));
         outer.setOpaque(false);
 
-        JPanel boxesRow = new JPanel(new java.awt.GridBagLayout());
+        JLabel cue = new JLabel("New row");
+        cue.setFont(Theme.TABLE_HEAD);
+        cue.setForeground(Theme.HEADING);
+
+        // Laid out by hand so every box sits exactly above its own column.
+        boxesRow = new JPanel(null) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void doLayout() {
+                // skip the row-number column, which has no box of its own
+                int x = numberWidth;
+                for (int i = 0; i < boxes.length && boxes[i] != null; i++) {
+                    int w = boxWidth[i];
+                    boxes[i].setBounds(x, 0, w, 26);
+                    x += w;
+                }
+            }
+        };
         boxesRow.setOpaque(false);
-        java.awt.GridBagConstraints gc = new java.awt.GridBagConstraints();
-        gc.gridy = 0;
-        gc.insets = new java.awt.Insets(2, 0, 2, 6);
-        gc.anchor = java.awt.GridBagConstraints.WEST;
+        boxesRow.setPreferredSize(new java.awt.Dimension(10, 26));
 
         for (int i = 0; i < columns.length; i++) {
-            JPanel cell = new JPanel(new BorderLayout(0, 2));
-            cell.setOpaque(false);
-            JLabel caption = new JLabel(columns[i].title);
-            caption.setFont(Theme.LABEL_BOLD);
-            caption.setForeground(Theme.HEADING);
-            int wide = Math.max(columns[i].width, 64);
-            JTextField box = Ui.field(6, wide);
-            final int index = i;
+            boxWidth[i] = Math.max(columns[i].width, 56);
+            JTextField box = Ui.field(6, boxWidth[i]);
             box.addActionListener(e -> addOrSave());
+            if (!columnEnabled[i]) {
+                box.setEnabled(false);
+                box.setBackground(Theme.WINDOW);
+                box.setForeground(Theme.DISABLED);
+                box.setFocusable(false);
+            }
             boxes[i] = box;
-            cell.add(caption, BorderLayout.NORTH);
-            cell.add(box, BorderLayout.CENTER);
-            gc.gridx = i;
-            gc.weightx = columns[i].kind == Column.VECTOR ? 0.2 : 0.0;
-            boxesRow.add(cell, gc);
+            boxesRow.add(box);
         }
-
-        JPanel addCell = new JPanel(new BorderLayout(0, 2));
-        addCell.setOpaque(false);
-        JLabel spacer = new JLabel(" ");
-        spacer.setFont(Theme.LABEL_BOLD);
-        addCell.add(spacer, BorderLayout.NORTH);
-        addCell.add(addButton, BorderLayout.CENTER);
-        gc.gridx = columns.length;
-        gc.weightx = 0.0;
-        boxesRow.add(addCell, gc);
-
-        // keeps the row of boxes on the left instead of spreading them out
-        JPanel gapFiller = new JPanel();
-        gapFiller.setOpaque(false);
-        gc.gridx = columns.length + 1;
-        gc.weightx = 1.0;
-        boxesRow.add(gapFiller, gc);
-
         message.setFont(Theme.HINT);
         message.setForeground(Theme.RED);
-
-        outer.add(boxesRow, BorderLayout.NORTH);
         message.setBorder(new EmptyBorder(0, 2, 0, 0));
         message.setVisible(false);
+
+        JPanel top = new JPanel(new BorderLayout(0, 2));
+        top.setOpaque(false);
+        top.add(cue, BorderLayout.NORTH);
+        top.add(boxesRow, BorderLayout.CENTER);
+        outer.add(top, BorderLayout.NORTH);
         outer.add(message, BorderLayout.SOUTH);
         return outer;
     }
@@ -364,6 +435,75 @@ final class RecordEditor extends JPanel {
         return numberPrefix + (numberStart + row);
     }
 
+    // Both the columns and the entry boxes take their widths from here, so the
+    // row of boxes always sits directly over the columns it belongs to.
+    private void syncWidths() {
+        if (syncing || boxesRow == null || table.getColumnCount() == 0) {
+            return;
+        }
+        // the viewport holds the table, so the scroll pane is what to measure
+        int width = pane == null ? 0 : pane.getViewport().getWidth()
+                - (pane.getVerticalScrollBar().isVisible()
+                        ? pane.getVerticalScrollBar().getWidth() : 0);
+        if (width <= 40) {
+            return;
+        }
+        syncing = true;
+
+        int first = numberPrefix == null ? 0 : 1;
+        int available = width - numberWidth;
+
+        // Share the room in proportion to what each column asked for, so a
+        // narrow editor squeezes the columns instead of growing a sideways
+        // scrollbar, and a wide one still gives the boxes room to type in.
+        int totalWanted = 0;
+        int[] wanted = new int[columns.length];
+        for (int i = 0; i < columns.length; i++) {
+            wanted[i] = Math.max(columns[i].width, 56);
+            totalWanted += wanted[i];
+        }
+        double scale = totalWanted == 0 ? 1.0 : (double) available / totalWanted;
+        if (columns.length == 1) {
+            // one column: let it take the room, but not into silly territory
+            scale = Math.min(scale, 1.6);
+        }
+
+        int used = 0;
+        for (int i = 0; i < columns.length; i++) {
+            int w = Math.max(44, (int) Math.floor(wanted[i] * scale));
+            boxWidth[i] = w;
+            table.getColumnModel().getColumn(i + first).setPreferredWidth(w);
+            table.getColumnModel().getColumn(i + first).setWidth(w);
+            used += w;
+        }
+        if (numberPrefix != null) {
+            table.getColumnModel().getColumn(0).setPreferredWidth(numberWidth);
+            table.getColumnModel().getColumn(0).setWidth(numberWidth);
+        }
+
+        // Anything left over (a single narrow column, for instance) widens the
+        // last table column only, so the table reaches the frame while the
+        // entry box stays the size of a sensible value.
+        int slack = available - used;
+        if (slack > 0 && columns.length > 0) {
+            int last = table.getColumnCount() - 1;
+            int extra = table.getColumnModel().getColumn(last).getWidth() + slack;
+            table.getColumnModel().getColumn(last).setPreferredWidth(extra);
+            table.getColumnModel().getColumn(last).setWidth(extra);
+        }
+        boxesRow.setPreferredSize(new java.awt.Dimension(used + numberWidth, 26));
+        boxesRow.revalidate();
+        boxesRow.repaint();
+        syncing = false;
+    }
+
+    // Re-run the width calculation whenever the pane changes size.
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        syncWidths();
+    }
+
     private void refresh() {
         model.fireTableDataChanged();
         String noun = data.size() == 1 ? "row" : "rows";
@@ -421,11 +561,20 @@ final class RecordEditor extends JPanel {
     // Greys out a column's entry box when the chosen option ignores it. The
     // header stays readable so it is clear what the column would hold.
     void setColumnEnabled(int index, boolean on) {
-        boxes[index].setEnabled(on);
-        boxes[index].setBackground(on ? java.awt.Color.WHITE : Theme.WINDOW);
-        boxes[index].setForeground(on ? Theme.INK : Theme.DISABLED);
-        boxes[index].setText("");
-        boxes[index].setFocusable(on);
+        if (index < 0 || index >= columns.length) {
+            return;
+        }
+        columnEnabled[index] = on;
+        JTextField box = boxes[index];
+        if (box == null) {
+            // called while the module is still being built
+            return;
+        }
+        box.setEnabled(on);
+        box.setBackground(on ? java.awt.Color.WHITE : Theme.WINDOW);
+        box.setForeground(on ? Theme.INK : Theme.DISABLED);
+        box.setText("");
+        box.setFocusable(on);
     }
 
     // Called after every add, save, remove and clear.
@@ -462,7 +611,7 @@ final class RecordEditor extends JPanel {
             if (numberPrefix == null) {
                 return columns[column].title;
             }
-            return column == 0 ? numberPrefix : columns[column - 1].title;
+            return column == 0 ? "#" : columns[column - 1].title;
         }
 
         @Override

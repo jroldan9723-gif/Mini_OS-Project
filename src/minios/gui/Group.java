@@ -42,7 +42,7 @@ final class Group extends JPanel {
         int w = getWidth();
 
         // frame, drawn in three pieces so the title has a gap to sit in
-        g2.setColor(Theme.BORDER);
+        g2.setColor(Theme.BORDER_DARK);
         int textWidth = 0;
         if (title != null && !title.isEmpty()) {
             g2.setFont(Theme.GROUP_TITLE);

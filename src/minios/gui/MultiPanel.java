@@ -39,12 +39,12 @@ public class MultiPanel extends ModulePanel {
 
     @Override
     public String buildScript() {
-        int mem = Ui.parseInt("Main memory size", memorySize.getText(), 1, 1_000_000);
-        int timeQuantum = Ui.parseInt("Time quantum", quantum.getText(), 1, 100);
         List<String[]> rows = jobs.rows();
         if (rows.isEmpty()) {
             throw new Ui.InputError("Add at least one job with the Add row button.");
         }
+        int mem = Ui.parseInt("Main memory size", memorySize.getText(), 1, 1_000_000);
+        int timeQuantum = Ui.parseInt("Time quantum", quantum.getText(), 1, 100);
 
         Set<String> seen = new HashSet<>();
         int[] jobMem = new int[rows.size()];

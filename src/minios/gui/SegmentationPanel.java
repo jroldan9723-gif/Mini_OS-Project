@@ -40,11 +40,11 @@ public class SegmentationPanel extends ModulePanel {
 
     @Override
     public String buildScript() {
-        long ram = Ui.parseInt("RAM size", ramSize.getText(), 1, 1_000_000_000);
         List<String[]> rows = segments.rows();
         if (rows.isEmpty()) {
             throw new Ui.InputError("Add at least one segment row.");
         }
+        long ram = Ui.parseInt("RAM size", ramSize.getText(), 1, 1_000_000_000);
 
         int n = rows.size();
         long[] base = new long[n];

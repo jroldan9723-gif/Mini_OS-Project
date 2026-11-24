@@ -38,11 +38,11 @@ public class PagingPanel extends ModulePanel {
 
     @Override
     public String buildScript() {
-        int size = Ui.parseInt("Page size", pageSize.getText(), 1, 1_000_000);
         List<String[]> rows = pages.rows();
         if (rows.isEmpty()) {
             throw new Ui.InputError("Add at least one page row.");
         }
+        int size = Ui.parseInt("Page size", pageSize.getText(), 1, 1_000_000);
         List<String[]> addrRows = addresses.rows();
 
         StringBuilder script = new StringBuilder();

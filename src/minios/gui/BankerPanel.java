@@ -26,8 +26,8 @@ public class BankerPanel extends ModulePanel {
     private final JTextField request = Ui.field(24);
 
     private final RecordEditor table = new RecordEditor("P", 1,
-            RecordEditor.Column.vector("Allocation", 150),
-            RecordEditor.Column.vector("Maximum", 150));
+            RecordEditor.Column.vector("Allocation", 120),
+            RecordEditor.Column.vector("Maximum", 120));
 
     private JComponent processRow;
     private JComponent requestRow;

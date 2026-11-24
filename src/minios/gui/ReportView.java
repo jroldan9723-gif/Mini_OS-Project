@@ -20,13 +20,14 @@ class ReportView extends JScrollPane {
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
         area.setTabSize(4);
-        area.setBorder(new javax.swing.border.EmptyBorder(6, 10, 8, 10));
+        area.setBorder(new javax.swing.border.EmptyBorder(10, 14, 12, 14));
 
         setViewportView(area);
         setBorder(javax.swing.BorderFactory.createLineBorder(Theme.BORDER));
         setBackground(Theme.SURFACE);
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        getVerticalScrollBar().setUnitIncrement(16);
+        getVerticalScrollBar().setUnitIncrement(18);
+        getVerticalScrollBar().setBlockIncrement(90);
     }
 
     void show(String reportText) {

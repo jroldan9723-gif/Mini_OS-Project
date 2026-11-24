@@ -125,11 +125,11 @@ public class FragmentationPanel extends ModulePanel {
             return script.toString();
         }
 
-        int mem = Ui.parseInt("Total memory", memorySize.getText(), 1, 1000000);
         List<String[]> jobRows = jobs.rows();
         if (jobRows.isEmpty()) {
             throw new Ui.InputError("The external demo needs at least one job.");
         }
+        int mem = Ui.parseInt("Total memory", memorySize.getText(), 1, 1000000);
         int ask = Ui.parseInt("New request", request.getText(), 1, mem);
 
         script.append("2\n").append(strat).append('\n');

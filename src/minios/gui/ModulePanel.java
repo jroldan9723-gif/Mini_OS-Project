@@ -150,9 +150,9 @@ abstract class ModulePanel extends JPanel {
         space();
     }
 
-    // A full width group box. Captions and multi line boxes go in here.
-    // A group holds its content at the top of the frame, so a short form does
-    // not leave stretched text boxes when the window is tall.
+    // A full width group frame. The editors go in here.
+    // A group is a titled frame. Its content fills the frame, which lets the
+    // table inside stretch to the height of the column.
     final JPanel addGroup(String title) {
         Group box = new Group(title);
         JPanel content = new JPanel(new BorderLayout());

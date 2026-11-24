@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -39,6 +38,22 @@ public final class GuiTableSelfTest {
             if (k instanceof Container) {
                 JButton b = button((Container) k, text);
                 if (b != null) return b;
+            }
+        }
+        return null;
+    }
+
+    // The table sits inside a scroll pane inside a small stack panel.
+    static JTable findTable(Container c) {
+        for (Component k : c.getComponents()) {
+            if (k instanceof JTable) {
+                return (JTable) k;
+            }
+            if (k instanceof Container) {
+                JTable found = findTable((Container) k);
+                if (found != null) {
+                    return found;
+                }
             }
         }
         return null;
@@ -83,9 +98,7 @@ public final class GuiTableSelfTest {
         check("row 2 name", ed.rows().get(1)[0], "Python");
 
         // click row 1 to edit it: the boxes should fill with its values
-        JTable table = null;
-        for (Component k : ed.getComponents())
-            if (k instanceof JScrollPane) table = (JTable) ((JScrollPane) k).getViewport().getView();
+        JTable table = findTable(ed);
         table.setRowSelectionInterval(0, 0);
         check("boxes filled for editing", b.get(0).getText(), "Java");
         check("add button renamed", save.getText(), "Save changes");

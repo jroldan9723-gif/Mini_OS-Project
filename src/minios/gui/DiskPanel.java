@@ -64,15 +64,14 @@ public class DiskPanel extends ModulePanel {
 
     @Override
     public String buildScript() {
-        int choice = algorithm.getSelectedIndex() + 1;
-        int max = Ui.parseInt("Highest cylinder number", maxCylinder.getText(), 1, 1_000_000);
-        int start = Ui.parseInt("Initial head position", head.getText(), 0, max);
-        int dir = direction.getSelectedIndex() + 1;
-
         List<String[]> rows = requests.rows();
         if (rows.isEmpty()) {
             throw new Ui.InputError("Add at least one cylinder to the request queue.");
         }
+        int choice = algorithm.getSelectedIndex() + 1;
+        int max = Ui.parseInt("Highest cylinder number", maxCylinder.getText(), 1, 1_000_000);
+        int start = Ui.parseInt("Initial head position", head.getText(), 0, max);
+        int dir = direction.getSelectedIndex() + 1;
 
         StringBuilder line = new StringBuilder();
         for (int i = 0; i < rows.size(); i++) {

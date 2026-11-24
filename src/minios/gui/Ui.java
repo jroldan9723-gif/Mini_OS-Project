@@ -8,7 +8,6 @@ import java.awt.RenderingHints;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -80,7 +79,7 @@ public final class Ui {
 
             @Override
             public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
-                g.setColor(c.hasFocus() ? Theme.ACCENT_TEXT : Theme.BORDER);
+                g.setColor(c.hasFocus() ? Theme.ACCENT_LIGHT : Theme.BORDER);
                 g.drawRect(x, y, w - 1, h - 1);
             }
 

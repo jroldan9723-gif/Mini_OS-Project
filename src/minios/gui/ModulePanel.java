@@ -15,8 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
@@ -37,7 +35,6 @@ abstract class ModulePanel extends JPanel {
     private final JLabel resultLabel = new JLabel("No run yet");
 
     private final JPanel strip = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 6));
-    private final JPanel form = new JPanel();
     private final JPanel groupRow = new JPanel(new GridLayout(1, 1, 10, 0));
 
     private StatusSink sink;
@@ -53,10 +50,6 @@ abstract class ModulePanel extends JPanel {
                 new EmptyBorder(2, 10, 2, 10)));
         // one line only: a wrapped strip would be clipped by the layout
         strip.setLayout(new javax.swing.BoxLayout(strip, javax.swing.BoxLayout.LINE_AXIS));
-
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setBackground(Theme.WINDOW);
-        form.setBorder(new EmptyBorder(0, 10, 10, 0));
 
         groupRow.setBackground(Theme.WINDOW);
         groupRow.setBorder(new EmptyBorder(0, 10, 0, 0));
@@ -175,85 +168,16 @@ abstract class ModulePanel extends JPanel {
         strip.add(Box.createHorizontalStrut(14));
     }
 
-    // A field with its caption above it.
-    final JLabel addRow(String labelText, JComponent field) {
-        return addRow(labelText, field, 30);
-    }
-
-    final JLabel addRow(String labelText, JComponent field, int fieldHeight) {
-        JLabel label = new JLabel(labelText);
-        label.setFont(Theme.LABEL);
-        label.setForeground(Theme.INK);
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        label.setBorder(new EmptyBorder(0, 0, 3, 0));
-        form.add(label);
-
-        JPanel holder = new JPanel(new BorderLayout());
-        holder.setOpaque(false);
-        holder.add(field, BorderLayout.CENTER);
-        holder.setAlignmentX(Component.LEFT_ALIGNMENT);
-        holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, fieldHeight));
-        holder.setPreferredSize(new Dimension(200, fieldHeight));
-        form.add(holder);
-        form.add(Box.createVerticalStrut(9));
-        return label;
-    }
-
-    // Caption above a box, laid out compactly for a grid inside a group.
-    static JPanel labelled(String caption, JComponent field) {
-        return labelled(caption, field, 96);
-    }
-
-    static JPanel labelled(String caption, JComponent field, int height) {
-        JPanel p = new JPanel(new BorderLayout(0, 3));
+    // A caption above an editor, used to put two editors side by side.
+    static JPanel cell(String caption, java.awt.Component body) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
         p.setOpaque(false);
         JLabel label = new JLabel(caption);
         label.setFont(Theme.LABEL);
         label.setForeground(Theme.INK);
         p.add(label, BorderLayout.NORTH);
-        JScrollPane pane = field instanceof JTextArea
-                ? Ui.scrolled((JTextArea) field) : new JScrollPane(field);
-        p.add(pane, BorderLayout.CENTER);
-        p.setMinimumSize(new Dimension(150, height));
-        p.setPreferredSize(new Dimension(190, height + 22));
+        p.add(body, BorderLayout.CENTER);
         return p;
-    }
-
-    final JComponent addWideRow(JComponent component) {
-        return addWideRow(component, 30);
-    }
-
-    final JComponent addWideRow(JComponent component, int rowHeight) {
-        int height = rowHeight;
-        if (component instanceof JLabel) {
-            JLabel caption = (JLabel) component;
-            caption.setFont(Theme.LABEL_BOLD);
-            caption.setForeground(Theme.HEADING);
-            height = Math.max(rowHeight, 18);
-        }
-        JPanel row = new JPanel(new BorderLayout());
-        row.setOpaque(false);
-        row.add(component, BorderLayout.CENTER);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
-        row.setPreferredSize(new Dimension(200, height));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(row);
-        form.add(Box.createVerticalStrut(7));
-        return component;
-    }
-
-    final JComponent addLastWideRow(JTextArea area) {
-        JScrollPane pane = Ui.scrolled(area);
-        pane.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JPanel row = new JPanel(new BorderLayout());
-        row.setOpaque(false);
-        row.add(pane, BorderLayout.CENTER);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
-        row.setPreferredSize(new Dimension(100, 90));
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
-        form.add(row);
-        form.add(Box.createVerticalStrut(7));
-        return pane;
     }
 
     // Greys out a whole row, including the caption and the field text, so an

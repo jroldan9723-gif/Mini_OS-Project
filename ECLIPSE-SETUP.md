@@ -143,7 +143,7 @@ There are four programs worth knowing, and they all start the same way:
 1. Expand `src > minios > gui`.
 2. Right-click **GuiMain.java** > **Run As** > **Java Application**.
 3. Pick a module from the tabs along the top.
-4. Press **Load example** to fill the form, or type your own numbers.
+4. Press **Load example** to fill the tables, or add your own rows.
 5. Press **Run**. The report appears in the result pane on the right.
 
 The first launch may ask which main class to use; pick `GuiMain` and

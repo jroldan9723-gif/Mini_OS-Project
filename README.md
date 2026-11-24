@@ -92,18 +92,23 @@ the report on the right:
 | CPU Scheduling | Banker's Algorithm | Paging | Segmentation | ...    |
 +----------------------------------------------------------------------+
 | CPU Scheduling                                                       |
-| One row per process. Burst times are required.  [Run] [Load example] |
+| Add one row per process. Burst is the work it needs.                 |
+|                                        [ Run module ] [ Load example ]|
 +----------------------------------------------------------------------+
 | Algorithm: [SRTF ... v]   Time quantum: [ 2 ]                        |
 +-----------------------------+----------------------------------------+
-| +- Processes / Processes --+ | RESULT        16 lines  |  25 ms     |
-| | Process IDs  | Arrival   | | Algorithm: SRTF (preemptive)          |
-| | [Web, DB ..] | [0,1,2..] | | Execution order: Web -> DB -> ...     |
-| | Burst times  | Priorities| | Gantt chart:                          |
-| | [6 3 8 4 5]  | [3 1 2 4] | | Process Arrival Burst Completion ...  |
-| +--------------------------+ | Average waiting time: 7.20            |
+| +- Processes -------------+ | RESULT       16 lines | 24 ms | 19 in |
+| | Process  Arrival  Burst  | | Algorithm: SRTF (preemptive)          |
+| | [      ] [      ] [    ] | | Execution order: Web -> DB -> ...     |
+| |         [ Add row ]      | | Gantt chart:                          |
+| |                          | | Process Arrival Burst Completion ...  |
+| | Web      0        6      | | Average waiting time: 7.20            |
+| | DB       1        3      | | Average response time: 5.80           |
+| | Mail     2        8      | |                                       |
+| |     [Add][Remove][Clear] | |                                       |
+| +--------------------------+ |                                       |
 +-----------------------------+----------------------------------------+
-| Last run: finished in 25 ms                                  ready   |
+| Last run: finished in 24 ms                                  ready   |
 +----------------------------------------------------------------------+
 ```
 
@@ -128,12 +133,32 @@ Load example and then Run:
 
 ![CPU scheduling screen](screenshots/1-cpu-scheduling.png)
 
-Lists (burst times, reference strings, request queues, ...) accept any
-length: numbers separated by spaces, tabs or newlines. The number of
-entries is never limited by the program; only the values themselves are
-checked (a burst time must be positive, a request must lie on the disk,
-and so on). When something is wrong, a dialog explains exactly what to
-fix and nothing runs until the form is valid.
+Data is entered one row at a time, not typed into a text box. Every
+module has the same table editor: fill the boxes above the table, press
+**Add row**, and the row appears below while the boxes empty themselves
+ready for the next one.
+
+```
+ Job      Memory   Burst   Arrival
+ [....]   [....]   [....]   [....]     <- type here
+                        [ Add row ]    <- then press this
+
+ J1      40       7       0
+ J2      30       4       2
+```
+
+* **Click a row** to load it back into the boxes. The button changes to
+  **Save changes**, so a typo can be fixed and saved over the old row.
+  **Cancel** leaves the row alone.
+* **Remove** deletes the selected row.
+* **Clear all** empties the table.
+* A row that is not valid yet, or that repeats a name already in the
+  table, is refused with a short message and is not added.
+
+The number of rows is unlimited. Only the values are checked (a burst
+must be positive, a request must lie on the disk, and so on). Everything
+is checked again when **Run** is pressed, and a dialog explains exactly
+what to fix.
 
 Rows that the chosen option does not use are greyed out, not deleted:
 the quantum box on the CPU screen, the priorities box unless Priority or the
@@ -430,6 +455,17 @@ module and checks the expected section of the output, including all
 three Banker script shapes (first run, data unchanged, data edited).
 Current result: **ALL GUI CHECKS PASSED** (11 checks).
 
+### Table button test
+
+```
+java -cp bin minios.gui.GuiTableSelfTest
+```
+
+Types into the entry boxes and presses Add row, Save changes, Remove and
+Clear all the way a user would, then checks what the table holds. It also
+checks that a repeated process name is refused. Current result:
+**ALL EDIT CHECKS PASSED** (15 checks).
+
 ### Result verification
 
 Outputs are deterministic (every run was repeated and compared), and
@@ -491,6 +527,10 @@ Mini_OS-Project/
 |   |       |-- PageReplacePanel.java    tab 6
 |   |       |-- DiskPanel.java           tab 7
 |   |       |-- MultiPanel.java          tab 8
+|   |       |-- GuiTableSelfTest.java    add / edit / remove checks
+|   |       |-- RecordEditor.java        table with Add and Edit buttons
+|   |       |-- Group.java               titled frame around a group of fields
+|   |       |-- StripTabs.java           hand drawn tab strip
 |   |       `-- GuiInputSelfTest.java    headless GUI checks
 |   `-- (bin/ appears after Eclipse or javac builds the project)
 `-- samples/

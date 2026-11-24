@@ -27,6 +27,16 @@ public final class Ui {
         }
     }
 
+    // A field whose width is chosen by the caller. Ui.field() caps the width
+    // so a short number does not stretch, which is wrong for a column of
+    // several numbers such as an allocation vector.
+    public static JTextField field(int columns, int width) {
+        JTextField f = field(columns);
+        f.setPreferredSize(new java.awt.Dimension(width, 26));
+        f.setMinimumSize(new java.awt.Dimension(width, 26));
+        return f;
+    }
+
     public static JTextField field(int columns) {
         JTextField f = new JTextField(columns);
         f.setFont(Theme.VALUE);

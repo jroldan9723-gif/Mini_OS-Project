@@ -39,17 +39,18 @@ public class CpuPanel extends ModulePanel {
 
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: ID (optional), arrival time, burst time. Greyed-out boxes are unused.",
+                "One line per process: ID, arrival, burst. Greyed boxes are unused.",
                 CPUScheduler::run);
+        Ui.styleCombo(algorithm);
         addRow("Algorithm:", algorithm);
         quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
-        addWideRow(new JLabel("<html><b>Process IDs</b> - optional, one per line (defaults P1, P2, ...)</html>"));
-        addWideRow(Ui.scrolled(names));
-        addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
-        addWideRow(Ui.scrolled(arrivals));
-        addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
-        addWideRow(Ui.scrolled(bursts));
-        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
+        addWideRow(new JLabel("<html><b>Process IDs</b> - optional; blank gives P1, P2, ...</html>"), 20);
+        addWideRow(Ui.scrolled(names), 74);
+        addWideRow(new JLabel("<html><b>Arrival times</b> - one per process, 0 or more</html>"), 20);
+        addWideRow(Ui.scrolled(arrivals), 74);
+        addWideRow(new JLabel("<html><b>Burst times</b> - one per process, each 1 to 1000</html>"), 20);
+        addWideRow(Ui.scrolled(bursts), 74);
+        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities), 74);
 
         algorithm.addActionListener(e -> updateOptionalRows());
         updateOptionalRows();

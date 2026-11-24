@@ -39,25 +39,27 @@ public class FragmentationPanel extends ModulePanel {
 
     public FragmentationPanel() {
         super("Fragmentation",
-                "Pick a demo. The boxes the other demo uses are greyed out and are not read.",
+                "Pick a demo. Greyed boxes belong to the other demo.",
                 FragmentationDemo::run);
+        Ui.styleCombo(kind);
+        Ui.styleCombo(strategy);
         addRow("Demo:", kind);
         addRow("Allocation strategy:", strategy);
 
         externalRows.add(addRow("Total memory in KB (external demo):", memorySize));
 
         internalRows.add(addWideRow(new JLabel(
-                "<html><b>Partition sizes in KB</b> - internal demo (one list)</html>")));
-        internalRows.add(addWideRow(Ui.scrolled(partitions)));
+                "<html><b>Partition sizes in KB</b> - internal demo (one list)</html>"), 20));
+        internalRows.add(addWideRow(Ui.scrolled(partitions), 66));
         internalRows.add(addWideRow(new JLabel(
-                "<html><b>Process sizes in KB</b> - internal demo (one list)</html>")));
-        internalRows.add(addWideRow(Ui.scrolled(processes)));
+                "<html><b>Process sizes in KB</b> - internal demo (one list)</html>"), 20));
+        internalRows.add(addWideRow(Ui.scrolled(processes), 66));
 
         externalRows.add(addWideRow(new JLabel(
-                "<html><b>Jobs</b> - external demo: \"name size\" per line</html>")));
-        externalRows.add(addWideRow(Ui.scrolled(jobs)));
+                "<html><b>Jobs</b> - external demo: \"name size\" per line</html>"), 20));
+        externalRows.add(addWideRow(Ui.scrolled(jobs), 66));
         externalRows.add(addWideRow(new JLabel(
-                "<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>")));
+                "<html><b>Jobs to free</b> - external demo: one name per line (optional)</html>"), 20));
         externalRows.add(addLastWideRow(frees));
         externalRows.add(addRow("New request in KB (external demo):", request));
 

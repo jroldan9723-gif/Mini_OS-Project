@@ -82,48 +82,45 @@ step-by-step exporting is only needed if you changed the code.
 
 ## How the GUI is organized
 
-One window, one tab per module, numbered like the console menu:
+One window, one module list on the left, numbered like the console menu:
 
 ```
-+------------------------------------------------------------------+
-| Mini OS Simulator                                          [x]   |
-+------------------------------------------------------------------+
-| Choose a module, enter your data, then click Run.                |
-| This program simulates the algorithms for our OS class; it does  |
-| not control real hardware.                                       |
-| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragment... >   |
-|                                                                  |
-| +--------------------------------------------------------------+ |
-| | CPU Scheduling                                               | |
-| |  [form: fields, lists, dropdowns]                            | |
-| +--------------------------------------------------------------+ |
-| +--------------------------------------------------------------+ |
-| | Results                                                      | |
-| |  Algorithm: SRTF ... Gantt chart ... averages ...            | |
-| +--------------------------------------------------------------+ |
-| [ Run ]  [ Load example ]                                        |
-+------------------------------------------------------------------+
++----------------------------------------------------------------------+
+| Operating System Simulator                        CLASSROOM PROJECT  |
+| Eight modules. Enter data on the left, read the report on the right. |
++---------------+------------------------------------------------------+
+| MODULES       | +-------------------------+ +----------------------+ |
+| 1 CPU Sched.  | | CPU Scheduling          | | Results    19 lines  | |
+| 2 Banker      | | one line per process... | | Algorithm: SRTF      | |
+| 3 Paging      | | [Algorithm    v]        | | Gantt chart...       | |
+| 4 Segment.    | | [Time quantum  ]        | | tables, averages     | |
+| 5 Fragment.   | | [Process IDs   ]        | |                      | |
+| 6 Page Repl.  | | [Arrival times ]        | |                      | |
+| 7 Disk        | | [Burst times   ]        | |                      | |
+| 8 Multiprog.  | +-------------------------+ |                      | |
+|               | [ Run ] [ Load example ]  | last line of report  | |
++---------------+-------------------------+ +----------------------+ |
 ```
 
-The window opens at 1180 x 740 but shrinks down to 900 x 600 on a small
-laptop screen, and the tab strip scrolls sideways instead of wrapping
-onto a second line.
+The window opens at 1240 x 820 but shrinks down to 980 x 620 on a small
+laptop screen. The module list is a sidebar, not a row of tabs, so it
+stays readable when the window is narrow.
 
-Every tab has the same two buttons:
+Every screen has the same two buttons:
 
 * **Run** - checks the form, runs the module, prints the full report into
   the output pane.
 * **Load example** - fills the form with a small working dataset, handy
   for a quick test or a live demonstration.
 
-`screenshots/` holds one picture of every tab, taken after pressing
+`screenshots/` holds one picture of every screen, taken after pressing
 Load example and then Run:
 
 `1-cpu-scheduling.png`, `2-banker.png`, `3-paging.png`,
 `4-segmentation.png`, `5-fragmentation.png`, `6-page-replacement.png`,
 `7-disk-scheduling.png`, `8-multiprogramming.png`.
 
-![CPU scheduling tab](screenshots/1-cpu-scheduling.png)
+![CPU scheduling screen](screenshots/1-cpu-scheduling.png)
 
 Lists (burst times, reference strings, request queues, ...) accept any
 length: numbers separated by spaces, tabs or newlines. The number of
@@ -133,10 +130,10 @@ and so on). When something is wrong, a dialog explains exactly what to
 fix and nothing runs until the form is valid.
 
 Rows that the chosen option does not use are greyed out, not deleted:
-the quantum box on the CPU tab, the priorities box unless Priority or the
-comparison is picked, the request boxes on the Banker tab unless a
-resource request is picked, the direction on the disk tab for FCFS and
-SSTF, and whichever half of the fragmentation tab the chosen demo does
+the quantum box on the CPU screen, the priorities box unless Priority or the
+comparison is picked, the request boxes on the Banker screen unless a
+resource request is picked, the direction on the disk screen for FCFS and
+SSTF, and whichever half of the fragmentation screen the chosen demo does
 not read. Filling a greyed-out box does nothing, because it is never
 sent to the module.
 
@@ -422,7 +419,7 @@ the address space.
 java -cp bin minios.gui.GuiInputSelfTest
 ```
 
-Loads the example of every tab, builds the input script, runs the real
+Loads the example of every screen, builds the input script, runs the real
 module and checks the expected section of the output, including all
 three Banker script shapes (first run, data unchanged, data edited).
 Current result: **ALL GUI CHECKS PASSED** (11 checks).
@@ -476,7 +473,8 @@ Mini_OS-Project/
 |   |   |-- MultiprogrammingSimulator.java tick-by-tick simulation
 |   |   `-- gui/
 |   |       |-- GuiMain.java             main window (entry point of the JAR)
-|   |       |-- ModulePanel.java         shared tab layout and Run handling
+|   |       |-- ModulePanel.java         shared screen layout and Run handling
+|   |       |-- Theme.java               colours and fonts for the window
 |   |       |-- Ui.java                  field helpers and validation
 |   |       |-- Runner.java              adapter: GUI input -> console module
 |   |       |-- CpuPanel.java            tab 1

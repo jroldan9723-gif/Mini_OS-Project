@@ -34,12 +34,13 @@ public class BankerPanel extends ModulePanel {
 
     public BankerPanel() {
         super("Banker's Algorithm",
-                "Rows = processes, columns = resource types. Allocation and Max must match; Available is one row.",
+                "Rows = processes, columns = resources. Allocation and Max must match.",
                 BankersAlgorithm::run);
+        Ui.styleCombo(mode);
         addRow("Mode:", mode);
-        addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"));
-        addWideRow(Ui.scrolled(allocation));
-        addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"));
+        addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"), 20);
+        addWideRow(Ui.scrolled(allocation), 86);
+        addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"), 20);
         addLastWideRow(maximum);
         addRow("Available resources:", available);
         requestRows.add(addRow("Process making the request (1..n):", process));

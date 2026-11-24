@@ -17,7 +17,7 @@ public class PagingPanel extends ModulePanel {
 
     public PagingPanel() {
         super("Paging",
-                "Page table: one frame number per page (-1 means the page is on disk). Addresses are optional.",
+                "One frame per page, -1 if it is on disk. Addresses are optional.",
                 PagingSimulator::run);
         addRow("Page size in bytes (e.g. 1024):", pageSize);
         addWideRow(new JLabel("<html><b>Page table</b> - frame number per page (space or line separated)</html>"));

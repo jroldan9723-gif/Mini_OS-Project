@@ -36,13 +36,15 @@ public class DiskPanel extends ModulePanel {
 
     public DiskPanel() {
         super("Disk Scheduling",
-                "Cylinder range, head position, and the list of requests.",
+                "Cylinder range, head position and the request list.",
                 DiskScheduler::run);
+        Ui.styleCombo(algorithm);
+        Ui.styleCombo(direction);
         addRow("Algorithm:", algorithm);
         addRow("Highest cylinder number (disk = 0..max):", maxCylinder);
         addRow("Initial head position:", head);
         directionRow = addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
-        addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"));
+        addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"), 20);
         addLastWideRow(requests);
 
         algorithm.addActionListener(e -> updateDirectionRow());

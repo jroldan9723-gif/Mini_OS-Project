@@ -17,7 +17,7 @@ public class PageReplacePanel extends ModulePanel {
 
     public PageReplacePanel() {
         super("Page Replacement",
-                "Reference string and number of frames. All four algorithms run on the same data.",
+                "One reference string, one frame count. All four algorithms use them.",
                 PageReplacementSimulator::run);
         addRow("Number of frames in RAM:", frames);
         addWideRow(new JLabel("<html><b>Reference string</b> - page numbers, any length</html>"));

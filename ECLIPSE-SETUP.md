@@ -125,9 +125,9 @@ recent version' error" below.
 2. Near the top you should see a comment starting
    `// The window that opens when the program starts.`
 3. Right-click the file > **Run As** > **Java Application**.
-4. In the window, look at tab 1: the **Time quantum** row is greyed out
-   when the algorithm is SRTF. That grey row only exists in the new
-   version.
+4. In the window, click **CPU Scheduling** on the left: the **Time quantum**
+   box is greyed out when the algorithm is SRTF. That grey row only exists
+   in the new version.
 5. Press **Load example**, then **Run**. Results appear in the lower pane.
 
 If you see the grey row and the results, the update worked.
@@ -142,7 +142,7 @@ There are four programs worth knowing, and they all start the same way:
 
 1. Expand `src > minios > gui`.
 2. Right-click **GuiMain.java** > **Run As** > **Java Application**.
-3. Pick a tab along the top.
+3. Pick a module from the list on the left.
 4. Press **Load example** to fill the form, or type your own numbers.
 5. Press **Run**. The report appears in the Results pane.
 
@@ -207,8 +207,8 @@ configuration `GuiMain - Mini_OS-Project`, destination
 
 | Change | Where you notice it |
 |--------|---------------------|
-| Rows that the chosen option does not use are greyed out | all tabs, e.g. the quantum row on tab 1 |
-| Results pane no longer prints instructions like "Enter the frame number..." | tabs 3 and 8 |
+| A grey box for an option that is not in use | every screen, e.g. the quantum row on CPU Scheduling |
+| The report no longer prints instructions like "Enter the frame number..." | Paging and Multiprogramming |
 | Shorter, plainer comments in every class | any `.java` file |
 | Four new boundary samples (36 in total now) | `samples/` |
 | Screenshots of all 8 tabs | `screenshots/` |
@@ -393,7 +393,7 @@ If the project has no red crosses and runs, you do not need any of this.
 | *"already exists in workspace"* while importing | two projects with the same name | you do not need to import; just use Steps 1-6 on the existing one |
 | Red crosses after Clean | the JRE library was never set for this project | section "Where the build path is" above |
 | `UnsupportedClassVersionError`, *class file version 65.0* | the project is compiled for a newer Java than the one running it | section "The 'compiled by a more recent version' error" below has the 30-second fix |
-| Rows are not greyed out | you are running an old build or the old JAR | **Project > Clean...**, then run `GuiMain` again |
+| No grey boxes anywhere | you are running an old build or the old JAR | **Project > Clean...**, then run `GuiMain` again |
 | `java -jar MiniOS-Simulator.jar` shows the old screen | the JAR is fine; it was rebuilt already | run it from the folder from Step 1, not from an older copy |
 | Console does not accept typing | the Console view is not focused | click inside the Console view first |
 

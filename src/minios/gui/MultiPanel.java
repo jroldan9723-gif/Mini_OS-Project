@@ -1,9 +1,11 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -23,10 +25,12 @@ public class MultiPanel extends ModulePanel {
         super("Multiprogramming",
                 "One job per line: name, memory in KB, CPU burst, arrival time. Waiting time counts the ticks in the job, ready and I/O queues, not the time running or on the device.",
                 MultiprogrammingSimulator::run);
-        addRow("Main memory size (KB):", memorySize);
-        addRow("Time quantum for the CPU (ticks):", quantum);
-        addWideRow(new JLabel("<html><b>Jobs</b> - \"name mem burst arrival\" per line</html>"));
-        addLastWideRow(jobs);
+        addSetting("Main memory (KB):", memorySize);
+        addSetting("Time quantum (ticks):", quantum);
+        JPanel group = addGroup("Jobs");
+        group.setLayout(new BorderLayout());
+        group.add(labelled("One job per line: \"name mem burst arrival\"", jobs, 170),
+                BorderLayout.CENTER);
     }
 
     @Override

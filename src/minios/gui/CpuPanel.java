@@ -1,19 +1,20 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 import minios.CPUScheduler;
 
-// Tab 1. The lists are read from the text boxes, so the number of processes is
-// whatever the user typed, and the quantum and priority rows only light up for
-// the algorithms that use them.
 public class CpuPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -39,18 +40,23 @@ public class CpuPanel extends ModulePanel {
 
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: ID, arrival, burst.",
+                "One row per process. Burst times are required.",
                 CPUScheduler::run);
         Ui.styleCombo(algorithm);
-        addRow("Algorithm:", algorithm);
-        quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
-        addWideRow(new JLabel("<html><b>Process IDs</b> - optional; blank gives P1, P2, ...</html>"), 20);
-        addWideRow(Ui.scrolled(names), 74);
-        addWideRow(new JLabel("<html><b>Arrival times</b> - one per process, 0 or more</html>"), 20);
-        addWideRow(Ui.scrolled(arrivals), 74);
-        addWideRow(new JLabel("<html><b>Burst times</b> - one per process, each 1 to 1000</html>"), 20);
-        addWideRow(Ui.scrolled(bursts), 74);
-        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities), 74);
+        quantum.setColumns(5);
+        addSetting("Algorithm:", algorithm);
+        quantumRow = addSetting("Time quantum:", quantum);
+        JPanel group = addGroup("Processes / Processes");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new GridLayout(2, 2, 8, 6));
+        lists.setOpaque(false);
+        lists.setBorder(new EmptyBorder(0, 0, 0, 0));
+        lists.add(labelled("Process IDs (optional)", names));
+        lists.add(labelled("Arrival times", arrivals));
+        lists.add(labelled("Burst times", bursts));
+        lists.add(labelled("Priorities (optional)", priorities));
+        group.add(lists, BorderLayout.CENTER);
+        priorityRow = (JComponent) lists.getComponent(3);
 
         algorithm.addActionListener(e -> updateOptionalRows());
         updateOptionalRows();

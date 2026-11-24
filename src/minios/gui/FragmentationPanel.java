@@ -1,18 +1,19 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.FragmentationDemo;
 
-// Tab 5. Both demos share the tab, so the rows the chosen demo does not use
-// are greyed out instead of being filled with numbers that would be ignored.
 public class FragmentationPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -43,25 +44,25 @@ public class FragmentationPanel extends ModulePanel {
                 FragmentationDemo::run);
         Ui.styleCombo(kind);
         Ui.styleCombo(strategy);
-        addRow("Demo:", kind);
-        addRow("Allocation strategy:", strategy);
+        addSetting("Demo:", kind);
+        addSetting("Strategy:", strategy);
 
-        externalRows.add(addRow("Total memory in KB (external demo):", memorySize));
+        externalRows.add(addSetting("Total memory (KB):", memorySize));
 
-        internalRows.add(addWideRow(new JLabel(
-                "<html><b>Partition sizes in KB</b> - internal demo (one list)</html>"), 20));
-        internalRows.add(addWideRow(Ui.scrolled(partitions), 66));
-        internalRows.add(addWideRow(new JLabel(
-                "<html><b>Process sizes in KB</b> - internal demo (one list)</html>"), 20));
-        internalRows.add(addWideRow(Ui.scrolled(processes), 66));
-
-        externalRows.add(addWideRow(new JLabel(
-                "<html><b>Jobs</b> - external demo: \"name size\" per line</html>"), 20));
-        externalRows.add(addWideRow(Ui.scrolled(jobs), 66));
-        externalRows.add(addWideRow(new JLabel(
-                "<html><b>Jobs to free</b> - external demo, optional</html>"), 20));
-        externalRows.add(addLastWideRow(frees));
-        externalRows.add(addRow("New request in KB (external demo):", request));
+        JPanel group = addGroup("Demos");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new GridLayout(2, 2, 8, 6));
+        lists.setOpaque(false);
+        lists.add(labelled("Partition sizes", partitions));
+        lists.add(labelled("Process sizes", processes));
+        lists.add(labelled("Jobs, \"name size\" (external demo)", jobs));
+        lists.add(labelled("Jobs to free (optional)", frees));
+        group.add(lists, BorderLayout.CENTER);
+        externalRows.add((JComponent) lists.getComponent(2));
+        internalRows.add((JComponent) lists.getComponent(0));
+        internalRows.add((JComponent) lists.getComponent(1));
+        externalRows.add((JComponent) lists.getComponent(3));
+        externalRows.add(addSetting("New request (KB):", request));
 
         kind.addActionListener(e -> updateEnabledRows());
         updateEnabledRows();

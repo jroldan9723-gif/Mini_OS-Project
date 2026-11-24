@@ -82,34 +82,39 @@ step-by-step exporting is only needed if you changed the code.
 
 ## How the GUI is organized
 
-One window, one module list on the left, numbered like the console menu:
+One window, a row of tabs across the top, the input groups on the left and
+the report on the right:
 
 ```
 +----------------------------------------------------------------------+
-| Operating System Simulator                        CLASSROOM PROJECT  |
-| Eight modules. Enter data on the left, read the report on the right. |
-+---------------+------------------------------------------------------+
-| MODULES       | +-------------------------+ +----------------------+ |
-| 1 CPU Sched.  | | CPU Scheduling          | | Results    19 lines  | |
-| 2 Banker      | | one line per process... | | Algorithm: SRTF      | |
-| 3 Paging      | | [Algorithm    v]        | | Gantt chart...       | |
-| 4 Segment.    | | [Time quantum  ]        | | tables, averages     | |
-| 5 Fragment.   | | [Process IDs   ]        | |                      | |
-| 6 Page Repl.  | | [Arrival times ]        | |                      | |
-| 7 Disk        | | [Burst times   ]        | |                      | |
-| 8 Multiprog.  | +-------------------------+ |                      | |
-|               | [ Run ] [ Load example ]  | last line of report  | |
-+---------------+-------------------------+ +----------------------+ |
+| Operating System Simulator                    classroom project  ...  |
++----------------------------------------------------------------------+
+| CPU Scheduling | Banker's Algorithm | Paging | Segmentation | ...    |
++----------------------------------------------------------------------+
+| CPU Scheduling                                                       |
+| One row per process. Burst times are required.  [Run] [Load example] |
++----------------------------------------------------------------------+
+| Algorithm: [SRTF ... v]   Time quantum: [ 2 ]                        |
++-----------------------------+----------------------------------------+
+| +- Processes / Processes --+ | RESULT        16 lines  |  25 ms     |
+| | Process IDs  | Arrival   | | Algorithm: SRTF (preemptive)          |
+| | [Web, DB ..] | [0,1,2..] | | Execution order: Web -> DB -> ...     |
+| | Burst times  | Priorities| | Gantt chart:                          |
+| | [6 3 8 4 5]  | [3 1 2 4] | | Process Arrival Burst Completion ...  |
+| +--------------------------+ | Average waiting time: 7.20            |
++-----------------------------+----------------------------------------+
+| Last run: finished in 25 ms                                  ready   |
++----------------------------------------------------------------------+
 ```
 
-The window opens at 1240 x 820 but shrinks down to 980 x 620 on a small
-laptop screen. The module list is a sidebar, not a row of tabs, so it
-stays readable when the window is narrow.
+The window opens at 1280 x 860 and shrinks down to 1020 x 660. One line
+settings such as the algorithm and the time quantum sit in a strip under
+the tab, so the boxes on the left only hold the data lists.
 
 Every screen has the same two buttons:
 
 * **Run** - checks the form, runs the module, prints the full report into
-  the output pane.
+  the result pane.
 * **Load example** - fills the form with a small working dataset, handy
   for a quick test or a live demonstration.
 
@@ -118,7 +123,8 @@ Load example and then Run:
 
 `1-cpu-scheduling.png`, `2-banker.png`, `3-paging.png`,
 `4-segmentation.png`, `5-fragmentation.png`, `6-page-replacement.png`,
-`7-disk-scheduling.png`, `8-multiprogramming.png`.
+`7-disk-scheduling.png`, `8-multiprogramming.png`. The two
+`all-screens-*.png` files show four screens each on one sheet.
 
 ![CPU scheduling screen](screenshots/1-cpu-scheduling.png)
 

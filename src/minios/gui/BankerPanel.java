@@ -1,19 +1,19 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.BankersAlgorithm;
 
-// Tab 2. The banker module keeps the data it was given last, so this panel
-// remembers what it sent and only resends the matrices when they change. The
-// two request boxes are greyed out in a plain safety check.
 public class BankerPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -37,14 +37,17 @@ public class BankerPanel extends ModulePanel {
                 "Rows = processes, columns = resources. Allocation and Max must match.",
                 BankersAlgorithm::run);
         Ui.styleCombo(mode);
-        addRow("Mode:", mode);
-        addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"), 20);
-        addWideRow(Ui.scrolled(allocation), 86);
-        addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"), 20);
-        addLastWideRow(maximum);
-        addRow("Available resources:", available);
-        requestRows.add(addRow("Process making the request (1..n):", process));
-        requestRows.add(addRow("Request vector:", request));
+        addSetting("Mode:", mode);
+        JPanel group = addGroup("Matrices");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new GridLayout(1, 2, 8, 0));
+        lists.setOpaque(false);
+        lists.add(labelled("Allocation matrix", allocation, 150));
+        lists.add(labelled("Maximum need", maximum, 150));
+        group.add(lists, BorderLayout.CENTER);
+        addSetting("Available:", available);
+        requestRows.add(addSetting("Process making the request (1..n):", process));
+        requestRows.add(addSetting("Request vector:", request));
 
         mode.addActionListener(e -> updateRequestRows());
         updateRequestRows();

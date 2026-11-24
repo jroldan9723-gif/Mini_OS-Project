@@ -1,6 +1,9 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -19,9 +22,10 @@ public class PageReplacePanel extends ModulePanel {
         super("Page Replacement",
                 "One reference string, one frame count. All four algorithms use them.",
                 PageReplacementSimulator::run);
-        addRow("Number of frames in RAM:", frames);
-        addWideRow(new JLabel("<html><b>Reference string</b> - page numbers, any length</html>"));
-        addLastWideRow(references);
+        addSetting("Number of frames:", frames);
+        JPanel group = addGroup("Reference string");
+        group.setLayout(new BorderLayout());
+        group.add(labelled("Page numbers, any length", references, 170), BorderLayout.CENTER);
     }
 
     @Override

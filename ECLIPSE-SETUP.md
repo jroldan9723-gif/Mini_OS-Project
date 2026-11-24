@@ -123,10 +123,10 @@ recent version' error" below.
 
 1. Expand `src > minios > gui` and open `GuiMain.java`.
 2. Near the top you should see a comment starting
-   `// The window that opens when the program starts.`
+   `// The window. A three pixel dark bar along the top, the eight module names as`
 3. Right-click the file > **Run As** > **Java Application**.
-4. In the window, click **CPU Scheduling** on the left: the **Time quantum**
-   box is greyed out when the algorithm is SRTF. That grey row only exists
+4. In the window, pick the **CPU Scheduling** tab: the **Time quantum**
+   box is greyed out when the algorithm is SRTF. That grey box only exists
    in the new version.
 5. Press **Load example**, then **Run**. Results appear in the lower pane.
 
@@ -142,9 +142,9 @@ There are four programs worth knowing, and they all start the same way:
 
 1. Expand `src > minios > gui`.
 2. Right-click **GuiMain.java** > **Run As** > **Java Application**.
-3. Pick a module from the list on the left.
+3. Pick a module from the tabs along the top.
 4. Press **Load example** to fill the form, or type your own numbers.
-5. Press **Run**. The report appears in the Results pane.
+5. Press **Run**. The report appears in the result pane on the right.
 
 The first launch may ask which main class to use; pick `GuiMain` and
 press **OK**. Eclipse remembers it after that.

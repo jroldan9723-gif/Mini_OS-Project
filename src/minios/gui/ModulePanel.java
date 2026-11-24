@@ -20,170 +20,172 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-// One module screen. The form sits in a card on the left, the report in a card
-// on the right, and a strip of summary tiles sits above the report. Subclasses
-// only add fields and build the input; everything visual is here.
+// One module screen. A strip of one line settings runs across the top, the
+// input groups fill the left column, and the report takes the right column.
+// Subclasses only add fields and build the input; the frame is the same on
+// every tab.
 abstract class ModulePanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private final ReportView report = new ReportView();
-
-    private final JPanel form = new JPanel();
-    private final JLabel status = new JLabel("Ready");
-    private final JLabel meta = new JLabel(" ");
-    private final MetricTile tileTime = new MetricTile("Compute time");
-    private final MetricTile tileLines = new MetricTile("Input lines");
-    private final MetricTile tileRows = new MetricTile("Report lines");
-
-    ModulePanel(String title, String hint, Runner.Module module) {
-        setLayout(new BorderLayout(16, 12));
-        setBackground(Theme.PAGE);
-        setBorder(new EmptyBorder(16, 18, 16, 18));
-
-        JPanel left = new JPanel(new BorderLayout(0, 12));
-        left.setOpaque(false);
-        left.setPreferredSize(new Dimension(372, 100));
-        left.add(buildFormCard(title, hint), BorderLayout.CENTER);
-        left.add(buildButtons(module), BorderLayout.SOUTH);
-
-        add(left, BorderLayout.WEST);
-        add(buildReportColumn(), BorderLayout.CENTER);
+    // Used by the window footer so a run can report up to the status line.
+    interface StatusSink {
+        void update(String message, int tone);
     }
 
-    private JPanel buildFormCard(String title, String hint) {
-        ShadowCard card = new ShadowCard(new BorderLayout());
-        card.setBorder(new EmptyBorder(16, 16, 14, 16));
+    private final ReportView report = new ReportView();
+    private final JLabel resultLabel = new JLabel("No run yet");
 
-        JPanel head = new JPanel();
-        head.setLayout(new BoxLayout(head, BoxLayout.Y_AXIS));
-        head.setOpaque(false);
+    private final JPanel strip = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 6));
+    private final JPanel form = new JPanel();
+    private final JPanel groupRow = new JPanel(new GridLayout(1, 1, 10, 0));
 
-        JLabel kicker = new JLabel("INPUT");
-        kicker.setFont(Theme.TINY);
-        kicker.setForeground(Theme.ACCENT);
-        kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
-        head.add(kicker);
-        head.add(Box.createVerticalStrut(4));
+    private StatusSink sink;
 
+    ModulePanel(String title, String hintText, Runner.Module module) {
+        setLayout(new BorderLayout());
+        setBackground(Theme.WINDOW);
+        setBorder(new EmptyBorder(0, 0, 0, 0));
+
+        strip.setBackground(Theme.HEADER_BG);
+        strip.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 1, 0, Theme.BORDER),
+                new EmptyBorder(2, 10, 2, 10)));
+        // one line only: a wrapped strip would be clipped by the layout
+        strip.setLayout(new javax.swing.BoxLayout(strip, javax.swing.BoxLayout.LINE_AXIS));
+
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        form.setBackground(Theme.WINDOW);
+        form.setBorder(new EmptyBorder(0, 10, 10, 0));
+
+        groupRow.setBackground(Theme.WINDOW);
+        groupRow.setBorder(new EmptyBorder(0, 10, 0, 0));
+
+        // Head, then the settings strip across the whole width, then the two
+        // columns: input groups on the left, report on the right.
+        JPanel body = new JPanel(new BorderLayout());
+        body.setBackground(Theme.WINDOW);
+        body.add(strip, BorderLayout.NORTH);
+        body.add(buildLeft(), BorderLayout.WEST);
+        body.add(buildRight(), BorderLayout.CENTER);
+
+        add(buildHeading(title, hintText, module), BorderLayout.NORTH);
+        add(body, BorderLayout.CENTER);
+    }
+
+    private JPanel buildHeading(String title, String hintText, Runner.Module module) {
+        JPanel head = new JPanel(new BorderLayout(12, 0));
+        head.setBackground(Theme.WINDOW);
+        head.setBorder(new EmptyBorder(9, 12, 8, 10));
+
+        JPanel text = new JPanel();
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        text.setOpaque(false);
         JLabel heading = new JLabel(title);
-        heading.setFont(Theme.H1);
+        heading.setFont(Theme.APP_TITLE);
         heading.setForeground(Theme.INK);
         heading.setAlignmentX(Component.LEFT_ALIGNMENT);
-        head.add(heading);
-
-        if (hint != null) {
-            head.add(Box.createVerticalStrut(4));
-            JLabel note = new JLabel("<html><body style='width: 272px'>" + hint + "</body></html>");
-            note.setFont(Theme.SMALL);
-            note.setForeground(Theme.MUTED);
-            note.setAlignmentX(Component.LEFT_ALIGNMENT);
-            head.add(note);
+        text.add(heading);
+        if (hintText != null) {
+            JLabel hint = new JLabel(hintText);
+            hint.setFont(Theme.HINT);
+            hint.setForeground(Theme.MUTED);
+            hint.setAlignmentX(Component.LEFT_ALIGNMENT);
+            text.add(hint);
         }
-        head.add(Box.createVerticalStrut(14));
-        card.add(head, BorderLayout.NORTH);
 
-        // Rows stack from the top and never stretch to fill the card.
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setOpaque(false);
-
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-        top.add(form, BorderLayout.NORTH);
-
-        JScrollPane scroller = new JScrollPane(top);
-        scroller.setBorder(null);
-        scroller.setOpaque(false);
-        scroller.getViewport().setOpaque(false);
-        scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scroller.getVerticalScrollBar().setUnitIncrement(16);
-        card.add(scroller, BorderLayout.CENTER);
-        return card;
-    }
-
-    private JPanel buildButtons(Runner.Module module) {
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        buttons.setOpaque(false);
         JButton run = Ui.primary("Run module");
         run.addActionListener(e -> runModule(module));
-        JButton example = Ui.secondary("Load example");
+        JButton example = Ui.button("Load example");
         example.addActionListener(e -> loadExample());
+        buttons.add(run);
+        buttons.add(example);
 
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        row.setOpaque(false);
-        row.add(run);
-        row.add(example);
-        return row;
+        head.add(text, BorderLayout.WEST);
+        head.add(buttons, BorderLayout.EAST);
+        return head;
     }
 
-    private JPanel buildReportColumn() {
-        JPanel column = new JPanel(new BorderLayout(0, 12));
-        column.setOpaque(false);
-        column.add(buildSummaryStrip(), BorderLayout.NORTH);
-        column.add(buildReportCard(), BorderLayout.CENTER);
-        return column;
+    private JPanel buildLeft() {
+        JPanel left = new JPanel(new BorderLayout());
+        left.setBackground(Theme.WINDOW);
+        left.setPreferredSize(new Dimension(500, 100));
+        left.setBorder(new EmptyBorder(0, 10, 10, 6));
+        left.add(groupRow, BorderLayout.CENTER);
+        return left;
     }
 
-    private JPanel buildSummaryStrip() {
-        JPanel strip = new JPanel(new GridLayout(1, 3, 10, 0));
-        strip.setOpaque(false);
-        strip.add(tileTime);
-        strip.add(tileLines);
-        strip.add(tileRows);
-        return strip;
+    private JPanel buildRight() {
+        JPanel right = new JPanel(new BorderLayout(0, 6));
+        right.setBackground(Theme.WINDOW);
+        right.setBorder(new EmptyBorder(0, 0, 10, 10));
+
+        JPanel bar = new JPanel(new BorderLayout());
+        bar.setBackground(Theme.HEADER_BG);
+        bar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BORDER),
+                new EmptyBorder(3, 8, 3, 8)));
+        JLabel cap = new JLabel("RESULT");
+        cap.setFont(Theme.GROUP_TITLE);
+        cap.setForeground(Theme.HEADING);
+        resultLabel.setFont(Theme.STATUS);
+        resultLabel.setForeground(Theme.MUTED);
+        bar.add(cap, BorderLayout.WEST);
+        bar.add(resultLabel, BorderLayout.EAST);
+
+        right.add(bar, BorderLayout.NORTH);
+        right.add(report, BorderLayout.CENTER);
+        return right;
     }
 
-    private JPanel buildReportCard() {
-        ShadowCard card = new ShadowCard(new BorderLayout());
-        card.setBorder(new EmptyBorder(0, 0, 3, 0));
-
-        JPanel head = new JPanel(new BorderLayout());
-        head.setOpaque(false);
-        head.setBorder(new EmptyBorder(14, 18, 10, 18));
-
-        JPanel left = new JPanel();
-        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
-        left.setOpaque(false);
-        JLabel kicker = new JLabel("OUTPUT");
-        kicker.setFont(Theme.TINY);
-        kicker.setForeground(Theme.ACCENT);
-        JLabel title = new JLabel("Report");
-        title.setFont(Theme.H1);
-        title.setForeground(Theme.INK);
-        left.add(kicker);
-        left.add(Box.createVerticalStrut(3));
-        left.add(title);
-
-        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        right.setOpaque(false);
-        meta.setFont(Theme.SMALL);
-        meta.setForeground(Theme.MUTED);
-        status.setFont(Theme.SMALL);
-        status.setForeground(Theme.MUTED);
-        right.add(meta);
-        right.add(Ui.pill(status));
-
-        head.add(left, BorderLayout.WEST);
-        head.add(right, BorderLayout.EAST);
-
-        report.setBorder(new EmptyBorder(0, 10, 6, 8));
-
-        card.add(head, BorderLayout.NORTH);
-        card.add(report, BorderLayout.CENTER);
-        return card;
+    // One line of the settings strip, caption then field.
+    final JLabel addSetting(String labelText, JComponent field) {
+        JLabel label = new JLabel(labelText);
+        label.setFont(Theme.LABEL);
+        label.setForeground(Theme.INK);
+        strip.add(label);
+        strip.add(Box.createHorizontalStrut(6));
+        strip.add(field);
+        space();
+        return label;
     }
 
-    // A field with its caption above it, so long captions stay readable and the
-    // field can use the full width of the card.
+    final void addSettingRow(JComponent extra) {
+        strip.add(extra);
+        space();
+    }
+
+    // A full width group box. Captions and multi line boxes go in here.
+    // A group holds its content at the top of the frame, so a short form does
+    // not leave stretched text boxes when the window is tall.
+    final JPanel addGroup(String title) {
+        Group box = new Group(title);
+        JPanel content = new JPanel(new BorderLayout());
+        content.setOpaque(false);
+        content.setBorder(new EmptyBorder(0, 0, 0, 0));
+        box.add(content, BorderLayout.CENTER);
+        groupRow.add(box);
+        return content;
+    }
+
+    // The strip is a single row, so each setting is spaced by hand.
+    private void space() {
+        strip.add(Box.createHorizontalStrut(14));
+    }
+
+    // A field with its caption above it.
     final JLabel addRow(String labelText, JComponent field) {
-        return addRow(labelText, field, 28);
+        return addRow(labelText, field, 30);
     }
 
     final JLabel addRow(String labelText, JComponent field, int fieldHeight) {
         JLabel label = new JLabel(labelText);
-        label.setFont(Theme.SMALL);
-        label.setForeground(Theme.MUTED);
+        label.setFont(Theme.LABEL);
+        label.setForeground(Theme.INK);
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        label.setBorder(new EmptyBorder(0, 1, 4, 0));
+        label.setBorder(new EmptyBorder(0, 0, 3, 0));
         form.add(label);
 
         JPanel holder = new JPanel(new BorderLayout());
@@ -193,22 +195,41 @@ abstract class ModulePanel extends JPanel {
         holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, fieldHeight));
         holder.setPreferredSize(new Dimension(200, fieldHeight));
         form.add(holder);
-        form.add(Box.createVerticalStrut(11));
+        form.add(Box.createVerticalStrut(9));
         return label;
     }
 
+    // Caption above a box, laid out compactly for a grid inside a group.
+    static JPanel labelled(String caption, JComponent field) {
+        return labelled(caption, field, 96);
+    }
+
+    static JPanel labelled(String caption, JComponent field, int height) {
+        JPanel p = new JPanel(new BorderLayout(0, 3));
+        p.setOpaque(false);
+        JLabel label = new JLabel(caption);
+        label.setFont(Theme.LABEL);
+        label.setForeground(Theme.INK);
+        p.add(label, BorderLayout.NORTH);
+        JScrollPane pane = field instanceof JTextArea
+                ? Ui.scrolled((JTextArea) field) : new JScrollPane(field);
+        p.add(pane, BorderLayout.CENTER);
+        p.setMinimumSize(new Dimension(150, height));
+        p.setPreferredSize(new Dimension(190, height + 22));
+        return p;
+    }
+
     final JComponent addWideRow(JComponent component) {
-        return addWideRow(component, 34);
+        return addWideRow(component, 30);
     }
 
     final JComponent addWideRow(JComponent component, int rowHeight) {
         int height = rowHeight;
         if (component instanceof JLabel) {
             JLabel caption = (JLabel) component;
-            caption.setFont(Theme.SMALL);
-            caption.setForeground(Theme.TEXT_CAPTION);
-            wrapCaption(caption);
-            height = Math.max(rowHeight, 40);
+            caption.setFont(Theme.LABEL_BOLD);
+            caption.setForeground(Theme.HEADING);
+            height = Math.max(rowHeight, 18);
         }
         JPanel row = new JPanel(new BorderLayout());
         row.setOpaque(false);
@@ -217,19 +238,8 @@ abstract class ModulePanel extends JPanel {
         row.setPreferredSize(new Dimension(200, height));
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(row);
-        form.add(Box.createVerticalStrut(9));
+        form.add(Box.createVerticalStrut(7));
         return component;
-    }
-
-    // Captions in the left column get a fixed HTML width, so a long one wraps
-    // onto a second line instead of being cut off at the card edge.
-    private static void wrapCaption(JLabel label) {
-        String text = label.getText();
-        String inner = text.startsWith("<html>") ? text.substring(6) : text;
-        if (inner.endsWith("</html>")) {
-            inner = inner.substring(0, inner.length() - 7);
-        }
-        label.setText("<html><body style='width: 268px'>" + inner + "</body></html>");
     }
 
     final JComponent addLastWideRow(JTextArea area) {
@@ -238,22 +248,23 @@ abstract class ModulePanel extends JPanel {
         JPanel row = new JPanel(new BorderLayout());
         row.setOpaque(false);
         row.add(pane, BorderLayout.CENTER);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
-        row.setPreferredSize(new Dimension(100, 92));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
+        row.setPreferredSize(new Dimension(100, 90));
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(row);
-        form.add(Box.createVerticalStrut(9));
+        form.add(Box.createVerticalStrut(7));
         return pane;
     }
 
-    // Greys out a whole row, including the caption and the field text.
+    // Greys out a whole row, including the caption and the field text, so an
+    // option the chosen algorithm ignores is clearly not in play.
     static void setRowEnabled(Component row, boolean on) {
         if (row instanceof JLabel) {
-            ((JLabel) row).setForeground(on ? Theme.TEXT_CAPTION : Theme.DISABLED);
+            ((JLabel) row).setForeground(on ? Theme.INK : Theme.DISABLED);
         }
         if (row instanceof javax.swing.text.JTextComponent) {
             javax.swing.text.JTextComponent t = (javax.swing.text.JTextComponent) row;
-            t.setBackground(on ? Color.WHITE : Theme.SOFT);
+            t.setBackground(on ? Color.WHITE : Theme.WINDOW);
             t.setForeground(on ? Theme.INK : Theme.DISABLED);
         }
         if (row instanceof JComponent) {
@@ -266,27 +277,32 @@ abstract class ModulePanel extends JPanel {
         }
     }
 
-    // Turns the form into input for the module, then shows what came back. If a
-    // field is wrong nothing runs and a message box explains why.
+    void setStatusSink(StatusSink sink) {
+        this.sink = sink;
+    }
+
+    private void post(String message, int tone) {
+        if (sink != null) {
+            sink.update(message, tone);
+        }
+    }
+
+    // Builds the module input, runs the same code the console mode runs, and
+    // puts the text it returns in the result pane. A bad field stops the run
+    // and a dialog says which one.
     private void runModule(Runner.Module module) {
-        status.setText("Running...");
-        status.setForeground(Theme.MUTED);
         long started = System.nanoTime();
         try {
             String script = buildScript();
             String text = Runner.run(module, script);
             report.show(text);
-            long ms = Math.max(1, (System.nanoTime() - started) / 1_000_000L);
-
+            long ms = Math.max(0, (System.nanoTime() - started) / 1_000_000L);
             int inputLines = script.split("\n", -1).length;
             int reportLines = text.split("\n", -1).length;
-            tileTime.set(ms + " ms", "same code as console", Theme.GREEN);
-            tileLines.set(String.valueOf(inputLines), "sent to the module", Theme.ACCENT);
-            tileRows.set(String.valueOf(reportLines), "shown on the right", Theme.AMBER);
-
-            status.setText("Done");
-            status.setForeground(Theme.GREEN);
-            meta.setText("Checked " + inputLines + " input lines");
+            resultLabel.setText(reportLines + " lines of output  |  " + ms + " ms  |  "
+                    + inputLines + " input lines");
+            resultLabel.setForeground(Theme.MUTED);
+            post("Last run: finished in " + ms + " ms", 1);
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -294,9 +310,9 @@ abstract class ModulePanel extends JPanel {
                 }
             });
         } catch (Ui.InputError e) {
-            status.setText("Needs fixing");
-            status.setForeground(Theme.RED);
-            meta.setText(" ");
+            resultLabel.setText("not run: check the input");
+            resultLabel.setForeground(Theme.RED);
+            post("Input problem, nothing was run", 2);
             Ui.showError(this, e.getMessage());
         }
     }

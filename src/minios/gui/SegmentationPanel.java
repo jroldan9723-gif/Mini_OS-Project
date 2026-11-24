@@ -1,6 +1,10 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -20,11 +24,14 @@ public class SegmentationPanel extends ModulePanel {
         super("Segmentation",
                 "One segment per line as base and limit. Addresses are entered as segment and offset.",
                 SegmentationSimulator::run);
-        addRow("Physical memory (RAM) size in bytes:", ramSize);
-        addWideRow(new JLabel("<html><b>Segment table</b> - \"base limit\" per line</html>"));
-        addWideRow(Ui.scrolled(segments));
-        addWideRow(new JLabel("<html><b>Addresses</b> - \"segment offset\" per line</html>"));
-        addLastWideRow(addresses);
+        addSetting("Physical memory (bytes):", ramSize);
+        JPanel group = addGroup("Segment table and addresses");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new GridLayout(2, 1, 0, 6));
+        lists.setOpaque(false);
+        lists.add(labelled("Segment table: base limit per line", segments));
+        lists.add(labelled("Addresses: segment offset per line", addresses));
+        group.add(lists, BorderLayout.CENTER);
     }
 
     @Override

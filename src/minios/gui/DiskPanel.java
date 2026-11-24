@@ -1,16 +1,16 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import minios.DiskScheduler;
 
-// Tab 7. The queue is checked against the disk size here, otherwise the module
-// would ask for the whole problem again. The direction only matters for the
-// SCAN family, so it is greyed out for FCFS and SSTF.
 public class DiskPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -40,12 +40,13 @@ public class DiskPanel extends ModulePanel {
                 DiskScheduler::run);
         Ui.styleCombo(algorithm);
         Ui.styleCombo(direction);
-        addRow("Algorithm:", algorithm);
-        addRow("Highest cylinder number (disk = 0..max):", maxCylinder);
-        addRow("Initial head position:", head);
-        directionRow = addRow("Initial direction for SCAN / C-SCAN / LOOK / C-LOOK:", direction);
-        addWideRow(new JLabel("<html><b>Request queue</b> - cylinder numbers, any length</html>"), 20);
-        addLastWideRow(requests);
+        addSetting("Algorithm:", algorithm);
+        addSetting("Highest cylinder:", maxCylinder);
+        addSetting("Initial head:", head);
+        directionRow = addSetting("Initial direction:", direction);
+        JPanel group = addGroup("Request queue");
+        group.setLayout(new BorderLayout());
+        group.add(labelled("Cylinder numbers, any length", requests, 170), BorderLayout.CENTER);
 
         algorithm.addActionListener(e -> updateDirectionRow());
         updateDirectionRow();

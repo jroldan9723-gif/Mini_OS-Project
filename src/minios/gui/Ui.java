@@ -2,11 +2,7 @@ package minios.gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 
@@ -17,11 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
-import javax.swing.border.MatteBorder;
+import javax.swing.border.AbstractBorder;
 
-// Helpers for the form fields and the input checks, so every screen validates
-// numbers the same way. The colours all come from Theme.
+// The shared look: tab strip, group boxes, flat fields and buttons, input
+// checks. Every screen builds from these, so a change here changes all eight.
 public final class Ui {
 
     public static class InputError extends RuntimeException {
@@ -34,152 +29,154 @@ public final class Ui {
 
     public static JTextField field(int columns) {
         JTextField f = new JTextField(columns);
-        f.setFont(Theme.BODY);
+        f.setFont(Theme.VALUE);
         f.setForeground(Theme.INK);
         f.setBackground(Color.WHITE);
-        f.setBorder(fieldBorder());
-        f.setMargin(new Insets(5, 8, 5, 8));
+        f.setBorder(fieldBorder(false));
+        f.setMargin(new Insets(4, 6, 4, 6));
+        // never narrower than a couple of digits, so a short value is readable
+        f.setPreferredSize(new java.awt.Dimension(
+                Math.max(64, f.getPreferredSize().width), 26));
         return f;
     }
 
+    // Small text areas holding one number per line.
     public static JTextArea area(int rows, int columns) {
-        JTextArea a = new JTextArea(rows, 1);
+        JTextArea a = new JTextArea(rows, columns);
         a.setLineWrap(true);
         a.setWrapStyleWord(false);
         a.setTabSize(4);
-        a.setFont(Theme.BODY);
+        a.setFont(Theme.VALUE);
         a.setForeground(Theme.INK);
         a.setBackground(Color.WHITE);
         a.setMargin(new Insets(4, 6, 4, 6));
         return a;
     }
 
-    public static JTextArea outputArea() {
-        JTextArea out = new JTextArea();
-        out.setEditable(false);
-        out.setFont(Theme.MONO);
-        out.setForeground(Theme.INK);
-        out.setBackground(Theme.CARD);
-        out.setTabSize(4);
-        return out;
-    }
-
-    // Only the height is fixed, so the box widens with the card instead of
-    // leaving a gap on the right.
     public static JScrollPane scrolled(JTextArea area) {
         JScrollPane pane = new JScrollPane(area);
-        pane.setBorder(BorderFactory.createLineBorder(Theme.LINE));
+        pane.setBorder(BorderFactory.createLineBorder(Theme.BORDER));
         pane.getVerticalScrollBar().setUnitIncrement(14);
         pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setPreferredSize(new java.awt.Dimension(120, area.getPreferredSize().height + 4));
         return pane;
     }
 
-    // A flat, single-pixel border. The default look and feel border is what
-    // makes a Swing window look dated.
-    static Border fieldBorder() {
-        return BorderFactory.createLineBorder(Theme.LINE);
-    }
-
-    // The stock combo box is short and 3D; give it the same flat frame and
-    // height as a text field so a row of controls lines up.
-    public static void styleCombo(javax.swing.JComboBox<?> combo) {
-        combo.setFont(Theme.BODY);
-        combo.setForeground(Theme.INK);
-        combo.setBackground(Color.WHITE);
-        combo.setBorder(fieldBorder());
-        combo.setPreferredSize(new java.awt.Dimension(200, 28));
-        ((javax.swing.JComponent) combo).putClientProperty("JComboBox.isTableCellEditor", Boolean.FALSE);
-    }
-
-    // Puts a rounded tinted chip behind a label, used for the small status
-    // text in the report header.
-    static JComponent pill(final javax.swing.JLabel label) {
-        return new JComponent() {
+    // A single hairline that darkens slightly while the field has the cursor,
+    // so it is obvious where typing will go.
+    static AbstractBorder fieldBorder(final boolean focused) {
+        return new AbstractBorder() {
             private static final long serialVersionUID = 1L;
-            {
-                setLayout(new java.awt.BorderLayout());
-                setBorder(new javax.swing.border.EmptyBorder(3, 8, 3, 8));
-                add(label, java.awt.BorderLayout.CENTER);
+
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
+                g.setColor(c.hasFocus() ? Theme.ACCENT_TEXT : Theme.BORDER);
+                g.drawRect(x, y, w - 1, h - 1);
             }
 
             @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                java.awt.Color c = label.getForeground();
-                g2.setColor(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue(), 26));
-                g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-                g2.dispose();
+            public Insets getBorderInsets(Component c) {
+                return new Insets(1, 1, 1, 1);
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c, Insets in) {
+                in.set(1, 1, 1, 1);
+                return in;
             }
         };
     }
 
-    static JButton primary(String text) {
-        return new FlatButton(text, Theme.ACCENT, Theme.ACCENT_DARK, Color.WHITE);
+    // Padding is compact on purpose: the parameter strip has to fit one line.
+    // The stock combo box is tall and 3D; give it the same flat frame and
+    // height as a text field so a line of controls lines up.
+    public static void styleCombo(javax.swing.JComboBox<?> combo) {
+        combo.setFont(Theme.VALUE);
+        combo.setForeground(Theme.INK);
+        combo.setBackground(Color.WHITE);
+        combo.setBorder(fieldBorder(false));
+        combo.setFocusable(false);
+        java.awt.Dimension d = combo.getPreferredSize();
+        combo.setPreferredSize(new java.awt.Dimension(Math.min(d.width, 300), 26));
     }
 
-    static JButton secondary(String text) {
-        return new FlatButton(text, Theme.CARD, Theme.SOFT, Theme.ACCENT);
+    public static JButton button(String text) {
+        JButton b = new FlatButton(text, Theme.SURFACE, Theme.BORDER, Theme.BORDER);
+        b.setFont(Theme.BUTTON);
+        b.setForeground(Theme.INK);
+        return b;
     }
 
-    // A button drawn by hand: rounded corners, a darker shade while pressed,
-    // no gradient and no 3D bevel.
+    public static JButton primary(String text) {
+        JButton b = new FlatButton(text, Theme.ACCENT, Theme.ACCENT_HOVER, Theme.ACCENT);
+        b.setFont(Theme.BUTTON);
+        b.setForeground(Color.WHITE);
+        return b;
+    }
+
+    // A button drawn by hand: square corners, a one pixel frame, a darker fill
+    // while pressed. The stock look and feel gradient is what makes a Swing
+    // window look its age.
     static final class FlatButton extends JButton {
         private static final long serialVersionUID = 1L;
 
         private final Color base;
         private final Color pressed;
-        private final Color textColour;
+        private final Color frame;
 
-        FlatButton(String text, Color base, Color pressed, Color textColour) {
+        FlatButton(String text, Color base, Color pressed, Color frame) {
             super(text);
             this.base = base;
             this.pressed = pressed;
-            this.textColour = textColour;
-            setFont(Theme.BODY_BOLD);
-            setForeground(textColour);
+            this.frame = frame;
             setContentAreaFilled(false);
             setFocusPainted(false);
             setBorderPainted(false);
             setOpaque(false);
             setRolloverEnabled(true);
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            setMargin(new Insets(7, 16, 7, 16));
-            setBorder(new MatteBorder(1, 1, 1, 1,
-                    base == Theme.CARD ? Theme.LINE : base));
+            setMargin(new Insets(5, 12, 5, 12));
+            setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
         }
 
         @Override
         public Insets getInsets() {
-            return new Insets(7, 16, 7, 16);
+            return new Insets(5, 12, 5, 12);
+        }
+
+        @Override
+        public java.awt.Dimension getPreferredSize() {
+            java.awt.FontMetrics fm = getFontMetrics(getFont());
+            return new java.awt.Dimension(fm.stringWidth(getText()) + 26, 28);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            Color fill = base;
-            if (getModel().isPressed()) {
-                fill = pressed;
-            } else if (getModel().isRollover() && base == Theme.CARD) {
-                fill = Theme.SOFT;
-            } else if (getModel().isRollover()) {
-                fill = pressed;
-            }
+            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            boolean down = getModel().isPressed();
+            boolean over = getModel().isRollover();
+            Color fill = down ? pressed : (over ? blend(base) : base);
             g2.setColor(fill);
-            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
-            if (base == Theme.CARD) {
-                g2.setColor(Theme.LINE);
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            if (frame != null) {
+                g2.setColor(frame == base ? Theme.ACCENT_HOVER : frame);
+                g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             }
             g2.setFont(getFont());
-            g2.setColor(isEnabled() ? textColour : Theme.DISABLED);
-            FontMetrics fm = g2.getFontMetrics();
+            java.awt.FontMetrics fm = g2.getFontMetrics();
+            java.awt.Color text = isEnabled() ? getForeground() : Theme.DISABLED;
+            g2.setColor(text);
             int x = (getWidth() - fm.stringWidth(getText())) / 2;
             int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
             g2.drawString(getText(), x, y);
             g2.dispose();
+        }
+
+        private static Color blend(Color c) {
+            int r = (c.getRed() + 255) / 2;
+            int g = (c.getGreen() + 255) / 2;
+            int b = (c.getBlue() + 255) / 2;
+            return new Color(r, g, b);
         }
     }
 
@@ -249,8 +246,8 @@ public final class Ui {
         return "Enter a whole number between " + min + " and " + max + ".";
     }
 
-    // A plain dialog instead of the default Swing message box, so an error
-    // looks like the rest of the window.
+    // A plain dialog instead of the default message box, so a mistake looks
+    // like the rest of the window.
     public static void showError(Component parent, String message) {
         JOptionPane pane = new JOptionPane(
                 "<html><body style='width: 320px'>" + message + "</body></html>",

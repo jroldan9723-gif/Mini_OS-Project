@@ -1,6 +1,10 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -17,13 +21,16 @@ public class PagingPanel extends ModulePanel {
 
     public PagingPanel() {
         super("Paging",
-                "One frame per page, -1 if it is on disk. Addresses are optional.",
+                "One frame number per page, -1 if the page is on disk.",
                 PagingSimulator::run);
-        addRow("Page size in bytes (e.g. 1024):", pageSize);
-        addWideRow(new JLabel("<html><b>Page table</b> - frame number per page (space or line separated)</html>"));
-        addWideRow(Ui.scrolled(frames));
-        addWideRow(new JLabel("<html><b>Logical addresses</b> to translate (optional list)</html>"));
-        addLastWideRow(addresses);
+        addSetting("Page size in bytes:", pageSize);
+        JPanel group = addGroup("Page table and addresses");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new GridLayout(2, 1, 0, 6));
+        lists.setOpaque(false);
+        lists.add(labelled("Frame number per page", frames));
+        lists.add(labelled("Logical addresses (optional)", addresses));
+        group.add(lists, BorderLayout.CENTER);
     }
 
     @Override

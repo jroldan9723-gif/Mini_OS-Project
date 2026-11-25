@@ -14,6 +14,8 @@ import minios.MultiprogrammingSimulator;
 // which is easier to check than four lists that must line up.
 public class MultiPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JTextField memorySize = Ui.field(10);
@@ -32,7 +34,10 @@ public class MultiPanel extends ModulePanel {
         addSetting("Main memory (KB):", memorySize);
         addSetting("Time quantum (ticks):", quantum);
 
-        JPanel group = addGroup("Jobs");
+                chart.setEmptyHint("Run the simulation to see the final memory map.");
+        addPreview(chart, "FINAL MEMORY MAP", 96);
+
+JPanel group = addGroup("Jobs");
         group.setLayout(new BorderLayout());
         group.add(jobs, BorderLayout.CENTER);
     }
@@ -92,5 +97,13 @@ public class MultiPanel extends ModulePanel {
             {"J3", "25", "5", "0"},
             {"J4", "20", "3", "5"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadMulti(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

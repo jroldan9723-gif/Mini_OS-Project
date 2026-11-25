@@ -14,6 +14,8 @@ import minios.DiskScheduler;
 // a long queue is easy to trim or correct before running.
 public class DiskPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JComboBox<String> algorithm = new JComboBox<>(new String[]{
@@ -48,7 +50,10 @@ public class DiskPanel extends ModulePanel {
         addSetting("Initial head:", head);
         directionRow = addSetting("Initial direction:", direction);
 
-        JPanel group = addGroup("Request queue");
+                chart.setEmptyHint("Run a schedule to see the head movement.");
+        addPreview(chart, "HEAD MOVEMENT", 124);
+
+JPanel group = addGroup("Request queue");
         group.setLayout(new BorderLayout());
         group.add(requests, BorderLayout.CENTER);
 
@@ -106,5 +111,13 @@ public class DiskPanel extends ModulePanel {
         requests.setRows(new String[][]{
             {"98"}, {"183"}, {"37"}, {"122"}, {"14"}, {"124"}, {"65"}, {"67"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadDisk(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

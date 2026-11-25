@@ -12,6 +12,8 @@ import minios.PageReplacementSimulator;
 // algorithms run on the same data.
 public class PageReplacePanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JTextField frames = Ui.field(6);
@@ -25,7 +27,10 @@ public class PageReplacePanel extends ModulePanel {
                 PageReplacementSimulator::run);
         addSetting("Number of frames:", frames);
 
-        JPanel group = addGroup("Reference string");
+                chart.setEmptyHint("Run the reference string to see hits and faults.");
+        addPreview(chart, "REFERENCE STRING", 124);
+
+JPanel group = addGroup("Reference string");
         group.setLayout(new BorderLayout());
         group.add(references, BorderLayout.CENTER);
     }
@@ -63,5 +68,13 @@ public class PageReplacePanel extends ModulePanel {
             {"7"}, {"0"}, {"1"}, {"2"}, {"0"}, {"3"}, {"0"}, {"4"}, {"2"}, {"3"},
             {"0"}, {"3"}, {"2"}, {"1"}, {"2"}, {"0"}, {"1"}, {"7"}, {"0"}, {"1"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadPageFrames(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

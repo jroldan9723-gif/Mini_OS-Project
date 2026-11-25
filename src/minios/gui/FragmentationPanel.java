@@ -17,6 +17,8 @@ import minios.FragmentationDemo;
 // and one new request. Greyed boxes belong to the demo that is not picked.
 public class FragmentationPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JComboBox<String> kind = new JComboBox<>(new String[]{
@@ -76,6 +78,9 @@ public class FragmentationPanel extends ModulePanel {
 
         demoBox.add(internal, "internal");
         demoBox.add(external, "external");
+
+        chart.setEmptyHint("Run a demo to see the memory map.");
+        addPreview(chart, "MEMORY MAP", 118);
 
         JPanel group = addGroup("Demos");
         group.setLayout(new BorderLayout());
@@ -166,5 +171,24 @@ public class FragmentationPanel extends ModulePanel {
             {"A", "200"}, {"B", "150"}, {"C", "300"}, {"D", "100"}, {"E", "250"}
         });
         frees.setRows(new String[][]{{"B"}});
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadMemoryMap(lastMemoryMap(reportText));
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
+    }
+
+    // The demos print several maps; the last one shows the end state.
+    private static String lastMemoryMap(String report) {
+        String last = null;
+        for (String line : report.split("\n")) {
+            if (line.contains("Memory map:")) {
+                last = line.substring(line.indexOf("Memory map:"));
+            }
+        }
+        return last;
     }
 }

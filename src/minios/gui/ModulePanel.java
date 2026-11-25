@@ -136,19 +136,21 @@ abstract class ModulePanel extends JPanel {
     // Gives a screen a small picture above its report. Only the CPU screen
     // uses it, for the Gantt chart. The box stays hidden until there is a
     // schedule to draw, so the other screens look unchanged.
-    final void addPreview(JComponent picture) {
+    final void addPreview(JComponent picture, String title, int height) {
         previewBox = new JPanel(new BorderLayout());
         previewBox.setBackground(Theme.SURFACE);
         previewBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Theme.BORDER),
                 new EmptyBorder(8, 12, 6, 12)));
 
-        JLabel caption = new JLabel("SCHEDULE");
+        JLabel caption = new JLabel(title);
+        previewPicture = picture;
+        basePreviewHeight = height;
         caption.setFont(Theme.GROUP_TITLE);
         caption.setForeground(Theme.HEADING);
         previewBox.add(caption, BorderLayout.NORTH);
         previewBox.add(picture, BorderLayout.CENTER);
-        previewBox.setPreferredSize(new Dimension(200, 118));
+        previewBox.setPreferredSize(new Dimension(200, height));
         previewBox.setVisible(false);
 
         JPanel column = (JPanel) report.getParent();
@@ -156,10 +158,22 @@ abstract class ModulePanel extends JPanel {
     }
 
     private JPanel previewBox;
+    private JComponent previewPicture;
+    private int basePreviewHeight = 118;
 
-    // Shows the picture once there is something to draw.
+    // Shows the picture once there is something to draw. The box takes the
+    // height the picture asks for, so a long list is never cut in half.
     final void setPreviewVisible(boolean on) {
-        if (previewBox == null || previewBox.isVisible() == on) {
+        if (previewBox == null) {
+            return;
+        }
+        if (on && previewPicture != null) {
+            int tall = Math.max(basePreviewHeight, previewPicture.getPreferredSize().height + 34);
+            previewBox.setPreferredSize(new Dimension(200, tall));
+        }
+        if (previewBox.isVisible() == on) {
+            previewBox.getParent().revalidate();
+            previewBox.getParent().repaint();
             return;
         }
         previewBox.setVisible(on);

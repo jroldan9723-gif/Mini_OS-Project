@@ -12,6 +12,8 @@ import minios.SegmentationSimulator;
 // reported after the module had already started.
 public class SegmentationPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JTextField ramSize = Ui.field(12);
@@ -29,7 +31,10 @@ public class SegmentationPanel extends ModulePanel {
                 SegmentationSimulator::run);
         addSetting("Physical memory (bytes):", ramSize);
 
-        JPanel group = addGroup("Segment table and addresses");
+                chart.setEmptyHint("Run a translation to see the segments in memory.");
+        addPreview(chart, "SEGMENTS IN MEMORY", 104);
+
+JPanel group = addGroup("Segment table and addresses");
         group.setLayout(new BorderLayout());
         JPanel lists = new JPanel(new java.awt.GridLayout(1, 2, 8, 0));
         lists.setOpaque(false);
@@ -97,5 +102,13 @@ public class SegmentationPanel extends ModulePanel {
         addresses.setRows(new String[][]{
             {"0", "50"}, {"1", "999"}, {"2", "0"}, {"5", "0"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadSegments(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

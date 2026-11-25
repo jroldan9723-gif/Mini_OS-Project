@@ -15,6 +15,8 @@ import minios.BankersAlgorithm;
 // with the Add row button like every other module.
 public class BankerPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     final JComboBox<String> mode = new JComboBox<>(new String[]{
@@ -41,7 +43,10 @@ public class BankerPanel extends ModulePanel {
         Ui.styleCombo(mode);
         addSetting("Mode:", mode);
 
-        JPanel group = addGroup("Processes");
+                chart.setEmptyHint("Run a safety check to see the work and need totals.");
+        addPreview(chart, "RESOURCE TOTALS", 104);
+
+JPanel group = addGroup("Processes");
         group.setLayout(new BorderLayout());
         group.add(table, BorderLayout.CENTER);
 
@@ -183,5 +188,13 @@ public class BankerPanel extends ModulePanel {
             {"2 1 1", "2 2 2"},
             {"0 0 2", "4 3 3"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadBanker(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

@@ -130,9 +130,11 @@ recent version' error" below.
 5. Pick the **CPU Scheduling** tab: the **Time quantum** box is greyed out
    when the algorithm is SRTF.
 6. Press **Load example**, then **Run**. Results appear on the right and
-   a coloured Gantt chart is drawn under them.
+   a picture is drawn under them. Every screen has one now, not just the
+   CPU tab.
 
-If you see the cards, the grey row and the chart, the update worked.
+If you see the cards, the grey row and a picture on every screen, the
+update worked.
 
 ## Step 7: The steps to run it every time
 
@@ -147,8 +149,11 @@ There are four programs worth knowing, and they all start the same way:
 3. The window opens on **Home**. Click any card, or a tab along the top,
    to open a module.
 4. Press **Load example** to fill the tables, or add your own rows.
-5. Press **Run**. The report appears in the result pane on the right. On
-   the CPU tab the Gantt chart is drawn under the report.
+5. Press **Run**. The report appears in the result pane on the right, and
+   a picture of the result is drawn under it: a timeline on the CPU and
+   page replacement screens, bars on Banker, paging and segmentation, the
+   memory map on fragmentation and multiprogramming, and the move order on
+   disk scheduling.
 
 The first launch may ask which main class to use; pick `GuiMain` and
 press **OK**. Eclipse remembers it after that.

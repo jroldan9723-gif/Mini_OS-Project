@@ -12,6 +12,8 @@ import minios.PagingSimulator;
 // frame is what the user types. -1 means the page is on disk.
 public class PagingPanel extends ModulePanel {
 
+    private final ResultChart chart = new ResultChart();
+
     private static final long serialVersionUID = 1L;
 
     private final JTextField pageSize = Ui.field(10);
@@ -27,7 +29,10 @@ public class PagingPanel extends ModulePanel {
                 PagingSimulator::run);
         addSetting("Page size in bytes:", pageSize);
 
-        JPanel group = addGroup("Page table and addresses");
+                chart.setEmptyHint("Run a translation to see memory used per page table entry.");
+        addPreview(chart, "MEMORY PER PAGE", 104);
+
+JPanel group = addGroup("Page table and addresses");
         group.setLayout(new BorderLayout());
         JPanel lists = new JPanel(new java.awt.GridLayout(1, 2, 8, 0));
         lists.setOpaque(false);
@@ -68,5 +73,13 @@ public class PagingPanel extends ModulePanel {
         addresses.setRows(new String[][]{
             {"0"}, {"1024"}, {"5000"}, {"8192"}, {"20000"}, {"999999"}
         });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadPaging(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

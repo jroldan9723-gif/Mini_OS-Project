@@ -233,12 +233,23 @@ idle gaps, and a table of arrival, burst, completion, turnaround
 (`completion - arrival`), waiting (`turnaround - burst`) and response
 (`first start - arrival`) with the three averages.
 
-On the CPU tab that same Gantt chart is also drawn as coloured blocks
-under the report, with a tick label at every start time and a legend
-naming each colour, so the timeline can be read without decoding the
-text. The chart is built from the printed schedule line, not from a
-second copy of the scheduler, so the picture and the report cannot
-disagree. It stays hidden until a run succeeds.
+Every module also draws its result as a picture under the report, built
+from the text the module prints, so the picture and the numbers cannot
+disagree:
+
+| Screen | Picture |
+|--------|---------|
+| CPU scheduling | the schedule as coloured blocks on a time axis, with the three averages |
+| Banker's algorithm | one bar per process showing the resources it still needs |
+| Paging | one bar per page showing the memory it occupies, pages on disk at zero |
+| Segmentation | one bar per segment showing its size |
+| Fragmentation | the memory map: jobs in colour, holes in grey |
+| Page replacement | the FIFO reference string, misses in red and hits grey |
+| Disk scheduling | the service order as boxes, with the movement between them |
+| Multiprogramming | the memory map at the end of the run, jobs plus free space |
+
+A picture stays hidden until a run succeeds, and is redrawn on the next
+run, so it never shows an old result next to new numbers.
 
 The comparison option runs FCFS, SJF, Round Robin and Priority on the
 same processes and prints waiting/turnaround per process and per
@@ -498,12 +509,15 @@ Current result: **ALL EDGE CHECKS PASSED** (23 checks).
 java -cp bin minios.gui.GuiChartTest
 ```
 
-Feeds the chart report text with normal slices, idle time and a preempted
-process, then damaged text (a word where a number belongs, a slice that
-ends before it starts, no chart at all) and checks it keeps only what it
-can read. It also opens the landing screen and clicks all eight cards to
+Checks the picture under each report. It feeds the CPU chart normal
+slices, idle time and a preempted process, then damaged text (a word where
+a number belongs, a slice that ends before it starts, no chart at all) and
+confirms it keeps only what it can read. The other readers get the same
+treatment. The strongest part loads the example on all eight screens,
+presses Run through the real code and confirms every screen ends up with a
+picture. It also opens the landing screen and clicks all eight cards to
 confirm each one selects its own module. Current result:
-**ALL CHART CHECKS PASSED** (12 checks).
+**ALL CHART CHECKS PASSED** (33 checks).
 
 ### Result verification
 
@@ -559,7 +573,7 @@ Mini_OS-Project/
 |   |       |-- Ui.java                  field helpers and validation
 |   |       |-- Runner.java              adapter: GUI input -> console module
 |   |       |-- HomePanel.java           landing screen with one card per module
-|   |       |-- GanttChart.java          coloured schedule picture, CPU screen
+|   |       |-- ResultChart.java         the picture drawn under every report
 |   |       |-- CpuPanel.java            tab 1
 |   |       |-- BankerPanel.java         tab 2
 |   |       |-- PagingPanel.java         tab 3

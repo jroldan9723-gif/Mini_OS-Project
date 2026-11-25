@@ -133,6 +133,40 @@ abstract class ModulePanel extends JPanel {
         return right;
     }
 
+    // Gives a screen a small picture above its report. Only the CPU screen
+    // uses it, for the Gantt chart. The box stays hidden until there is a
+    // schedule to draw, so the other screens look unchanged.
+    final void addPreview(JComponent picture) {
+        previewBox = new JPanel(new BorderLayout());
+        previewBox.setBackground(Theme.SURFACE);
+        previewBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BORDER),
+                new EmptyBorder(8, 12, 6, 12)));
+
+        JLabel caption = new JLabel("SCHEDULE");
+        caption.setFont(Theme.GROUP_TITLE);
+        caption.setForeground(Theme.HEADING);
+        previewBox.add(caption, BorderLayout.NORTH);
+        previewBox.add(picture, BorderLayout.CENTER);
+        previewBox.setPreferredSize(new Dimension(200, 118));
+        previewBox.setVisible(false);
+
+        JPanel column = (JPanel) report.getParent();
+        column.add(previewBox, BorderLayout.SOUTH);
+    }
+
+    private JPanel previewBox;
+
+    // Shows the picture once there is something to draw.
+    final void setPreviewVisible(boolean on) {
+        if (previewBox == null || previewBox.isVisible() == on) {
+            return;
+        }
+        previewBox.setVisible(on);
+        previewBox.getParent().revalidate();
+        previewBox.getParent().repaint();
+    }
+
     // One line of the settings strip, caption then field.
     final JLabel addSetting(String labelText, JComponent field) {
         JLabel label = new JLabel(labelText);
@@ -220,6 +254,7 @@ abstract class ModulePanel extends JPanel {
             String script = buildScript();
             String text = Runner.run(module, script);
             report.show(text);
+            afterRun(text);
             long ms = Math.max(0, (System.nanoTime() - started) / 1_000_000L);
             int inputLines = script.split("\n", -1).length;
             int reportLines = text.split("\n", -1).length;
@@ -234,11 +269,18 @@ abstract class ModulePanel extends JPanel {
                 }
             });
         } catch (Ui.InputError e) {
+            afterRun(null);
             resultLabel.setText("not run: check the input");
             resultLabel.setForeground(Theme.RED);
             post("Input problem, nothing was run", 2);
             Ui.showError(this, e.getMessage());
         }
+    }
+
+    // Called after a run: with the report text when it worked, with null when
+    // the input was rejected. The CPU screen uses it to redraw its chart;
+    // every other screen ignores it.
+    void afterRun(String reportText) {
     }
 
     public abstract String buildScript();

@@ -43,6 +43,8 @@ final class Theme {
     private static final String MONO_FAMILY = pick("Consolas", "Cascadia Mono", "Menlo", "DejaVu Sans Mono");
 
     static final Font APP_TITLE = new Font(FAMILY, Font.BOLD, 13);
+    static final Font TITLE_BIG = new Font(FAMILY, Font.BOLD, 22);
+    static final Font CARD_TITLE = new Font(FAMILY, Font.BOLD, 13);
     static final Font TAB = new Font(FAMILY, Font.PLAIN, 12);
     static final Font TAB_ACTIVE = new Font(FAMILY, Font.BOLD, 12);
     static final Font GROUP_TITLE = new Font(FAMILY, Font.BOLD, 10);

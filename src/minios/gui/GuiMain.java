@@ -17,9 +17,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-// The window. A three pixel dark bar along the top, the eight module names as
-// tabs, then the open module below. All eight screens are created up front so
-// switching tabs is instant and nothing is lost when moving around.
+// The window. A three pixel dark bar along the top, then a row of tabs that
+// starts with Home and continues with the eight module names, then the open
+// screen below. All nine screens are created up front so switching tabs is
+// instant and nothing typed is lost when moving around.
 public final class GuiMain {
 
     private static final String[] SHORT = {
@@ -59,6 +60,8 @@ public final class GuiMain {
             new CpuPanel(), new BankerPanel(), new PagingPanel(), new SegmentationPanel(),
             new FragmentationPanel(), new PageReplacePanel(), new DiskPanel(), new MultiPanel()
         };
+        // Home sits at tab 0 so every module keeps its familiar position.
+        tabs.addTab("Home", new HomePanel(tabs));
         for (int i = 0; i < panels.length; i++) {
             tabs.addTab(SHORT[i], panels[i]);
         }
@@ -91,10 +94,14 @@ public final class GuiMain {
         bar.setBackground(Theme.BAR);
         bar.setBorder(new EmptyBorder(6, 12, 6, 12));
 
+        JPanel brand = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
+        brand.setOpaque(false);
+        brand.add(HomePanel.badge(16));
         JLabel name = new JLabel("Operating System Simulator");
         name.setFont(Theme.APP_TITLE);
         name.setForeground(Color.WHITE);
-        bar.add(name, BorderLayout.WEST);
+        brand.add(name);
+        bar.add(brand, BorderLayout.WEST);
 
         // a short accent rule under the title, the only decoration up here
         JPanel rule = new JPanel();

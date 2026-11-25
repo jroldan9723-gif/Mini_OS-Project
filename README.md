@@ -131,6 +131,14 @@ Load example and then Run:
 `7-disk-scheduling.png`, `8-multiprogramming.png`. The two
 `all-screens-*.png` files show four screens each on one sheet.
 
+The window opens on a landing screen: one card per module with a one line
+description, and the same eight modules as tabs along the top. Clicking a
+card opens that module, so nobody has to guess which tab holds what. The
+Home tab is listed first and the module tabs keep the order of the console
+menu.
+
+![Landing screen, one card per module](screenshots/0-home.png)
+
 ![CPU scheduling screen](screenshots/1-cpu-scheduling.png)
 
 Data is entered one row at a time, not typed into a text box. Every
@@ -224,6 +232,13 @@ Every run reports the execution order, a Gantt chart with preemptions and
 idle gaps, and a table of arrival, burst, completion, turnaround
 (`completion - arrival`), waiting (`turnaround - burst`) and response
 (`first start - arrival`) with the three averages.
+
+On the CPU tab that same Gantt chart is also drawn as coloured blocks
+under the report, with a tick label at every start time and a legend
+naming each colour, so the timeline can be read without decoding the
+text. The chart is built from the printed schedule line, not from a
+second copy of the scheduler, so the picture and the report cannot
+disagree. It stays hidden until a run succeeds.
 
 The comparison option runs FCFS, SJF, Round Robin and Priority on the
 same processes and prints waiting/turnaround per process and per
@@ -477,6 +492,19 @@ numbers belong, values out of range, a job bigger than memory) and checks
 that every one comes back as a readable message rather than a crash.
 Current result: **ALL EDGE CHECKS PASSED** (23 checks).
 
+### Gantt chart and landing screen test
+
+```
+java -cp bin minios.gui.GuiChartTest
+```
+
+Feeds the chart report text with normal slices, idle time and a preempted
+process, then damaged text (a word where a number belongs, a slice that
+ends before it starts, no chart at all) and checks it keeps only what it
+can read. It also opens the landing screen and clicks all eight cards to
+confirm each one selects its own module. Current result:
+**ALL CHART CHECKS PASSED** (12 checks).
+
 ### Result verification
 
 Outputs are deterministic (every run was repeated and compared), and
@@ -530,6 +558,8 @@ Mini_OS-Project/
 |   |       |-- Theme.java               colours and fonts for the window
 |   |       |-- Ui.java                  field helpers and validation
 |   |       |-- Runner.java              adapter: GUI input -> console module
+|   |       |-- HomePanel.java           landing screen with one card per module
+|   |       |-- GanttChart.java          coloured schedule picture, CPU screen
 |   |       |-- CpuPanel.java            tab 1
 |   |       |-- BankerPanel.java         tab 2
 |   |       |-- PagingPanel.java         tab 3
@@ -540,6 +570,7 @@ Mini_OS-Project/
 |   |       |-- MultiPanel.java          tab 8
 |   |       |-- GuiTableSelfTest.java    add / edit / remove checks
 |   |       |-- GuiInputEdgeTest.java    bad input checks, all 8 screens
+|   |       |-- GuiChartTest.java        chart parsing and card clicks
 |   |       |-- RecordEditor.java        table with Add and Edit buttons
 |   |       |-- Group.java               titled frame around a group of fields
 |   |       |-- StripTabs.java           hand drawn tab strip

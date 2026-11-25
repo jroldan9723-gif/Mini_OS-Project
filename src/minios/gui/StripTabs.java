@@ -36,8 +36,11 @@ final class StripTabs extends JTabbedPane {
 
         @Override
         protected int calculateTabWidth(int tabPlacement, int tabIndex, FontMetrics metrics) {
-            // roomy left and right padding, like a toolbar button
-            return super.calculateTabWidth(tabPlacement, tabIndex, metrics) + 22;
+            // Measured from the font we actually paint with, not the one the
+            // look and feel hands us. Nine tabs have to fit one row at the
+            // smallest window width, otherwise Home scrolls out of sight.
+            FontMetrics fm = tabPane.getFontMetrics(Theme.TAB);
+            return fm.stringWidth(tabPane.getTitleAt(tabIndex)) + 18;
         }
 
         @Override

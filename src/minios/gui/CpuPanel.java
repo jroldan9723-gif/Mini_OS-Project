@@ -38,6 +38,7 @@ public class CpuPanel extends ModulePanel {
             RecordEditor.Column.optionalNumber("Priority", 74, 0, 999));
 
     private JComponent quantumRow;
+    private final GanttChart chart = new GanttChart();
 
     public CpuPanel() {
         super("CPU Scheduling",
@@ -51,6 +52,8 @@ public class CpuPanel extends ModulePanel {
         JPanel group = addGroup("Processes");
         group.setLayout(new BorderLayout());
         group.add(processes, BorderLayout.CENTER);
+
+        addPreview(chart);
 
         algorithm.addActionListener(e -> updateOptionalRows());
         updateOptionalRows();
@@ -115,6 +118,14 @@ public class CpuPanel extends ModulePanel {
 
         script.append("0\n");
         return script.toString();
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.load(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 
     @Override

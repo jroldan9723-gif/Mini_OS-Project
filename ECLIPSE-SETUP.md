@@ -123,14 +123,16 @@ recent version' error" below.
 
 1. Expand `src > minios > gui` and open `GuiMain.java`.
 2. Near the top you should see a comment starting
-   `// The window. A three pixel dark bar along the top, the eight module names as`
+   `// The window. A three pixel dark bar along the top, then a row of tabs that`
 3. Right-click the file > **Run As** > **Java Application**.
-4. In the window, pick the **CPU Scheduling** tab: the **Time quantum**
-   box is greyed out when the algorithm is SRTF. That grey box only exists
-   in the new version.
-5. Press **Load example**, then **Run**. Results appear in the lower pane.
+4. The window opens on a **Home** tab with eight numbered cards. That
+   screen only exists in the new version.
+5. Pick the **CPU Scheduling** tab: the **Time quantum** box is greyed out
+   when the algorithm is SRTF.
+6. Press **Load example**, then **Run**. Results appear on the right and
+   a coloured Gantt chart is drawn under them.
 
-If you see the grey row and the results, the update worked.
+If you see the cards, the grey row and the chart, the update worked.
 
 ## Step 7: The steps to run it every time
 
@@ -142,9 +144,11 @@ There are four programs worth knowing, and they all start the same way:
 
 1. Expand `src > minios > gui`.
 2. Right-click **GuiMain.java** > **Run As** > **Java Application**.
-3. Pick a module from the tabs along the top.
+3. The window opens on **Home**. Click any card, or a tab along the top,
+   to open a module.
 4. Press **Load example** to fill the tables, or add your own rows.
-5. Press **Run**. The report appears in the result pane on the right.
+5. Press **Run**. The report appears in the result pane on the right. On
+   the CPU tab the Gantt chart is drawn under the report.
 
 The first launch may ask which main class to use; pick `GuiMain` and
 press **OK**. Eclipse remembers it after that.
@@ -419,7 +423,7 @@ git pull
 
 Then do Steps 4-6 as usual.
 
-### The three GUI checks, without opening a window
+### The four GUI checks, without opening a window
 
 These are quick to run before a demo. Each one prints PASS lines and a
 final summary:
@@ -427,6 +431,7 @@ final summary:
 * Right-click **src/minios/gui/GuiInputSelfTest.java** > Run As > Java Application
 * Right-click **src/minios/gui/GuiTableSelfTest.java** > Run As > Java Application
 * Right-click **src/minios/gui/GuiInputEdgeTest.java** > Run As > Java Application
+* Right-click **src/minios/gui/GuiChartTest.java** > Run As > Java Application
 
-Expect `ALL GUI CHECKS PASSED`, `ALL EDIT CHECKS PASSED` and
-`ALL EDGE CHECKS PASSED`.
+Expect `ALL GUI CHECKS PASSED`, `ALL EDIT CHECKS PASSED`,
+`ALL EDGE CHECKS PASSED` and `ALL CHART CHECKS PASSED`.

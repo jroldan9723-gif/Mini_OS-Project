@@ -1,19 +1,20 @@
 package minios.gui;
 
+import java.awt.BorderLayout;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import minios.CPUScheduler;
 
-// Tab 1. The lists are read from the text boxes, so the number of processes is
-// whatever the user typed, and the quantum and priority rows only light up for
-// the algorithms that use them.
+// Tab 1. Processes are added one at a time with the Add row button, so a long
+// list does not mean keeping four text boxes in step by hand. The quantum row
+// only lights up for the algorithms that use it.
 public class CpuPanel extends ModulePanel {
 
     private static final long serialVersionUID = 1L;
@@ -29,27 +30,31 @@ public class CpuPanel extends ModulePanel {
         "Priority (non-preemptive, smaller number = higher priority)"
     });
     private final JTextField quantum = Ui.field(6);
-    private final JTextArea names = Ui.area(3, 34);
-    private final JTextArea arrivals = Ui.area(3, 34);
-    private final JTextArea bursts = Ui.area(3, 34);
-    private final JTextArea priorities = Ui.area(3, 34);
+
+    private final RecordEditor processes = new RecordEditor(null, 1,
+            RecordEditor.Column.optionalName("Process", 92),
+            RecordEditor.Column.number("Arrival", 74, 0, 1000),
+            RecordEditor.Column.number("Burst", 74, 1, 1000),
+            RecordEditor.Column.optionalNumber("Priority", 74, 0, 999));
 
     private JComponent quantumRow;
-    private JComponent priorityRow;
+    private final ResultChart chart = new ResultChart();
 
     public CpuPanel() {
         super("CPU Scheduling",
-                "One line per process: ID (optional), arrival time, burst time. Greyed-out boxes are unused.",
+                "Add one row per process. Burst is the work it needs.",
                 CPUScheduler::run);
-        addRow("Algorithm:", algorithm);
-        quantumRow = addRow("Time quantum (Round Robin / comparison):", quantum);
-        addWideRow(new JLabel("<html><b>Process IDs</b> - optional, one per line (defaults P1, P2, ...)</html>"));
-        addWideRow(Ui.scrolled(names));
-        addWideRow(new JLabel("<html><b>Arrival times</b> - one per process (0 or more)</html>"));
-        addWideRow(Ui.scrolled(arrivals));
-        addWideRow(new JLabel("<html><b>Burst times</b> - one per process (each 1..1000)</html>"));
-        addWideRow(Ui.scrolled(bursts));
-        priorityRow = addRow("Priorities (Priority / comparison):", Ui.scrolled(priorities));
+        Ui.styleCombo(algorithm);
+        quantum.setColumns(5);
+        addSetting("Algorithm:", algorithm);
+        quantumRow = addSetting("Time quantum:", quantum);
+
+        JPanel group = addGroup("Processes");
+        group.setLayout(new BorderLayout());
+        group.add(processes, BorderLayout.CENTER);
+
+        chart.setEmptyHint("Run a schedule to see the timeline.");
+        addPreview(chart, "SCHEDULE TIMELINE", 118);
 
         algorithm.addActionListener(e -> updateOptionalRows());
         updateOptionalRows();
@@ -59,42 +64,38 @@ public class CpuPanel extends ModulePanel {
     private void updateOptionalRows() {
         int choice = CHOICES[algorithm.getSelectedIndex()];
         setRowEnabled(quantumRow, choice == 3 || choice == 4);
-        setRowEnabled(priorityRow, choice == 4 || choice == 6);
+        processes.setColumnEnabled(3, choice == 4 || choice == 6);
     }
 
     @Override
     public String buildScript() {
         int choice = CHOICES[algorithm.getSelectedIndex()];
-        int[] burstTimes = Ui.parseIntList("Burst times", bursts.getText(), 1, 1000);
-        int n = burstTimes.length;
-
-        int[] arrivalTimes = Ui.parseIntList("Arrival times", arrivals.getText(), 0, 1000);
-        if (arrivalTimes.length != n) {
-            throw new Ui.InputError("Need one arrival time per process (expected "
-                    + n + ", saw " + arrivalTimes.length + ").");
+        List<String[]> rows = processes.rows();
+        if (rows.isEmpty()) {
+            throw new Ui.InputError("Add at least one process with the Add row button.");
         }
 
-        String[] nameRows = Ui.lines(names.getText());
+        int n = rows.size();
         String[] processNames = new String[n];
-        if (nameRows.length == 0) {
-            for (int i = 0; i < n; i++) {
-                processNames[i] = "";
+        int[] arrivalTimes = new int[n];
+        int[] burstTimes = new int[n];
+        int[] pri = new int[n];
+        Set<String> seen = new HashSet<>();
+
+        for (int i = 0; i < n; i++) {
+            String[] row = rows.get(i);
+            String name = row[0].isEmpty() ? "P" + (i + 1) : row[0];
+            if (!seen.add(name.toLowerCase())) {
+                throw new Ui.InputError("There are two processes called " + name + ".");
             }
-        } else {
-            if (nameRows.length != n) {
-                throw new Ui.InputError("Either leave the names empty or give one name per "
-                        + "process (expected " + n + ", saw " + nameRows.length + ").");
-            }
-            Set<String> seen = new HashSet<>();
-            for (int i = 0; i < n; i++) {
-                String name = nameRows[i];
-                if (name.length() > 10) {
-                    throw new Ui.InputError("Keep process names to 10 characters: \"" + name + "\".");
+            processNames[i] = name;
+            arrivalTimes[i] = Integer.parseInt(row[1]);
+            burstTimes[i] = Integer.parseInt(row[2]);
+            if (choice == 4 || choice == 6) {
+                if (row[3].isEmpty()) {
+                    throw new Ui.InputError("Process " + name + " needs a priority for this option.");
                 }
-                if (!seen.add(name.toLowerCase())) {
-                    throw new Ui.InputError("There is already a process called " + name + ".");
-                }
-                processNames[i] = name;
+                pri[i] = Integer.parseInt(row[3]);
             }
         }
 
@@ -111,11 +112,6 @@ public class CpuPanel extends ModulePanel {
             script.append(Ui.parseInt("Time quantum", quantum.getText(), 1, 100)).append('\n');
         }
         if (choice == 4 || choice == 6) {
-            int[] pri = Ui.parseIntList("Priorities", priorities.getText());
-            if (pri.length != n) {
-                throw new Ui.InputError("Expected one priority per process (expected "
-                        + n + ", saw " + pri.length + ").");
-            }
             for (int value : pri) {
                 script.append(value).append('\n');
             }
@@ -126,12 +122,23 @@ public class CpuPanel extends ModulePanel {
     }
 
     @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadTimeline(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
+    }
+
+    @Override
     public void loadExample() {
         algorithm.setSelectedIndex(4);
-        names.setText("Web\nDB\nMail\nCache\nLog");
-        arrivals.setText("0\n1\n2\n1\n3");
-        bursts.setText("6 3 8 4 5");
-        priorities.setText("3 1 2 4 2");
         quantum.setText("2");
+        processes.setRows(new String[][]{
+            {"Web", "0", "6", "3"},
+            {"DB", "1", "3", "1"},
+            {"Mail", "2", "8", "2"},
+            {"Cache", "1", "4", "4"},
+            {"Log", "3", "5", "2"}
+        });
     }
 }

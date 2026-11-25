@@ -1,52 +1,63 @@
 package minios.gui;
 
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.util.List;
+
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import minios.SegmentationSimulator;
 
-// Tab 4. Segments are checked here too, because an overlap would only
-// be reported after the module had already started.
+// Tab 4. Segments are checked here too, because an overlap would only be
+// reported after the module had already started.
 public class SegmentationPanel extends ModulePanel {
+
+    private final ResultChart chart = new ResultChart();
 
     private static final long serialVersionUID = 1L;
 
     private final JTextField ramSize = Ui.field(12);
-    private final JTextArea segments = Ui.area(4, 30);
-    private final JTextArea addresses = Ui.area(4, 30);
+
+    private final RecordEditor segments = new RecordEditor("Seg ", 0,
+            RecordEditor.Column.number("Base", 90, 0, Integer.MAX_VALUE),
+            RecordEditor.Column.number("Limit", 90, 1, Integer.MAX_VALUE));
+    private final RecordEditor addresses = new RecordEditor(null, 1,
+            RecordEditor.Column.number("Segment", 90, 0, Integer.MAX_VALUE),
+            RecordEditor.Column.number("Offset", 90, 0, Integer.MAX_VALUE));
 
     public SegmentationPanel() {
         super("Segmentation",
-                "One segment per line as base and limit. Addresses are entered as segment and offset.",
+                "Add one row per segment, then the addresses to look up.",
                 SegmentationSimulator::run);
-        addRow("Physical memory (RAM) size in bytes:", ramSize);
-        addWideRow(new JLabel("<html><b>Segment table</b> - \"base limit\" per line</html>"));
-        addWideRow(Ui.scrolled(segments));
-        addWideRow(new JLabel("<html><b>Addresses</b> - \"segment offset\" per line</html>"));
-        addLastWideRow(addresses);
+        addSetting("Physical memory (bytes):", ramSize);
+
+                chart.setEmptyHint("Run a translation to see the segments in memory.");
+        addPreview(chart, "SEGMENTS IN MEMORY", 104);
+
+JPanel group = addGroup("Segment table and addresses");
+        group.setLayout(new BorderLayout());
+        JPanel lists = new JPanel(new java.awt.GridLayout(1, 2, 8, 0));
+        lists.setOpaque(false);
+        lists.add(cell("Segments", segments));
+        lists.add(cell("Addresses (optional)", addresses));
+        group.add(lists, BorderLayout.CENTER);
     }
 
     @Override
     public String buildScript() {
-        long ram = Ui.parseInt("RAM size", ramSize.getText(), 1, 1_000_000_000);
-        String[] rows = Ui.lines(segments.getText());
-        if (rows.length == 0) {
-            throw new Ui.InputError("The segment table is empty - enter at least one \"base limit\" line.");
+        List<String[]> rows = segments.rows();
+        if (rows.isEmpty()) {
+            throw new Ui.InputError("Add at least one segment row.");
         }
+        long ram = Ui.parseInt("RAM size", ramSize.getText(), 1, 1_000_000_000);
 
-        long[] base = new long[rows.length];
-        long[] limit = new long[rows.length];
-        for (int i = 0; i < rows.length; i++) {
-            int[] pair = Ui.parseIntList("Segment " + i, rows[i]);
-            if (pair.length != 2) {
-                throw new Ui.InputError("Segment " + i + " needs exactly two numbers: \"base limit\".");
-            }
-            base[i] = pair[0];
-            limit[i] = pair[1];
-            if (base[i] < 0 || limit[i] <= 0) {
-                throw new Ui.InputError("Segment " + i + ": base must be >= 0 and limit must be > 0.");
-            }
+        int n = rows.size();
+        long[] base = new long[n];
+        long[] limit = new long[n];
+        for (int i = 0; i < n; i++) {
+            String[] row = rows.get(i);
+            base[i] = Long.parseLong(row[0]);
+            limit[i] = Long.parseLong(row[1]);
             long end = base[i] + limit[i] - 1;
             if (end >= ram) {
                 throw new Ui.InputError("Segment " + i + " ends at " + end
@@ -63,24 +74,20 @@ public class SegmentationPanel extends ModulePanel {
 
         StringBuilder script = new StringBuilder();
         script.append("1\n");
-        script.append(rows.length).append('\n');
+        script.append(n).append('\n');
         script.append(ram).append('\n');
-        for (int i = 0; i < rows.length; i++) {
+        for (int i = 0; i < n; i++) {
             script.append(base[i]).append('\n');
             script.append(limit[i]).append('\n');
         }
 
-        String[] addrRows = Ui.lines(addresses.getText());
-        for (String row : addrRows) {
-            int[] pair = Ui.parseIntList("Address", row);
-            if (pair.length != 2) {
-                throw new Ui.InputError("Address \"" + row + "\" needs exactly two numbers: \"segment offset\".");
-            }
-            if (pair[0] == -1) {
+        for (String[] row : addresses.rows()) {
+            int segment = Integer.parseInt(row[0]);
+            if (segment == -1) {
                 throw new Ui.InputError("-1 is reserved for stopping the address loop; do not enter it as a segment.");
             }
-            script.append(pair[0]).append('\n');
-            script.append(pair[1]).append('\n');
+            script.append(segment).append('\n');
+            script.append(row[1]).append('\n');
         }
         script.append("-1\n0\n");
         return script.toString();
@@ -89,7 +96,19 @@ public class SegmentationPanel extends ModulePanel {
     @Override
     public void loadExample() {
         ramSize.setText("1024");
-        segments.setText("0 100\n100 200\n400 150");
-        addresses.setText("0 50\n1 999\n2 0\n5 0");
+        segments.setRows(new String[][]{
+            {"0", "100"}, {"100", "200"}, {"400", "150"}
+        });
+        addresses.setRows(new String[][]{
+            {"0", "50"}, {"1", "999"}, {"2", "0"}, {"5", "0"}
+        });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadSegments(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

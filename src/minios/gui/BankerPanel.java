@@ -1,20 +1,21 @@
 package minios.gui;
 
-import java.util.ArrayList;
+import java.awt.BorderLayout;
 import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import minios.BankersAlgorithm;
 
-// Tab 2. The banker module keeps the data it was given last, so this panel
-// remembers what it sent and only resends the matrices when they change. The
-// two request boxes are greyed out in a plain safety check.
+// Tab 2. Each process is one row holding everything the algorithm needs:
+// what it already holds and the most it will ever ask for. Rows are added
+// with the Add row button like every other module.
 public class BankerPanel extends ModulePanel {
+
+    private final ResultChart chart = new ResultChart();
 
     private static final long serialVersionUID = 1L;
 
@@ -22,28 +23,37 @@ public class BankerPanel extends ModulePanel {
         "Safety check (enter the system data)",
         "Resource request (give a process more resources)"
     });
-    private final JTextArea allocation = Ui.area(4, 34);
-    private final JTextArea maximum = Ui.area(4, 34);
     final JTextField available = Ui.field(24);
     private final JTextField process = Ui.field(6);
     private final JTextField request = Ui.field(24);
 
-    private String loadedData = null;
+    private final RecordEditor table = new RecordEditor("P", 1,
+            RecordEditor.Column.vector("Allocation", 120),
+            RecordEditor.Column.vector("Maximum", 120));
 
-    private final List<JComponent> requestRows = new ArrayList<>();
+    private JComponent processRow;
+    private JComponent requestRow;
+
+    private String loadedData = null;
 
     public BankerPanel() {
         super("Banker's Algorithm",
-                "Rows = processes, columns = resource types. Allocation and Max must match; Available is one row.",
+                "One row per process: what it holds now, then the most it may ask for.",
                 BankersAlgorithm::run);
-        addRow("Mode:", mode);
-        addWideRow(new JLabel("<html><b>Allocation matrix</b> - one row per process</html>"));
-        addWideRow(Ui.scrolled(allocation));
-        addWideRow(new JLabel("<html><b>Maximum-need matrix</b> - same shape as allocation</html>"));
-        addLastWideRow(maximum);
-        addRow("Available resources:", available);
-        requestRows.add(addRow("Process making the request (1..n):", process));
-        requestRows.add(addRow("Request vector:", request));
+        Ui.styleCombo(mode);
+        addSetting("Mode:", mode);
+
+                chart.setEmptyHint("Run a safety check to see the work and need totals.");
+        addPreview(chart, "RESOURCE TOTALS", 104);
+
+JPanel group = addGroup("Processes");
+        group.setLayout(new BorderLayout());
+        group.add(table, BorderLayout.CENTER);
+
+        available.setPreferredSize(new java.awt.Dimension(120, 26));
+        addSetting("Available:", available);
+        processRow = addSetting("Request from process:", process);
+        requestRow = addSetting("Request vector:", request);
 
         mode.addActionListener(e -> updateRequestRows());
         updateRequestRows();
@@ -51,33 +61,31 @@ public class BankerPanel extends ModulePanel {
 
     private void updateRequestRows() {
         boolean asking = mode.getSelectedIndex() == 1;
-        for (JComponent row : requestRows) {
-            setRowEnabled(row, asking);
-        }
+        setRowEnabled(processRow, asking);
+        setRowEnabled(requestRow, asking);
     }
 
     @Override
     public String buildScript() {
         String data = systemDataScript();
-        String snapshot = data;
 
         StringBuilder script = new StringBuilder();
         if (mode.getSelectedIndex() == 0) {
             script.append("1\n").append(data).append("0\n");
-            loadedData = snapshot;
+            loadedData = data;
             return script.toString();
         }
 
-        int n = Ui.lines(allocation.getText()).length;
-        int proc = Ui.parseInt("Process making the request", process.getText(), 1, n);
+        List<String[]> rows = table.rows();
+        int proc = Ui.parseInt("Process making the request", process.getText(), 1, rows.size());
         int[] req = Ui.parseIntList("Request vector", request.getText());
-        int m = Ui.parseIntList("Available resources", available.getText()).length;
-        if (req.length != m) {
-            throw new Ui.InputError("The request needs exactly " + m
+        int[] avail = Ui.parseIntList("Available resources", available.getText());
+        if (req.length != avail.length) {
+            throw new Ui.InputError("The request needs exactly " + avail.length
                     + " number(s), one per resource type.");
         }
 
-        if (snapshot.equals(loadedData)) {
+        if (data.equals(loadedData)) {
             script.append("2\n").append(proc).append('\n');
             appendList(script, req);
             script.append("0\n");
@@ -85,50 +93,55 @@ public class BankerPanel extends ModulePanel {
             script.append("2\n").append(data).append(proc).append('\n');
             appendList(script, req);
             script.append("0\n");
-            loadedData = snapshot;
         } else {
             script.append("1\n").append(data);
             script.append("2\n").append(proc).append('\n');
             appendList(script, req);
             script.append("0\n");
-            loadedData = snapshot;
         }
+        loadedData = data;
         return script.toString();
     }
 
     private String systemDataScript() {
-        String[] allocRows = Ui.lines(allocation.getText());
-        String[] maxRows = Ui.lines(maximum.getText());
-        if (allocRows.length == 0) {
-            throw new Ui.InputError("The allocation matrix is empty - enter at least one row.");
-        }
-        if (maxRows.length != allocRows.length) {
-            throw new Ui.InputError("Allocation has " + allocRows.length
-                    + " row(s) but Max has " + maxRows.length + ". They must match.");
+        List<String[]> rows = table.rows();
+        if (rows.isEmpty()) {
+            throw new Ui.InputError("Add at least one process with the Add row button.");
         }
 
-        int[][] alloc = parseMatrix("Allocation", allocRows);
-        int[][] max = parseMatrix("Maximum", maxRows);
+        int n = rows.size();
+        int m = -1;
+        int[][] alloc = new int[n][];
+        int[][] max = new int[n][];
+        for (int i = 0; i < n; i++) {
+            int[] a = parseRow("Allocation", rows.get(i)[0], i);
+            int[] x = parseRow("Maximum", rows.get(i)[1], i);
+            if (m < 0) {
+                m = a.length;
+            }
+            alloc[i] = a;
+            max[i] = x;
+        }
+
         int[] avail = Ui.parseIntList("Available resources", available.getText(), 0,
                 Integer.MAX_VALUE);
-        int n = alloc.length;
-        int m = alloc[0].length;
         if (avail.length != m) {
             throw new Ui.InputError("Available needs exactly " + m
                     + " number(s), one per resource type.");
         }
 
-        StringBuilder data = new StringBuilder();
-        data.append(n).append('\n').append(m).append('\n');
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 if (max[i][j] < alloc[i][j]) {
-                    throw new Ui.InputError("Process P" + (i + 1) + " already holds "
-                            + alloc[i][j] + " of R" + (j + 1) + " but its Max is only "
-                            + max[i][j] + " (Max must be >= Allocation).");
+                    throw new Ui.InputError("Row P" + (i + 1) + " already holds "
+                            + alloc[i][j] + " but its maximum is only " + max[i][j]
+                            + " (the maximum must be at least the allocation).");
                 }
             }
         }
+
+        StringBuilder data = new StringBuilder();
+        data.append(n).append('\n').append(m).append('\n');
         for (int i = 0; i < n; i++) {
             appendList(data, alloc[i]);
         }
@@ -139,19 +152,16 @@ public class BankerPanel extends ModulePanel {
         return data.toString();
     }
 
-    private int[][] parseMatrix(String label, String[] rows) {
-        int[] first = Ui.parseIntList(label + " row 1", rows[0], 0, Integer.MAX_VALUE);
-        int[][] matrix = new int[rows.length][first.length];
-        matrix[0] = first;
-        for (int i = 1; i < rows.length; i++) {
-            int[] row = Ui.parseIntList(label + " row " + (i + 1), rows[i], 0, Integer.MAX_VALUE);
-            if (row.length != first.length) {
-                throw new Ui.InputError(label + " row " + (i + 1) + " has " + row.length
-                        + " number(s) but row 1 has " + first.length + ". All rows must match.");
-            }
-            matrix[i] = row;
+    private int[] parseRow(String label, String text, int row) {
+        int[] values = Ui.parseIntList(label + " for row P" + (row + 1), text, 0,
+                Integer.MAX_VALUE);
+        int width = Ui.parseIntList("Allocation for row P1", table.rows().get(0)[0], 0,
+                Integer.MAX_VALUE).length;
+        if (values.length != width) {
+            throw new Ui.InputError(label + " for row P" + (row + 1) + " has " + values.length
+                    + " number(s) but row P1 has " + width + ". Every row needs the same count.");
         }
-        return matrix;
+        return values;
     }
 
     private static void appendList(StringBuilder script, int[] values) {
@@ -168,10 +178,23 @@ public class BankerPanel extends ModulePanel {
     @Override
     public void loadExample() {
         mode.setSelectedIndex(0);
-        allocation.setText("0 1 0\n2 0 0\n3 0 2\n2 1 1\n0 0 2");
-        maximum.setText("7 5 3\n3 2 2\n9 0 2\n2 2 2\n4 3 3");
         available.setText("3 3 2");
         process.setText("2");
         request.setText("1 0 2");
+        table.setRows(new String[][]{
+            {"0 1 0", "7 5 3"},
+            {"2 0 0", "3 2 2"},
+            {"3 0 2", "9 0 2"},
+            {"2 1 1", "2 2 2"},
+            {"0 0 2", "4 3 3"}
+        });
+    }
+
+    @Override
+    void afterRun(String reportText) {
+        if (reportText != null) {
+            chart.loadBanker(reportText);
+        }
+        setPreviewVisible(reportText != null && chart.hasChart());
     }
 }

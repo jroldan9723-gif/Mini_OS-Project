@@ -44,7 +44,8 @@ In Eclipse: import the project (File > Import > General > Existing
 Projects into Workspace), open `src/minios/gui/GuiMain.java` and choose
 Run As > Java Application. Already have it imported and just need the
 newer code? `ECLIPSE-SETUP.md` has the six steps for that (find the
-folder, download, paste and replace, F5, Clean, run), plus the one-time
+folder, download, paste and replace, F5, Clean, run), its step 7 lists
+the run steps for all four programs, and it ends with the one-time
 import if you do not have the project in Eclipse yet.
 
 ### Console menu (same engine, text mode)
@@ -70,7 +71,8 @@ On Windows the same two commands work in the Command Prompt.
 
 1. File > Export...
 2. Java > Runnable JAR file > Next
-3. Launch configuration: `GuiMain - minios`
+3. Launch configuration: `GuiMain - Mini_OS-Project` (Eclipse names it
+   after the class and the project)
 4. Export destination: any file name ending in `.jar`
 
 The repository already contains a ready-made `MiniOS-Simulator.jar`, so
@@ -80,61 +82,97 @@ step-by-step exporting is only needed if you changed the code.
 
 ## How the GUI is organized
 
-One window, one tab per module, numbered like the console menu:
+One window, a row of tabs across the top, the input groups on the left and
+the report on the right:
 
 ```
-+------------------------------------------------------------------+
-| Mini OS Simulator                                          [x]   |
-+------------------------------------------------------------------+
-| Choose a module, enter your data, then click Run.                |
-| This program simulates the algorithms for our OS class; it does  |
-| not control real hardware.                                       |
-| 1 CPU | 2 Banker | 3 Paging | 4 Segmentation | 5 Fragment... >   |
-|                                                                  |
-| +--------------------------------------------------------------+ |
-| | CPU Scheduling                                               | |
-| |  [form: fields, lists, dropdowns]                            | |
-| +--------------------------------------------------------------+ |
-| +--------------------------------------------------------------+ |
-| | Results                                                      | |
-| |  Algorithm: SRTF ... Gantt chart ... averages ...            | |
-| +--------------------------------------------------------------+ |
-| [ Run ]  [ Load example ]                                        |
-+------------------------------------------------------------------+
++----------------------------------------------------------------------+
+| Operating System Simulator                    classroom project  ...  |
++----------------------------------------------------------------------+
+| CPU Scheduling | Banker's Algorithm | Paging | Segmentation | ...    |
++----------------------------------------------------------------------+
+| CPU Scheduling                                                       |
+| Add one row per process. Burst is the work it needs.                 |
+|                                        [ Run module ] [ Load example ]|
++----------------------------------------------------------------------+
+| Algorithm: [SRTF ... v]   Time quantum: [ 2 ]                        |
++-----------------------------+----------------------------------------+
+| +- Processes -------------+ | RESULT       16 lines | 24 ms | 19 in |
+| | Process  Arrival  Burst  | | Algorithm: SRTF (preemptive)          |
+| | [      ] [      ] [    ] | | Execution order: Web -> DB -> ...     |
+| |         [ Add row ]      | | Gantt chart:                          |
+| |                          | | Process Arrival Burst Completion ...  |
+| | Web      0        6      | | Average waiting time: 7.20            |
+| | DB       1        3      | | Average response time: 5.80           |
+| | Mail     2        8      | |                                       |
+| |     [Add][Remove][Clear] | |                                       |
+| +--------------------------+ |                                       |
++-----------------------------+----------------------------------------+
+| Last run: finished in 24 ms                                  ready   |
++----------------------------------------------------------------------+
 ```
 
-The window opens at 1180 x 740 but shrinks down to 900 x 600 on a small
-laptop screen, and the tab strip scrolls sideways instead of wrapping
-onto a second line.
+The window opens at 1280 x 860 and shrinks down to 1020 x 660. One line
+settings such as the algorithm and the time quantum sit in a strip under
+the tab, so the boxes on the left only hold the data lists.
 
-Every tab has the same two buttons:
+Every screen has the same two buttons:
 
 * **Run** - checks the form, runs the module, prints the full report into
-  the output pane.
+  the result pane.
 * **Load example** - fills the form with a small working dataset, handy
   for a quick test or a live demonstration.
 
-`screenshots/` holds one picture of every tab, taken after pressing
+`screenshots/` holds one picture of every screen, taken after pressing
 Load example and then Run:
 
 `1-cpu-scheduling.png`, `2-banker.png`, `3-paging.png`,
 `4-segmentation.png`, `5-fragmentation.png`, `6-page-replacement.png`,
-`7-disk-scheduling.png`, `8-multiprogramming.png`.
+`7-disk-scheduling.png`, `8-multiprogramming.png`. The two
+`all-screens-*.png` files show four screens each on one sheet.
 
-![CPU scheduling tab](screenshots/1-cpu-scheduling.png)
+The window opens on a landing screen: one card per module with a one line
+description, and the same eight modules as tabs along the top. Clicking a
+card opens that module, so nobody has to guess which tab holds what. The
+Home tab is listed first and the module tabs keep the order of the console
+menu.
 
-Lists (burst times, reference strings, request queues, ...) accept any
-length: numbers separated by spaces, tabs or newlines. The number of
-entries is never limited by the program; only the values themselves are
-checked (a burst time must be positive, a request must lie on the disk,
-and so on). When something is wrong, a dialog explains exactly what to
-fix and nothing runs until the form is valid.
+![Landing screen, one card per module](screenshots/0-home.png)
+
+![CPU scheduling screen](screenshots/1-cpu-scheduling.png)
+
+Data is entered one row at a time, not typed into a text box. Every
+module has the same table editor: fill the boxes above the table, press
+**Add row**, and the row appears below while the boxes empty themselves
+ready for the next one.
+
+```
+ Job      Memory   Burst   Arrival
+ [....]   [....]   [....]   [....]     <- type here
+                        [ Add row ]    <- then press this
+
+ J1      40       7       0
+ J2      30       4       2
+```
+
+* **Click a row** to load it back into the boxes. The button changes to
+  **Save changes**, so a typo can be fixed and saved over the old row.
+  **Cancel** leaves the row alone.
+* **Remove** deletes the selected row.
+* **Clear all** empties the table.
+* A row that is not valid yet, or that repeats a name already in the
+  table, is refused with a short message and is not added.
+
+The number of rows is unlimited. Only the values are checked (a burst
+must be positive, a request must lie on the disk, and so on). Everything
+is checked again when **Run** is pressed, and a dialog explains exactly
+what to fix.
 
 Rows that the chosen option does not use are greyed out, not deleted:
-the quantum box on the CPU tab, the priorities box unless Priority or the
-comparison is picked, the request boxes on the Banker tab unless a
-resource request is picked, the direction on the disk tab for FCFS and
-SSTF, and whichever half of the fragmentation tab the chosen demo does
+the quantum box on the CPU screen, the priorities box unless Priority or the
+comparison is picked, the request boxes on the Banker screen unless a
+resource request is picked, the direction on the disk screen for FCFS and
+SSTF, and whichever half of the fragmentation screen the chosen demo does
 not read. Filling a greyed-out box does nothing, because it is never
 sent to the module.
 
@@ -194,6 +232,24 @@ Every run reports the execution order, a Gantt chart with preemptions and
 idle gaps, and a table of arrival, burst, completion, turnaround
 (`completion - arrival`), waiting (`turnaround - burst`) and response
 (`first start - arrival`) with the three averages.
+
+Every module also draws its result as a picture under the report, built
+from the text the module prints, so the picture and the numbers cannot
+disagree:
+
+| Screen | Picture |
+|--------|---------|
+| CPU scheduling | the schedule as coloured blocks on a time axis, with the three averages |
+| Banker's algorithm | one bar per process showing the resources it still needs |
+| Paging | one bar per page showing the memory it occupies, pages on disk at zero |
+| Segmentation | one bar per segment showing its size |
+| Fragmentation | the memory map: jobs in colour, holes in grey |
+| Page replacement | the FIFO reference string, misses in red and hits grey |
+| Disk scheduling | the service order as boxes, with the movement between them |
+| Multiprogramming | the memory map at the end of the run, jobs plus free space |
+
+A picture stays hidden until a run succeeds, and is redrawn on the next
+run, so it never shows an old result next to new numbers.
 
 The comparison option runs FCFS, SJF, Round Robin and Priority on the
 same processes and prints waiting/turnaround per process and per
@@ -420,10 +476,48 @@ the address space.
 java -cp bin minios.gui.GuiInputSelfTest
 ```
 
-Loads the example of every tab, builds the input script, runs the real
+Loads the example of every screen, builds the input script, runs the real
 module and checks the expected section of the output, including all
 three Banker script shapes (first run, data unchanged, data edited).
 Current result: **ALL GUI CHECKS PASSED** (11 checks).
+
+### Table button test
+
+```
+java -cp bin minios.gui.GuiTableSelfTest
+```
+
+Types into the entry boxes and presses Add row, Save changes, Remove and
+Clear all the way a user would, then checks what the table holds. It also
+checks that a repeated process name is refused. Current result:
+**ALL EDIT CHECKS PASSED** (16 checks).
+
+### Bad input test
+
+```
+java -cp bin minios.gui.GuiInputEdgeTest
+```
+
+Sends junk to all eight screens (empty tables, blank numbers, words where
+numbers belong, values out of range, a job bigger than memory) and checks
+that every one comes back as a readable message rather than a crash.
+Current result: **ALL EDGE CHECKS PASSED** (23 checks).
+
+### Gantt chart and landing screen test
+
+```
+java -cp bin minios.gui.GuiChartTest
+```
+
+Checks the picture under each report. It feeds the CPU chart normal
+slices, idle time and a preempted process, then damaged text (a word where
+a number belongs, a slice that ends before it starts, no chart at all) and
+confirms it keeps only what it can read. The other readers get the same
+treatment. The strongest part loads the example on all eight screens,
+presses Run through the real code and confirms every screen ends up with a
+picture. It also opens the landing screen and clicks all eight cards to
+confirm each one selects its own module. Current result:
+**ALL CHART CHECKS PASSED** (33 checks).
 
 ### Result verification
 
@@ -474,9 +568,12 @@ Mini_OS-Project/
 |   |   |-- MultiprogrammingSimulator.java tick-by-tick simulation
 |   |   `-- gui/
 |   |       |-- GuiMain.java             main window (entry point of the JAR)
-|   |       |-- ModulePanel.java         shared tab layout and Run handling
+|   |       |-- ModulePanel.java         shared screen layout and Run handling
+|   |       |-- Theme.java               colours and fonts for the window
 |   |       |-- Ui.java                  field helpers and validation
 |   |       |-- Runner.java              adapter: GUI input -> console module
+|   |       |-- HomePanel.java           landing screen with one card per module
+|   |       |-- ResultChart.java         the picture drawn under every report
 |   |       |-- CpuPanel.java            tab 1
 |   |       |-- BankerPanel.java         tab 2
 |   |       |-- PagingPanel.java         tab 3
@@ -485,6 +582,12 @@ Mini_OS-Project/
 |   |       |-- PageReplacePanel.java    tab 6
 |   |       |-- DiskPanel.java           tab 7
 |   |       |-- MultiPanel.java          tab 8
+|   |       |-- GuiTableSelfTest.java    add / edit / remove checks
+|   |       |-- GuiInputEdgeTest.java    bad input checks, all 8 screens
+|   |       |-- GuiChartTest.java        chart parsing and card clicks
+|   |       |-- RecordEditor.java        table with Add and Edit buttons
+|   |       |-- Group.java               titled frame around a group of fields
+|   |       |-- StripTabs.java           hand drawn tab strip
 |   |       `-- GuiInputSelfTest.java    headless GUI checks
 |   `-- (bin/ appears after Eclipse or javac builds the project)
 `-- samples/

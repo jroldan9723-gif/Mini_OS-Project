@@ -15,7 +15,8 @@ import javax.swing.JComponent;
 
 // Draws the result of a module as a picture. Four shapes are enough for the
 // whole simulator:
-//   TIMELINE  blocks along a time axis      (CPU scheduling, page replacement)
+//   GANTT     the CPU schedule as a bar chart on a time axis
+//   TIMELINE  one block per reference       (page replacement)
 //   STEPS     a flat sequence of moves      (disk head movement)
 //   BARS      one bar per row with a total  (paging, segmentation, Banker)
 //   MEMORY    how memory is laid out        (fragmentation, multiprogramming)
@@ -25,7 +26,7 @@ final class ResultChart extends JComponent {
 
     private static final long serialVersionUID = 1L;
 
-    enum Kind { TIMELINE, STEPS, BARS, MEMORY }
+    enum Kind { GANTT, TIMELINE, STEPS, BARS, MEMORY }
 
     // One piece of the picture. Which fields matter depends on the kind.
     private static final class Piece {
@@ -97,7 +98,7 @@ final class ResultChart extends JComponent {
     // ---------------------------------------------------------------- CPU
     // Reads a line such as "  0-5 P1 | 5-7 P3 | 7-10 P2 (preempted)".
     boolean loadTimeline(String report) {
-        reset(Kind.TIMELINE);
+        reset(Kind.GANTT);
         String chart = findChartLine(report);
         if (chart != null) {
             for (String part : chart.split("\\|")) {
@@ -119,18 +120,32 @@ final class ResultChart extends JComponent {
                     String label = piece.substring(space + 1).trim();
                     Piece p = add(label, start, end);
                     p.idle = label.startsWith("idle");
-                    if (!p.idle) {
-                        colourOf(label.replace(" (preempted)", ""));
-                    }
+                    // a preempted slice keeps the process colour and is
+                    // marked with a star, as the report words it
                     p.suffix = label.contains("(preempted)") ? "*" : "";
                     p.label = label.replace(" (preempted)", "");
+                    if (!p.idle) {
+                        colourOf(p.label);
+                    }
                 } catch (NumberFormatException e) {
                     // a line that does not parse is simply not drawn
                 }
             }
         }
         summary = averages(report);
-        wanted = 104;
+        // the report starts with "Algorithm: SRTF (Shortest Remaining ...)"
+        String title = "";
+        for (String line : (report == null ? "" : report).split("\n")) {
+            if (line.startsWith("Algorithm:")) {
+                title = line.substring("Algorithm:".length()).trim();
+                break;
+            }
+        }
+        if (title.contains(" (")) {
+            title = title.substring(0, title.indexOf(" ("));
+        }
+        caption = title;
+        wanted = 118;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return !pieces.isEmpty();
@@ -677,6 +692,9 @@ final class ResultChart extends JComponent {
         }
 
         switch (kind) {
+            case GANTT:
+                paintGantt(g2, left, right, usable);
+                break;
             case TIMELINE:
                 paintTimeline(g2, left, right, usable);
                 break;
@@ -693,6 +711,92 @@ final class ResultChart extends JComponent {
                 break;
         }
         g2.dispose();
+    }
+
+    // The CPU Gantt chart. Coloured blocks on a time axis, the algorithm
+    // name above, the process names inside the blocks, a tick under each
+    // start and a legend at the bottom. A preempted slice ends in a star.
+    private void paintGantt(Graphics2D g2, int left, int right, int usable) {
+        int padLeft = 8;
+        int padRight = 8;
+        int width = usable - padLeft - padRight;
+        int totalTime = pieces.get(pieces.size() - 1).end;
+        if (width <= 20 || totalTime <= 0) {
+            return;
+        }
+
+
+        // the bar sits low enough to leave room for a caption above it
+        int barY = 26;
+        int barH = Math.max(30, getHeight() - barY - 56);
+
+        int lastTickX = -100;
+        for (int i = 0; i < pieces.size(); i++) {
+            Piece seg = pieces.get(i);
+            int x1 = left + padLeft + (int) Math.round((double) seg.start / totalTime * width);
+            int x2 = left + padLeft + (int) Math.round((double) seg.end / totalTime * width);
+            int w = Math.max(2, x2 - x1);
+
+            g2.setColor(seg.idle ? IDLE : colourOf(seg.label));
+            g2.fillRect(x1, barY, w, barH);
+            g2.setColor(Theme.SURFACE);
+            g2.drawRect(x1, barY, w, barH);
+
+            // the name goes inside the block when it fits
+            g2.setFont(Theme.LABEL_BOLD);
+            FontMetrics fm = g2.getFontMetrics();
+            String name = seg.label + seg.suffix;
+            if (fm.stringWidth(name) + 6 <= w) {
+                g2.setColor(seg.idle ? Theme.MUTED : Color.WHITE);
+                int tx = x1 + (w - fm.stringWidth(name)) / 2;
+                int ty = barY + (barH + fm.getAscent() - fm.getDescent()) / 2;
+                g2.drawString(name, tx, ty);
+            }
+
+            // a tick under every start, skipped when two would overlap
+            g2.setFont(Theme.HINT);
+            int baseY = barY + barH;
+            if (x1 - lastTickX >= 22) {
+                g2.setColor(Theme.BORDER_DARK);
+                g2.drawLine(x1, baseY, x1, baseY + 5);
+                g2.setColor(Theme.MUTED);
+                String startText = String.valueOf(seg.start);
+                int sx = x1 - g2.getFontMetrics().stringWidth(startText) / 2;
+                g2.drawString(startText, Math.max(0, sx), baseY + 17);
+                lastTickX = x1;
+            }
+            if (i == pieces.size() - 1) {
+                g2.setColor(Theme.BORDER_DARK);
+                g2.drawLine(x2, baseY, x2, baseY + 5);
+                g2.setColor(Theme.MUTED);
+                String endText = String.valueOf(seg.end);
+                int ex = x2 - g2.getFontMetrics().stringWidth(endText) / 2;
+                // keep the last label inside the picture
+                int limit = getWidth() - 4 - g2.getFontMetrics().stringWidth(endText);
+                g2.drawString(endText, Math.min(ex, limit), baseY + 17);
+            }
+        }
+
+        // legend at the bottom, one colour per process
+        int lx = left + padLeft;
+        int ly = barY + barH + 34;
+        g2.setFont(Theme.HINT);
+        FontMetrics lf = g2.getFontMetrics();
+        for (Map.Entry<String, Color> e : colours.entrySet()) {
+            int need = 14 + lf.stringWidth(e.getKey()) + 10;
+            if (lx + need > right) {
+                break;
+            }
+            g2.setColor(e.getValue());
+            g2.fillRect(lx, ly - 9, 10, 10);
+            g2.setColor(Theme.HEADING);
+            g2.drawString(e.getKey(), lx + 14, ly);
+            lx += need + 4;
+        }
+        g2.setColor(IDLE);
+        g2.fillRect(lx, ly - 9, 10, 10);
+        g2.setColor(Theme.MUTED);
+        g2.drawString("idle", lx + 14, ly);
     }
 
     private void paintTimeline(Graphics2D g2, int left, int right, int usable) {

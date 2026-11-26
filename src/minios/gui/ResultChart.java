@@ -15,7 +15,8 @@ import javax.swing.JComponent;
 
 // Draws the result of a module as a picture. Four shapes are enough for the
 // whole simulator:
-//   TIMELINE  blocks along a time axis      (CPU scheduling, page replacement)
+//   GANTT     the CPU schedule as a bar chart on a time axis
+//   TIMELINE  one block per reference       (page replacement)
 //   STEPS     a flat sequence of moves      (disk head movement)
 //   BARS      one bar per row with a total  (paging, segmentation, Banker)
 //   MEMORY    how memory is laid out        (fragmentation, multiprogramming)
@@ -25,7 +26,7 @@ final class ResultChart extends JComponent {
 
     private static final long serialVersionUID = 1L;
 
-    enum Kind { TIMELINE, STEPS, BARS, MEMORY }
+    enum Kind { GANTT, TIMELINE, STEPS, BARS, MEMORY }
 
     // One piece of the picture. Which fields matter depends on the kind.
     private static final class Piece {
@@ -49,14 +50,17 @@ final class ResultChart extends JComponent {
 
     // Colours reused in order, so the same name keeps one colour all run.
     private static final Color[] PALETTE = {
-        new Color(0x3D, 0x6E, 0xA8), new Color(0x4C, 0x8B, 0x6A),
-        new Color(0x8C, 0x5A, 0xA0), new Color(0xB5, 0x6B, 0x38),
-        new Color(0x2F, 0x7D, 0x8C), new Color(0x9A, 0x4A, 0x5C),
-        new Color(0x6B, 0x7A, 0x3A), new Color(0x5A, 0x62, 0xA8)
+        new Color(79, 129, 189), new Color(192, 80, 77),
+        new Color(155, 187, 89), new Color(128, 100, 162),
+        new Color(75, 172, 198), new Color(247, 150, 70),
+        new Color(119, 147, 60), new Color(149, 55, 53)
     };
-    private static final Color IDLE = new Color(0xDD, 0xE1, 0xE6);
-    private static final Color HOLE = new Color(0xE8, 0xEC, 0xF1);
-    private static final Color FAULT = new Color(0x9C, 0x22, 0x1A);
+    private static final Color IDLE = new Color(0xDC, 0xDC, 0xDC);
+    private static final Color HOLE = new Color(0xDC, 0xDC, 0xDC);
+    private static final Color GRID = new Color(0xE6, 0xE6, 0xE6);
+    private static final Color AXIS = new Color(0x5A, 0x5A, 0x5A);
+    private static final Color INK = new Color(0x32, 0x32, 0x32);
+    private static final Color FAULT = new Color(192, 80, 77);
 
     ResultChart() {
         setOpaque(false);
@@ -97,7 +101,7 @@ final class ResultChart extends JComponent {
     // ---------------------------------------------------------------- CPU
     // Reads a line such as "  0-5 P1 | 5-7 P3 | 7-10 P2 (preempted)".
     boolean loadTimeline(String report) {
-        reset(Kind.TIMELINE);
+        reset(Kind.GANTT);
         String chart = findChartLine(report);
         if (chart != null) {
             for (String part : chart.split("\\|")) {
@@ -119,18 +123,32 @@ final class ResultChart extends JComponent {
                     String label = piece.substring(space + 1).trim();
                     Piece p = add(label, start, end);
                     p.idle = label.startsWith("idle");
-                    if (!p.idle) {
-                        colourOf(label.replace(" (preempted)", ""));
-                    }
+                    // a preempted slice keeps the process colour and is
+                    // marked with a star, as the report words it
                     p.suffix = label.contains("(preempted)") ? "*" : "";
                     p.label = label.replace(" (preempted)", "");
+                    if (!p.idle) {
+                        colourOf(p.label);
+                    }
                 } catch (NumberFormatException e) {
                     // a line that does not parse is simply not drawn
                 }
             }
         }
         summary = averages(report);
-        wanted = 104;
+        // the report starts with "Algorithm: SRTF (Shortest Remaining ...)"
+        String title = "";
+        for (String line : (report == null ? "" : report).split("\n")) {
+            if (line.startsWith("Algorithm:")) {
+                title = line.substring("Algorithm:".length()).trim();
+                break;
+            }
+        }
+        if (title.contains(" (")) {
+            title = title.substring(0, title.indexOf(" ("));
+        }
+        caption = title;
+        wanted = 128;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return !pieces.isEmpty();
@@ -228,7 +246,7 @@ final class ResultChart extends JComponent {
             summary = "faults " + faults + "   |   hits " + hits + "   |   fault rate " + rate;
         }
         summary = summary.isEmpty() ? "" : summary;
-        wanted = 112;
+        wanted = 128;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return !pieces.isEmpty();
@@ -289,7 +307,7 @@ final class ResultChart extends JComponent {
                 // an entry that does not parse is left out
             }
         }
-        wanted = 118;
+        wanted = 128;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return !pieces.isEmpty();
@@ -321,7 +339,7 @@ final class ResultChart extends JComponent {
                 // "(end of disk)" and "(wrap)" are notes, not cylinders
             }
         }
-        wanted = 124;
+        wanted = 168;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return pieces.size() > 1;
@@ -561,7 +579,7 @@ final class ResultChart extends JComponent {
                 break;
             }
         }
-        wanted = 124;
+        wanted = 168;
         setPreferredSize(new Dimension(400, wanted));
         repaint();
         return pieces.size() > 1;
@@ -609,7 +627,7 @@ final class ResultChart extends JComponent {
 
     void finishBars(String footer) {
         summary = footer;
-        wanted = 30 + pieces.size() * 18 + 8;
+        wanted = 150;
         setPreferredSize(new Dimension(400, wanted));
         setMinimumSize(new Dimension(200, wanted));
         repaint();
@@ -677,6 +695,9 @@ final class ResultChart extends JComponent {
         }
 
         switch (kind) {
+            case GANTT:
+                paintGantt(g2, left, right, usable);
+                break;
             case TIMELINE:
                 paintTimeline(g2, left, right, usable);
                 break;
@@ -695,40 +716,94 @@ final class ResultChart extends JComponent {
         g2.dispose();
     }
 
+    // The CPU Gantt chart, drawn the way the reference does it: a tall
+    // coloured bar with the process name bold inside each block, the
+    // algorithm name above it, a tick under every start and a colour key
+    // along the bottom. A preempted slice ends in a star.
+    private void paintGantt(Graphics2D g2, int left, int right, int usable) {
+        int padLeft = 8;
+        int width = usable - padLeft - 16;
+        int totalTime = pieces.get(pieces.size() - 1).end;
+        if (width <= 20 || totalTime <= 0) {
+            return;
+        }
+
+        int barY = 30;
+        int barH = Math.max(28, getHeight() - barY - 58);
+
+        int lastTickX = -100;
+        for (int i = 0; i < pieces.size(); i++) {
+            Piece seg = pieces.get(i);
+            int x1 = left + padLeft + (int) Math.round((double) seg.start / totalTime * width);
+            int x2 = left + padLeft + (int) Math.round((double) seg.end / totalTime * width);
+            int w = Math.max(2, x2 - x1);
+
+            g2.setColor(seg.idle ? IDLE : colourOf(seg.label));
+            g2.fillRect(x1, barY, w, barH);
+            g2.setColor(Color.WHITE);
+            g2.drawRect(x1, barY, w, barH);
+
+            g2.setFont(Theme.LABEL_BOLD);
+            FontMetrics fm = g2.getFontMetrics();
+            String name = seg.label + seg.suffix;
+            if (fm.stringWidth(name) + 6 <= w) {
+                g2.setColor(seg.idle ? new Color(90, 90, 90) : Color.WHITE);
+                g2.drawString(name, x1 + (w - fm.stringWidth(name)) / 2,
+                        barY + (barH + fm.getAscent() - fm.getDescent()) / 2);
+            }
+
+            g2.setFont(Theme.HINT);
+            g2.setColor(INK);
+            int baseY = barY + barH;
+            if (x1 - lastTickX >= 22) {
+                g2.drawLine(x1, baseY, x1, baseY + 5);
+                g2.drawString(String.valueOf(seg.start), x1 - 3, baseY + 17);
+                lastTickX = x1;
+            }
+            g2.setFont(Theme.HINT);
+            if (i == pieces.size() - 1) {
+                g2.drawLine(x2, baseY, x2, baseY + 5);
+                String endText = String.valueOf(seg.end);
+                int ex = x2 - g2.getFontMetrics().stringWidth(endText) / 2;
+                int limit = getWidth() - 4 - g2.getFontMetrics().stringWidth(endText);
+                g2.drawString(endText, Math.min(ex, limit), baseY + 17);
+            }
+        }
+
+        legend(g2, left + padLeft, barY + barH + 36, true);
+    }
+
+    // Page replacement keeps the block style but carries a result strip:
+    // one block per reference, red for a miss, grey for a hit.
     private void paintTimeline(Graphics2D g2, int left, int right, int usable) {
-        int top = 24;
-        int barHeight = 34;
+        int top = 26;
+        int barHeight = Math.max(30, getHeight() - top - 58);
         int first = pieces.get(0).start;
         int last = pieces.get(pieces.size() - 1).end;
         int span = Math.max(1, last - first);
 
-        g2.setFont(Theme.HINT);
         FontMetrics fm = g2.getFontMetrics();
-
         for (Piece s : pieces) {
             int x1 = left + Math.round((s.start - first) * (float) usable / span);
             int x2 = left + Math.round((s.end - first) * (float) usable / span);
             int w = Math.max(2, x2 - x1);
-            Color fill = s.fault ? FAULT : s.idle ? IDLE : colourOf(s.label);
-            g2.setColor(fill);
+            g2.setColor(s.fault ? FAULT : IDLE);
             g2.fillRect(x1, top, w, barHeight);
-            g2.setColor(Theme.SURFACE);
+            g2.setColor(Color.WHITE);
             g2.drawRect(x1, top, w, barHeight);
 
             String name = s.label + s.suffix;
-            g2.setFont(Theme.LABEL);
+            g2.setFont(Theme.LABEL_BOLD);
             FontMetrics tf = g2.getFontMetrics();
             if (tf.stringWidth(name) + 6 < w) {
-                g2.setColor(s.idle ? Theme.MUTED : Color.WHITE);
-                int tx = x1 + (w - tf.stringWidth(name)) / 2;
-                int ty = top + (barHeight + tf.getAscent() - tf.getDescent()) / 2;
-                g2.drawString(name, tx, ty);
+                g2.setColor(s.fault ? Color.WHITE : new Color(90, 90, 90));
+                g2.drawString(name, x1 + (w - tf.stringWidth(name)) / 2,
+                        top + (barHeight + tf.getAscent() - tf.getDescent()) / 2);
             }
             g2.setFont(Theme.HINT);
             fm = g2.getFontMetrics();
         }
 
-        // a tick at every start, plus the final end
         g2.setFont(Theme.HINT);
         fm = g2.getFontMetrics();
         for (int i = 0; i < pieces.size(); i++) {
@@ -736,7 +811,20 @@ final class ResultChart extends JComponent {
         }
         tick(g2, fm, left, usable, span, first, last, top + barHeight);
 
-        legend(g2, left, top + barHeight + 27, true);
+        // key: what a red block means and what a grey block means
+        int lx = left;
+        int ly = top + barHeight + 36;
+        g2.setFont(Theme.HINT);
+        fm = g2.getFontMetrics();
+        g2.setColor(FAULT);
+        g2.fillRect(lx, ly - 9, 10, 10);
+        g2.setColor(INK);
+        g2.drawString("miss", lx + 14, ly);
+        lx += 24 + fm.stringWidth("miss");
+        g2.setColor(IDLE);
+        g2.fillRect(lx, ly - 9, 10, 10);
+        g2.setColor(INK);
+        g2.drawString("hit", lx + 14, ly);
     }
 
     private void tick(Graphics2D g2, FontMetrics fm, int left, int usable,
@@ -757,98 +845,147 @@ final class ResultChart extends JComponent {
         g2.drawString(label, tx, baseY + 15);
     }
 
+    // The disk chart, drawn the way the reference draws its comparison:
+    // a vertical bar per stop in the service order, a value axis on the
+    // left, gridlines across and the cylinder under each bar.
     private void paintSteps(Graphics2D g2, int left, int usable) {
-        // one column per move, scaled to the highest cylinder reached
-        int top = 26;
-        // the column is wider than the box so the movement number fits in
-        // the gap between one cylinder and the next
-        // the gap must hold a three digit movement number
-        int gap = Math.max(16, tabPaneMetrics(g2).stringWidth("888"));
-        int size = Math.min(56, Math.max(gap + 20, usable / Math.max(1, pieces.size())));
-        int box = size - gap;
+        int top = 30;
+        int bottom = getHeight() - 34;
+        int right = left + usable - 16;
+        if (bottom <= top || right <= left) {
+            return;
+        }
+
         int highest = 1;
         for (Piece p : pieces) {
             highest = Math.max(highest, p.value);
         }
-        g2.setFont(Theme.HINT);
-        FontMetrics fm = g2.getFontMetrics();
-        int x = left;
-        for (int i = 0; i < pieces.size(); i++) {
-            Piece p = pieces.get(i);
-            Color fill = i == 0 ? Theme.BORDER_DARK : colourOf("head");
-            g2.setColor(fill);
-            g2.fillRect(x, top, box, box);
-            g2.setFont(Theme.LABEL);
-            FontMetrics tf = g2.getFontMetrics();
-            g2.setColor(Color.WHITE);
-            String text = String.valueOf(p.value);
-            if (tf.stringWidth(text) + 4 < box) {
-                g2.drawString(text, x + (box - tf.stringWidth(text)) / 2,
-                        top + (box + tf.getAscent() - tf.getDescent()) / 2);
-            }
-            g2.setFont(Theme.HINT);
-            fm = g2.getFontMetrics();
-            if (i < pieces.size() - 1) {
-                // the distance travelled goes in the gap, or under the box
-                // when the gap is too narrow for a number
-                int next = pieces.get(i + 1).value;
-                String move = String.valueOf(Math.abs(next - p.value));
-                g2.setColor(Theme.MUTED);
-                int mx = x + box + (size - box - fm.stringWidth(move)) / 2;
-                g2.drawString(move, mx, top + box / 2 + 4);
-            }
-            x += size;
+        // round the axis up so the labels are readable numbers
+        int axisMax = roundUp(highest);
+        if (axisMax <= 0) {
+            axisMax = 1;
         }
-        g2.setColor(Theme.MUTED);
-        g2.drawString("cylinder per box, movement between boxes, scale 0.." + highest,
-                left, top + box + 20);
-    }
 
-    // Metrics of the small font, used to size the gaps in the step chart.
-    private java.awt.FontMetrics tabPaneMetrics(Graphics2D g2) {
+        // gridlines and the value axis
         g2.setFont(Theme.HINT);
-        return g2.getFontMetrics();
+        for (int i = 0; i <= 4; i++) {
+            int y = bottom - (bottom - top) * i / 4;
+            g2.setColor(GRID);
+            g2.drawLine(left + 34, y, right, y);
+            g2.setColor(AXIS);
+            g2.drawString(String.valueOf(axisMax * i / 4), left, y + 4);
+        }
+        g2.setColor(AXIS);
+        g2.drawLine(left + 34, top, left + 34, bottom);
+        g2.drawLine(left + 34, bottom, right, bottom);
+
+        int groups = pieces.size();
+        int groupW = (right - left - 34) / Math.max(1, groups);
+        int barW = Math.min(42, Math.max(8, groupW - 10));
+
+        g2.setFont(Theme.HINT);
+        FontMetrics nameFont = g2.getFontMetrics();
+        for (int i = 0; i < groups; i++) {
+            Piece p = pieces.get(i);
+            int cx = left + 34 + i * groupW + groupW / 2;
+            int h = (int) Math.round((double) p.value / axisMax * (bottom - top));
+            // the first bar is the head position, drawn in the muted shade
+            g2.setColor(i == 0 ? new Color(0xAF, 0xB9, 0xC6) : PALETTE[0]);
+            g2.fillRect(cx - barW / 2, bottom - h, barW, Math.max(1, h));
+
+            g2.setColor(INK);
+            String name = String.valueOf(p.value);
+            if (nameFont.stringWidth(name) <= groupW) {
+                g2.drawString(name, cx - nameFont.stringWidth(name) / 2, bottom + 15);
+            }
+        }
     }
 
+    // Rounds a maximum up so the axis reads 0, 25, 50, 75, 100. The four
+    // gridline steps want a number that divides evenly, so start from the
+    // step size and multiply up.
+    private static int roundUp(int value) {
+        if (value <= 4) {
+            return 4;
+        }
+        int[] steps = {1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 300, 400, 500,
+            1000, 2000, 2500, 5000};
+        for (int step : steps) {
+            int top = step * 4;
+            if (top >= value) {
+                return top;
+            }
+        }
+        return (value / 4000 + 1) * 4000;
+    }
+
+    // A vertical bar per row, like the reference comparison chart: value
+    // axis on the left, gridlines, the row name under each bar and the
+    // number above it.
     private void paintBars(Graphics2D g2, int left, int right, int usable) {
-        int top = 24;
-        int rowHeight = 18;
-        int labelWidth = 90;
-        int total = Math.max(1, pieces.get(0).end);
+        int top = 30;
+        int bottom = getHeight() - 34;
+        if (bottom <= top || right <= left) {
+            return;
+        }
+
+        int highest = 1;
+        for (Piece p : pieces) {
+            highest = Math.max(highest, Math.max(p.value, p.end));
+        }
+        int axisMax = roundUp(highest);
+        if (axisMax <= 0) {
+            axisMax = 1;
+        }
 
         g2.setFont(Theme.HINT);
         FontMetrics fm = g2.getFontMetrics();
-        for (int i = 0; i < pieces.size(); i++) {
+        for (int i = 0; i <= 4; i++) {
+            int y = bottom - (bottom - top) * i / 4;
+            g2.setColor(GRID);
+            g2.drawLine(left + 34, y, right, y);
+            g2.setColor(AXIS);
+            g2.drawString(String.valueOf(axisMax * i / 4), left, y + 4);
+        }
+        g2.setColor(AXIS);
+        g2.drawLine(left + 34, top, left + 34, bottom);
+        g2.drawLine(left + 34, bottom, right, bottom);
+
+        int groups = pieces.size();
+        int groupW = (right - left - 34) / Math.max(1, groups);
+        int barW = Math.min(40, Math.max(8, groupW - 10));
+
+        for (int i = 0; i < groups; i++) {
             Piece p = pieces.get(i);
-            int y = top + i * rowHeight;
-            g2.setColor(Theme.HEADING);
-            g2.drawString(p.label, left, y + rowHeight - 5);
+            int cx = left + 34 + i * groupW + groupW / 2;
+            int h = (int) Math.round((double) p.value / axisMax * (bottom - top));
+            g2.setColor(p.idle ? IDLE : PALETTE[0]);
+            g2.fillRect(cx - barW / 2, bottom - h, barW, Math.max(1, h));
 
+            // the number sits above the bar when there is room
+            g2.setColor(INK);
             String value = String.valueOf(p.value);
-            int numberWidth = fm.stringWidth(value) + 12;
-            int barX = left + labelWidth;
-            int barW = Math.max(20, right - barX - numberWidth);
-            int fill = Math.round(p.value * (float) barW / total);
-            g2.setColor(Theme.HAIRLINE);
-            g2.fillRect(barX, y + 2, barW, rowHeight - 6);
-            // one colour for all bars, unless a colour marks something
-            // special such as a page that is on disk
-            g2.setColor(p.idle ? IDLE : Theme.ACCENT);
-            g2.fillRect(barX, y + 2, Math.max(1, fill), rowHeight - 6);
+            g2.drawString(value, cx - fm.stringWidth(value) / 2,
+                    Math.max(top + 10, bottom - h - 5));
 
-            g2.setColor(Theme.HEADING);
-            g2.drawString(value, right - fm.stringWidth(value), y + rowHeight - 5);
+            // the row name goes under the bar, trimmed when the gap is tight
+            String name = p.label;
+            while (fm.stringWidth(name) > groupW && name.length() > 2) {
+                name = name.substring(0, name.length() - 1);
+            }
+            g2.drawString(name, cx - fm.stringWidth(name) / 2, bottom + 15);
         }
     }
 
+    // The memory map: one tall bar split into the jobs and the holes, each
+    // block named and measured, with a colour key underneath.
     private void paintMemory(Graphics2D g2, int left, int usable) {
-        int top = 24;
-        int barHeight = 34;
+        int top = 26;
+        int barHeight = Math.max(30, getHeight() - top - 58);
         int first = pieces.get(0).start;
         int last = pieces.get(pieces.size() - 1).end;
         int span = Math.max(1, last - first);
 
-        g2.setFont(Theme.HINT);
         FontMetrics fm = g2.getFontMetrics();
         for (Piece p : pieces) {
             int x1 = left + Math.round((p.start - first) * (float) usable / span);
@@ -856,14 +993,14 @@ final class ResultChart extends JComponent {
             int w = Math.max(2, x2 - x1);
             g2.setColor(p.idle ? HOLE : colourOf(p.label));
             g2.fillRect(x1, top, w, barHeight);
-            g2.setColor(Theme.SURFACE);
+            g2.setColor(Color.WHITE);
             g2.drawRect(x1, top, w, barHeight);
 
             String name = p.label + " (" + (p.end - p.start) + ")";
-            g2.setFont(Theme.LABEL);
+            g2.setFont(Theme.LABEL_BOLD);
             FontMetrics tf = g2.getFontMetrics();
             if (tf.stringWidth(name) + 6 < w) {
-                g2.setColor(p.idle ? Theme.MUTED : Color.WHITE);
+                g2.setColor(p.idle ? new Color(90, 90, 90) : Color.WHITE);
                 g2.drawString(name, x1 + (w - tf.stringWidth(name)) / 2,
                         top + (barHeight + tf.getAscent() - tf.getDescent()) / 2);
             }
@@ -872,7 +1009,7 @@ final class ResultChart extends JComponent {
         }
         tick(g2, fm, left, usable, span, first, first, top + barHeight);
         tick(g2, fm, left, usable, span, first, last, top + barHeight);
-        legend(g2, left, top + barHeight + 27, false);
+        legend(g2, left, top + barHeight + 36, false);
     }
 
     // Small colour key, so every colour in the picture has a name.
@@ -882,20 +1019,21 @@ final class ResultChart extends JComponent {
         FontMetrics fm = g2.getFontMetrics();
         List<String> names = new ArrayList<>(colours.keySet());
         for (String name : names) {
-            if (x + fm.stringWidth(name) > getWidth() - 10) {
+            int need = 24 + fm.stringWidth(name);
+            if (x + need > getWidth() - 10) {
                 break;
             }
             g2.setColor(colours.get(name));
-            g2.fillRect(x, y - 7, 9, 9);
-            g2.setColor(Theme.HEADING);
-            g2.drawString(name, x + 13, y);
-            x += 13 + fm.stringWidth(name) + 12;
+            g2.fillRect(x, y - 10, 10, 10);
+            g2.setColor(INK);
+            g2.drawString(name, x + 14, y);
+            x += need;
         }
-        if (withIdle && x + 13 + fm.stringWidth("idle") < getWidth() - 10) {
+        if (withIdle && x + 24 + fm.stringWidth("idle") < getWidth() - 10) {
             g2.setColor(IDLE);
-            g2.fillRect(x, y - 7, 9, 9);
-            g2.setColor(Theme.MUTED);
-            g2.drawString("idle", x + 13, y);
+            g2.fillRect(x, y - 10, 10, 10);
+            g2.setColor(INK);
+            g2.drawString("idle", x + 14, y);
         }
     }
 }
